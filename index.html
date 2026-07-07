@@ -39,7 +39,6 @@
             display: block;
         }
 
-        /* Hafif nefes alma animasyonu */
         @keyframes fadeInScale {
             0% {
                 opacity: 0;
@@ -60,7 +59,6 @@
             animation: breathe 3s ease-in-out infinite;
         }
 
-        /* Çok hafif loading noktaları - sadece aktivite hissi versin */
         .loader {
             margin-top: 32px;
             display: flex;
@@ -94,7 +92,7 @@
 <body>
     <div class="splash-wrapper">
         <div class="logo-container" id="logoContainer">
-            <img src="assets/logo.png" alt="Tarotistan" class="logo" id="splashLogo">
+            <img src="logo.png" alt="Tarotistan" class="logo" id="splashLogo">
         </div>
         <div class="loader" id="loader">
             <div class="loader-dot"></div>
@@ -108,14 +106,13 @@
             'use strict';
 
             const TARGET_PAGE = 'auth.html';
-            const CHECK_INTERVAL = 3000; // ms
-            const MIN_DISPLAY_TIME = 2000; // ms
+            const CHECK_INTERVAL = 3000;
+            const MIN_DISPLAY_TIME = 2500;
 
             let logoLoaded = false;
             let connectionOk = false;
             let minTimePassed = false;
 
-            // Logo yüklenme kontrolü
             const logo = document.getElementById('splashLogo');
             logo.onload = function() {
                 logoLoaded = true;
@@ -123,18 +120,15 @@
                 tryNavigate();
             };
             logo.onerror = function() {
-                // Logo yüklenemese bile devam et, beyaz ekran kalmaz
                 logoLoaded = true;
                 tryNavigate();
             };
 
-            // Minimum gösterim süresi
             setTimeout(() => {
                 minTimePassed = true;
                 tryNavigate();
             }, MIN_DISPLAY_TIME);
 
-            // İnternet kontrolü - sessiz, uyarı yok
             async function checkInternet() {
                 if (!navigator.onLine) return false;
                 try {
@@ -149,32 +143,27 @@
                 }
             }
 
-            // Periyodik kontrol
             async function startConnectionCheck() {
                 const isOnline = await checkInternet();
                 if (isOnline) {
                     connectionOk = true;
                     tryNavigate();
                 } else {
-                    // Sessizce bekle, interval ile tekrar dene
                     setTimeout(startConnectionCheck, CHECK_INTERVAL);
                 }
             }
 
-            // Tarayıcı native online event
             window.addEventListener('online', () => {
                 connectionOk = true;
                 tryNavigate();
             });
 
-            // Yönlendirme
             function tryNavigate() {
                 if (connectionOk && logoLoaded && minTimePassed) {
                     window.location.replace(TARGET_PAGE);
                 }
             }
 
-            // Başlat
             startConnectionCheck();
 
         })();
