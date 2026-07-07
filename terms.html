@@ -111,12 +111,18 @@
                 window.location.href = 'auth.html';
                 return;
             }
-            if (!user.emailVerified) {
+            // emailVerified bilgisi cache'te eski (false) olabilir,
+            // verify.html'de applyActionCode sonrası taze veriyi çekmek için reload şart.
+            user.reload().then(function() {
+                if (!auth.currentUser.emailVerified) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('termsState').style.display = 'flex';
+            }).catch(function() {
                 window.location.href = 'auth.html';
-                return;
-            }
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('termsState').style.display = 'flex';
+            });
         });
 
         continueBtn.addEventListener('click', function() {
