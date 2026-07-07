@@ -9,7 +9,33 @@ const LANG = {
         googleContinue: "Google ile devam et",
         showPassword: "Göster",
         hidePassword: "Gizle",
-        passwordsNotMatch: "Şifreler eşleşmiyor"
+        passwordsNotMatch: "Şifreler eşleşmiyor",
+        
+        // Email doğrulama
+        verifyTitle: "Email Doğrulama",
+        verifySent: "6 haneli kod gönderildi",
+        verifyPlaceholder: "Kodu girin",
+        verifyButton: "Doğrula",
+        resendCode: "Tekrar gönder",
+        resendWait: "sn sonra tekrar gönder",
+        invalidCode: "Geçersiz veya süresi dolmuş kod",
+        
+        // Terms
+        termsTitle: "Gizlilik Politikası ve Kullanım Şartları",
+        termsText: `Tarotistan uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
+
+1. KİŞİSEL VERİLER: E-posta adresiniz ve çekim geçmişiniz güvenli bir şekilde saklanır. Bilgileriniz üçüncü taraflarla paylaşılmaz.
+
+2. KULLANIM: Uygulama eğlence ve kişisel gelişim amaçlıdır. Tıbbi, hukuki veya finansal kararlar için kullanılmamalıdır.
+
+3. REKLAMLAR: Ücretsiz kullanımda ödüllü reklamlar gösterilir. Premium üyelikle reklamsız deneyim sunulur.
+
+4. ÜYELİK: Premium üyelik aylık veya yıllık olarak satın alınabilir. İptal istediğiniz an yapılabilir.
+
+5. SORUMLULUK REDDİ: Tarot çekimleri yorum niteliğindedir, bağlayıcı değildir.`,
+        termsAccept: "Okudum, kabul ediyorum",
+        termsRequired: "Devam etmek için onaylamanız gerekir",
+        continueButton: "Devam Et"
     },
     en: {
         appName: "TAROTISTAN",
@@ -21,7 +47,31 @@ const LANG = {
         googleContinue: "Continue with Google",
         showPassword: "Show",
         hidePassword: "Hide",
-        passwordsNotMatch: "Passwords do not match"
+        passwordsNotMatch: "Passwords do not match",
+        
+        verifyTitle: "Email Verification",
+        verifySent: "6-digit code sent",
+        verifyPlaceholder: "Enter code",
+        verifyButton: "Verify",
+        resendCode: "Resend",
+        resendWait: "s to resend",
+        invalidCode: "Invalid or expired code",
+        
+        termsTitle: "Privacy Policy and Terms of Use",
+        termsText: `By using the Tarotistan app, you agree to the following terms:
+
+1. PERSONAL DATA: Your email address and draw history are stored securely. Your information is not shared with third parties.
+
+2. USAGE: The app is for entertainment and personal growth purposes only. It should not be used for medical, legal, or financial decisions.
+
+3. ADS: Rewarded ads are shown in free usage. Premium membership offers an ad-free experience.
+
+4. MEMBERSHIP: Premium membership can be purchased monthly or yearly. Cancellation can be done at any time.
+
+5. DISCLAIMER: Tarot draws are for interpretive purposes only and are not binding.`,
+        termsAccept: "I have read and agree",
+        termsRequired: "You must accept to continue",
+        continueButton: "Continue"
     }
 };
 
