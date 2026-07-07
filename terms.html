@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAROTISTAN</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100%; background: #fff; }
+        .container {
+            max-width: 480px; margin: 0 auto;
+            padding: 40px 24px; font-family: 'Times New Roman', serif;
+        }
+        h1 { font-size: 1.4rem; text-align: center; margin-bottom: 32px; }
+        .content {
+            background: #fafafa; border-radius: 12px;
+            padding: 20px; margin-bottom: 24px;
+            max-height: 50vh; overflow-y: auto;
+            font-size: 0.9rem; line-height: 1.6;
+            white-space: pre-line;
+        }
+        .accept-box { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
+        .accept-box input { margin-top: 4px; width: 18px; height: 18px; }
+        .accept-box label { font-size: 0.9rem; }
+        .btn {
+            width: 100%; padding: 16px;
+            background: #000; color: #fff;
+            border: none; border-radius: 12px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1rem; cursor: pointer;
+        }
+        .btn:disabled { background: #ccc; }
+        .error { color: #e74c3c; font-size: 0.85rem; margin-top: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="termsTitle"></h1>
+        <div class="content" id="termsText"></div>
+        <div class="accept-box">
+            <input type="checkbox" id="acceptCheck">
+            <label for="acceptCheck" id="termsAccept"></label>
+        </div>
+        <button class="btn" id="continueBtn" disabled></button>
+        <p class="error" id="errorMsg"></p>
+    </div>
+    <script>
+        document.getElementById('termsTitle').textContent = t('termsTitle');
+        document.getElementById('termsText').textContent = t('termsText');
+        document.getElementById('termsAccept').textContent = t('termsAccept');
+        document.getElementById('continueBtn').textContent = t('continueButton');
+
+        const checkbox = document.getElementById('acceptCheck');
+        const btn = document.getElementById('continueBtn');
+        const error = document.getElementById('errorMsg');
+
+        checkbox.addEventListener('change', () => {
+            btn.disabled = !checkbox.checked;
+            error.textContent = '';
+        });
+
+        btn.addEventListener('click', () => {
+            if (!checkbox.checked) { error.textContent = t('termsRequired'); return; }
+            const user = firebase.auth().currentUser;
+            if (!user) { window.location.href = 'auth.html'; return; }
+
+            firebase.firestore().collection('users').doc(user.uid).set({
+                email: user.email,
+                displayName: user.displayName || '',
+                isPremium: false,
+                premiumUntil: null,
+                termsAccepted: true,
+                termsAcceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => window.location.href = 'dashboard.html');
+        });
+    </script>
+</body>
+</html>
