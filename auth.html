@@ -130,6 +130,17 @@
     </div>
 
     <script>
+        // Firebase email action linki (verifyEmail, resetPassword vb.) yanlışlıkla
+        // auth.html'e düşerse doğru sayfaya (verify.html) yönlendir.
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get('mode');
+            const oobCode = params.get('oobCode');
+            if (mode && oobCode) {
+                window.location.replace('verify.html' + window.location.search);
+            }
+        })();
+
         // Dil uygula
         document.getElementById('appName').textContent = t('appName');
         document.getElementById('tabLogin').textContent = t('login');
