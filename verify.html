@@ -39,19 +39,39 @@
         const mode = urlParams.get('mode');
         const oobCode = urlParams.get('oobCode');
 
+        function goToTerms() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('status').textContent = 'Email doğrulandı!';
+            setTimeout(() => window.location.href = 'terms.html', 1500);
+        }
+
+        function showInvalid() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('status').textContent = 'Bağlantı geçersiz veya süresi dolmuş.';
+        }
+
         if (mode === 'verifyEmail' && oobCode) {
+            // Senaryo 1: Kod doğrudan bize geldi (custom Action URL), kendimiz uyguluyoruz.
             auth.applyActionCode(oobCode)
-                .then(() => {
-                    document.getElementById('spinner').style.display = 'none';
-                    document.getElementById('status').textContent = 'Email doğrulandı!';
-                    setTimeout(() => window.location.href = 'terms.html', 1500);
-                })
-                .catch(() => {
-                    document.getElementById('spinner').style.display = 'none';
-                    document.getElementById('status').textContent = 'Bağlantı geçersiz veya süresi dolmuş.';
-                });
+                .then(goToTerms)
+                .catch(showInvalid);
         } else {
-            window.location.href = 'auth.html';
+            // Senaryo 2: Firebase'in varsayılan action sayfası doğrulamayı zaten
+            // yaptı ve continueUrl olarak buraya (parametresiz) yönlendirdi.
+            // Kullanıcının oturum durumunu tazeleyip emailVerified'ı kontrol ediyoruz.
+            auth.onAuthStateChanged(function(user) {
+                if (!user) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                user.reload().then(function() {
+                    if (auth.currentUser.emailVerified) {
+                        goToTerms();
+                    } else {
+                        showInvalid();
+                    }
+                }).catch(showInvalid);
+            });
         }
     </script>
 </body>
