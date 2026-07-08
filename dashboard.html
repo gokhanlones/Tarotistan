@@ -114,6 +114,52 @@
             border-top: 1px solid #e8e8ed;
             z-index: 10;
         }
+
+        /* ---- Niyet modalı ---- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: center; justify-content: center;
+            padding: 24px;
+            z-index: 100;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            width: 100%; max-width: 340px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 12px;
+        }
+        .modal-title {
+            font-size: 1.3rem; font-weight: 700;
+            color: #000;
+        }
+        .intent-input {
+            width: 100%; min-height: 90px;
+            border: 2px solid #e8e8ed; border-radius: 10px;
+            padding: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; color: #000;
+            resize: none;
+        }
+        .intent-input:focus { border-color: #000; outline: none; }
+        .char-counter {
+            align-self: flex-end;
+            font-size: 0.75rem; color: #999;
+            margin-top: -6px;
+        }
+        .send-btn {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: #000; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .send-btn svg { width: 22px; height: 22px; fill: #fff; }
     </style>
 </head>
 <body>
@@ -169,6 +215,17 @@
 
     <div class="bottom-nav"></div>
 
+    <div class="modal-overlay" id="intentOverlay">
+        <div class="modal-box">
+            <div class="modal-title" id="intentTitle"></div>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
+            <div class="char-counter" id="charCounter">0/200</div>
+            <button class="send-btn" id="sendIntentBtn" aria-label="Gönder">
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
     <script>
         // Dil uygula
         document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
@@ -184,18 +241,48 @@
         document.getElementById('adFreeYearly').textContent = t('adFree');
         document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
         document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
+        document.getElementById('intentTitle').textContent = t('intentTitle');
+        document.getElementById('intentInput').placeholder = t('intentPlaceholder');
 
         // TODO: Menü içeriği eklenecek
         document.getElementById('menuBtn').addEventListener('click', function() {
             console.log('Menü açılacak');
         });
 
-        // TODO: Kart açılımı ekranlarına yönlendirme eklenecek
+        // ---- Niyet modalı ----
+        let currentReadingType = null;
+        const intentOverlay = document.getElementById('intentOverlay');
+        const intentInput = document.getElementById('intentInput');
+        const charCounter = document.getElementById('charCounter');
+
+        function openIntentModal(type) {
+            currentReadingType = type;
+            intentInput.value = '';
+            charCounter.textContent = '0/200';
+            intentOverlay.classList.add('active');
+            intentInput.focus();
+        }
+        function closeIntentModal() {
+            intentOverlay.classList.remove('active');
+        }
+        intentInput.addEventListener('input', function() {
+            charCounter.textContent = intentInput.value.length + '/200';
+        });
+        intentOverlay.addEventListener('click', function(e) {
+            if (e.target === intentOverlay) closeIntentModal();
+        });
+        document.getElementById('sendIntentBtn').addEventListener('click', function() {
+            const intentText = intentInput.value.trim();
+            // TODO: kart açılım ekranına yönlendirme eklenecek (niyet + tür ile)
+            console.log('Niyet gönderildi:', intentText, '- Açılım türü:', currentReadingType);
+            closeIntentModal();
+        });
+
         document.getElementById('singleCardOption').addEventListener('click', function() {
-            console.log('Tek kart açılımı seçildi');
+            openIntentModal('single');
         });
         document.getElementById('threeCardOption').addEventListener('click', function() {
-            console.log('Geçmiş-Şimdi-Gelecek açılımı seçildi');
+            openIntentModal('three');
         });
 
         // TODO: Ödeme akışına yönlendirme eklenecek
