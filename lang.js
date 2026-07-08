@@ -35,7 +35,15 @@ const LANG = {
 5. SORUMLULUK REDDİ: Tarot çekimleri yorum niteliğindedir, bağlayıcı değildir.`,
         termsAccept: "Okudum, kabul ediyorum",
         termsRequired: "Devam etmek için onaylamanız gerekir",
-        continueButton: "Devam Et"
+        continueButton: "Devam Et",
+
+        // Dashboard / Seçici
+        dashboardTitle: "TAROTİSTAN",
+        singleCardTitle: "Aklındaki sorunun cevabı",
+        threeCardTitle: "Geçmiş, Şimdi, Gelecek",
+        adFree: "Reklamsız",
+        monthlyPrice: "Aylık 49,99 TL",
+        yearlyPrice: "Yıllık 399,99 TL"
     },
     en: {
         appName: "TAROTISTAN",
@@ -71,7 +79,15 @@ const LANG = {
 5. DISCLAIMER: Tarot draws are for interpretive purposes only and are not binding.`,
         termsAccept: "I have read and agree",
         termsRequired: "You must accept to continue",
-        continueButton: "Continue"
+        continueButton: "Continue",
+
+        // Dashboard / Selector
+        dashboardTitle: "TAROTISTAN",
+        singleCardTitle: "The answer to what's on your mind",
+        threeCardTitle: "Past, Present, Future",
+        adFree: "Ad-free",
+        monthlyPrice: "Monthly 49.99 TL",
+        yearlyPrice: "Yearly 399.99 TL"
     }
 };
 
