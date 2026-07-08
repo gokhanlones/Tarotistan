@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROTISTAN</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .ad-box {
+            width: 100%; max-width: 320px;
+            text-align: center;
+        }
+        .ad-title {
+            font-size: 1.2rem; font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .ad-desc {
+            font-size: 0.95rem; color: #555;
+            margin-bottom: 32px; line-height: 1.5;
+        }
+        .btn-watch {
+            width: 100%; padding: 16px;
+            background: #000; color: #fff;
+            border: none; border-radius: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="ad-box">
+        <div class="ad-title">Reklam</div>
+        <div class="ad-desc" id="adText"></div>
+        <button class="btn-watch" id="watchBtn">Reklamı İzle (Test)</button>
+    </div>
+
+    <script>
+        const type = sessionStorage.getItem('tarotReadingType'); // 'single' veya 'three'
+        const intent = sessionStorage.getItem('tarotIntent');
+
+        if (type === 'single') {
+            document.getElementById('adText').textContent =
+                'Tek kart çekimi için kısa bir reklam izliyorsunuz.';
+        } else if (type === 'three') {
+            document.getElementById('adText').textContent =
+                'Üç kart çekimi için reklam izliyorsunuz.';
+        } else {
+            window.location.href = 'dashboard.html';
+        }
+
+        document.getElementById('watchBtn').addEventListener('click', function() {
+            // Gerçek AdMob/AdSense entegrasyonu buraya gelecek
+            // Şimdilik test: direkt kart sayfasına atla
+            window.location.href = 'cards.html';
+        });
+    </script>
+</body>
+</html>
