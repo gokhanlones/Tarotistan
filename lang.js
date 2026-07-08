@@ -40,10 +40,13 @@ const LANG = {
         // Dashboard / Seçici
         dashboardTitle: "TAROTİSTAN",
         singleCardTitle: "Aklındaki sorunun cevabı",
-        singleCardLabel: "Tek Kart",
+        singleCardLabel: "I Kart",
+        singleCardAds: "1 Reklam",
         threeCardTitle: "Geçmiş, Şimdi, Gelecek",
-        threeCardLabel: "Üç Kart",
+        threeCardLabel: "III Kart",
+        threeCardAds: "3 Reklam",
         adFree: "Reklamsız",
+        dailyLimit: "Günlük 5 oturum",
         monthlyPrice: "Aylık 49,99 TL",
         yearlyPrice: "Yıllık 399,99 TL"
     },
@@ -86,10 +89,13 @@ const LANG = {
         // Dashboard / Selector
         dashboardTitle: "TAROTISTAN",
         singleCardTitle: "The answer to what's on your mind",
-        singleCardLabel: "One Card",
+        singleCardLabel: "I Card",
+        singleCardAds: "1 Ad",
         threeCardTitle: "Past, Present, Future",
-        threeCardLabel: "Three Cards",
+        threeCardLabel: "III Card",
+        threeCardAds: "3 Ads",
         adFree: "Ad-free",
+        dailyLimit: "5 sessions/day",
         monthlyPrice: "Monthly 49.99 TL",
         yearlyPrice: "Yearly 399.99 TL"
     }
