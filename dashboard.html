@@ -46,7 +46,7 @@
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px;
             color: #000;
-            margin-right: 40px; /* hamburger genişliği kadar dengele */
+            margin-right: 40px;
         }
 
         /* ---- İçerik ---- */
@@ -63,7 +63,6 @@
             gap: 12px;
         }
 
-        /* Tüm kartlar (1-2-3-4) ortak yapı: görsel + overlay + 3 satır metin */
         .tarot-card {
             position: relative;
             aspect-ratio: 9 / 16;
@@ -106,7 +105,7 @@
             opacity: 0.85;
         }
 
-        /* ---- Alt navigasyon (yer tutucu) ---- */
+        /* ---- Alt navigasyon ---- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -161,9 +160,30 @@
         }
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
         .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ---- Auth kontrol spinner ---- */
+        .auth-check {
+            position: fixed; inset: 0;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+        }
+        .auth-check.hidden { display: none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+    <div class="auth-check" id="authCheck">
+        <div class="spinner"></div>
+    </div>
 
     <div class="topbar">
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
@@ -228,6 +248,17 @@
     </div>
 
     <script>
+        const auth = firebase.auth();
+
+        // Auth kontrolü — giriş yapılmamışsa auth.html'e at
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            document.getElementById('authCheck').classList.add('hidden');
+        });
+
         // Dil uygula
         document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
         document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
@@ -244,7 +275,6 @@
         document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
         document.getElementById('intentTitle').textContent = t('intentTitle');
 
-        // TODO: Menü içeriği eklenecek
         document.getElementById('menuBtn').addEventListener('click', function() {
             console.log('Menü açılacak');
         });
@@ -289,12 +319,12 @@
             openIntentModal('three');
         });
 
-        // TODO: Ödeme akışına yönlendirme eklenecek
+        // Premium kartlar — şimdilik yakında
         document.getElementById('monthlyOption').addEventListener('click', function() {
-            console.log('Aylık üyelik seçildi');
+            alert('Premium üyelik yakında!');
         });
         document.getElementById('yearlyOption').addEventListener('click', function() {
-            console.log('Yıllık üyelik seçildi');
+            alert('Premium üyelik yakında!');
         });
     </script>
 </body>
