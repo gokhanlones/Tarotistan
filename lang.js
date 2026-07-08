@@ -51,8 +51,7 @@ const LANG = {
         yearlyPrice: "Yıllık 399,99 TL",
 
         // Niyet modalı
-        intentTitle: "Niyet",
-        intentPlaceholder: "Niyetini yaz..."
+        intentTitle: "Niyet"
     },
     en: {
         appName: "TAROTISTAN",
@@ -104,8 +103,7 @@ const LANG = {
         yearlyPrice: "Yearly 399.99 TL",
 
         // Intent modal
-        intentTitle: "Intention",
-        intentPlaceholder: "Write your intention..."
+        intentTitle: "Intention"
     }
 };
 
