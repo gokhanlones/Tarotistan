@@ -160,6 +160,7 @@
             margin-top: 4px;
         }
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
+        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -220,7 +221,7 @@
             <div class="modal-title" id="intentTitle"></div>
             <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
             <div class="char-counter" id="charCounter">0/200</div>
-            <button class="send-btn" id="sendIntentBtn" aria-label="Gönder">
+            <button class="send-btn" id="sendIntentBtn" aria-label="Gönder" disabled>
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
         </div>
@@ -258,23 +259,27 @@
             currentReadingType = type;
             intentInput.value = '';
             charCounter.textContent = '0/200';
+            sendBtn.disabled = true;
             intentOverlay.classList.add('active');
             intentInput.focus();
         }
         function closeIntentModal() {
             intentOverlay.classList.remove('active');
         }
+        const sendBtn = document.getElementById('sendIntentBtn');
         intentInput.addEventListener('input', function() {
             charCounter.textContent = intentInput.value.length + '/200';
+            sendBtn.disabled = intentInput.value.trim().length === 0;
         });
         intentOverlay.addEventListener('click', function(e) {
             if (e.target === intentOverlay) closeIntentModal();
         });
-        document.getElementById('sendIntentBtn').addEventListener('click', function() {
+        sendBtn.addEventListener('click', function() {
             const intentText = intentInput.value.trim();
-            // TODO: kart açılım ekranına yönlendirme eklenecek (niyet + tür ile)
-            console.log('Niyet gönderildi:', intentText, '- Açılım türü:', currentReadingType);
-            closeIntentModal();
+            if (!intentText) return;
+            sessionStorage.setItem('tarotIntent', intentText);
+            sessionStorage.setItem('tarotReadingType', currentReadingType);
+            window.location.href = 'cards.html';
         });
 
         document.getElementById('singleCardOption').addEventListener('click', function() {
