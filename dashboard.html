@@ -120,8 +120,8 @@
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
             display: none;
-            align-items: center; justify-content: center;
-            padding: 24px;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 0;
             z-index: 100;
         }
         .modal-overlay.active { display: flex; }
@@ -242,7 +242,6 @@
         document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
         document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
         document.getElementById('intentTitle').textContent = t('intentTitle');
-        document.getElementById('intentInput').placeholder = t('intentPlaceholder');
 
         // TODO: Menü içeriği eklenecek
         document.getElementById('menuBtn').addEventListener('click', function() {
