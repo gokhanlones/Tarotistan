@@ -48,7 +48,11 @@ const LANG = {
         adFree: "Reklamsız",
         dailyLimit: "Günlük 5 oturum",
         monthlyPrice: "Aylık 49,99 TL",
-        yearlyPrice: "Yıllık 399,99 TL"
+        yearlyPrice: "Yıllık 399,99 TL",
+
+        // Niyet modalı
+        intentTitle: "Niyet",
+        intentPlaceholder: "Niyetini yaz..."
     },
     en: {
         appName: "TAROTISTAN",
@@ -97,7 +101,11 @@ const LANG = {
         adFree: "Ad-free",
         dailyLimit: "5 sessions/day",
         monthlyPrice: "Monthly 49.99 TL",
-        yearlyPrice: "Yearly 399.99 TL"
+        yearlyPrice: "Yearly 399.99 TL",
+
+        // Intent modal
+        intentTitle: "Intention",
+        intentPlaceholder: "Write your intention..."
     }
 };
 
