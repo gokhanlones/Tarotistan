@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROTISTAN</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---- Üst banner ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8e8ed;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+            margin-right: 40px; /* hamburger genişliği kadar dengele */
+        }
+
+        /* ---- İçerik ---- */
+        .content {
+            padding: 76px 16px 88px;
+            display: flex; flex-direction: column;
+            gap: 16px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Okuma seçenekleri (kart 1 ve 2) */
+        .reading-card {
+            display: flex; align-items: center; gap: 16px;
+            border: 2px solid #e8e8ed; border-radius: 14px;
+            padding: 14px; background: #fafafa;
+            cursor: pointer;
+        }
+        .reading-card:active { background: #f0f0f0; }
+        .reading-card .card-visual {
+            width: 72px; height: 72px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid #e8e8ed;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .reading-card .card-visual img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .reading-card .card-text {
+            font-size: 1.05rem; font-weight: 600;
+            color: #000; line-height: 1.35;
+        }
+
+        /* Premium kartları (kart 3 ve 4) */
+        .premium-card {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 6px;
+            border: 2px solid #C9A961; border-radius: 14px;
+            padding: 20px 14px;
+            background: #FFFDF7;
+            cursor: pointer;
+            text-align: center;
+        }
+        .premium-card:active { background: #FBF6E9; }
+        .premium-card .ad-free {
+            font-size: 0.8rem; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: #A8863F;
+        }
+        .premium-card .price {
+            font-size: 1.2rem; font-weight: 700;
+            color: #000;
+        }
+
+        /* ---- Alt navigasyon (yer tutucu) ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="dashboardTitle"></div>
+    </div>
+
+    <div class="content">
+        <div class="reading-card" id="singleCardOption">
+            <div class="card-visual"><img src="onecard.png" alt=""></div>
+            <div class="card-text" id="singleCardTitle"></div>
+        </div>
+
+        <div class="reading-card" id="threeCardOption">
+            <div class="card-visual"><img src="thirdcard.png" alt=""></div>
+            <div class="card-text" id="threeCardTitle"></div>
+        </div>
+
+        <div class="premium-card" id="monthlyOption">
+            <div class="ad-free" id="adFreeMonthly"></div>
+            <div class="price" id="monthlyPrice"></div>
+        </div>
+
+        <div class="premium-card" id="yearlyOption">
+            <div class="ad-free" id="adFreeYearly"></div>
+            <div class="price" id="yearlyPrice"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav"></div>
+
+    <script>
+        // Dil uygula
+        document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
+        document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
+        document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
+        document.getElementById('adFreeMonthly').textContent = t('adFree');
+        document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
+        document.getElementById('adFreeYearly').textContent = t('adFree');
+        document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
+
+        // TODO: Menü içeriği eklenecek
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            console.log('Menü açılacak');
+        });
+
+        // TODO: Kart açılımı ekranlarına yönlendirme eklenecek
+        document.getElementById('singleCardOption').addEventListener('click', function() {
+            console.log('Tek kart açılımı seçildi');
+        });
+        document.getElementById('threeCardOption').addEventListener('click', function() {
+            console.log('Geçmiş-Şimdi-Gelecek açılımı seçildi');
+        });
+
+        // TODO: Ödeme akışına yönlendirme eklenecek
+        document.getElementById('monthlyOption').addEventListener('click', function() {
+            console.log('Aylık üyelik seçildi');
+        });
+        document.getElementById('yearlyOption').addEventListener('click', function() {
+            console.log('Yıllık üyelik seçildi');
+        });
+    </script>
+</body>
+</html>
