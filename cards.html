@@ -55,6 +55,13 @@
             max-width: 600px;
             margin: 0 auto;
         }
+        .selection-info {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 16px;
+            min-height: 24px;
+        }
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -97,7 +104,23 @@
             background: #ffffff;
             border-top: 1px solid #e8e8ed;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
         }
+        .btn-continue {
+            width: 100%; max-width: 340px;
+            padding: 14px;
+            background: #000; color: #fff;
+            border: none; border-radius: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+            display: none;
+        }
+        .btn-continue.visible { display: block; }
+        .btn-continue:disabled { background: #ccc; }
     </style>
 </head>
 <body>
@@ -110,18 +133,55 @@
     </div>
 
     <div class="content">
+        <div class="selection-info" id="selectionInfo"></div>
         <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
-    <div class="bottom-nav"></div>
+    <div class="bottom-nav">
+        <button class="btn-continue" id="continueBtn">Reklam İzle ve Devam Et</button>
+    </div>
 
     <script>
-        const grid = document.getElementById('cardsGrid');
-        const TOTAL_CARDS = 78;
+        const readingType = sessionStorage.getItem('tarotReadingType'); // 'single' veya 'three'
+        const intent = sessionStorage.getItem('tarotIntent');
 
+        if (!readingType || !intent) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const maxSelect = readingType === 'single' ? 1 : 3;
+        let selectedIndices = [];
+
+        const grid = document.getElementById('cardsGrid');
+        const selectionInfo = document.getElementById('selectionInfo');
+        const continueBtn = document.getElementById('continueBtn');
+
+        function updateInfo() {
+            if (maxSelect === 1) {
+                selectionInfo.textContent = selectedIndices.length === 1
+                    ? 'Kart seçildi. Devam etmek için aşağıdaki butona basın.'
+                    : 'Aklındaki soru için bir kart seç.';
+            } else {
+                selectionInfo.textContent = selectedIndices.length + ' / ' + maxSelect + ' kart seçildi';
+                if (selectedIndices.length === maxSelect) {
+                    selectionInfo.textContent += ' — Devam etmek için aşağıdaki butona basın.';
+                }
+            }
+        }
+
+        function updateContinueButton() {
+            if (selectedIndices.length === maxSelect) {
+                continueBtn.classList.add('visible');
+            } else {
+                continueBtn.classList.remove('visible');
+            }
+        }
+
+        const TOTAL_CARDS = 78;
         for (let i = 0; i < TOTAL_CARDS; i++) {
             const card = document.createElement('div');
             card.className = 'card-item';
+            card.dataset.index = i;
             card.style.animationDelay = (i * 0.025) + 's';
 
             const img = document.createElement('img');
@@ -133,10 +193,33 @@
             grid.appendChild(card);
 
             card.addEventListener('click', function() {
-                document.querySelectorAll('.card-item.selected').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
+                const idx = parseInt(card.dataset.index);
+
+                if (card.classList.contains('selected')) {
+                    // Seçimi kaldır
+                    card.classList.remove('selected');
+                    selectedIndices = selectedIndices.filter(x => x !== idx);
+                } else {
+                    // Yeni seçim ekle
+                    if (selectedIndices.length < maxSelect) {
+                        card.classList.add('selected');
+                        selectedIndices.push(idx);
+                    }
+                }
+
+                updateInfo();
+                updateContinueButton();
             });
         }
+
+        updateInfo();
+
+        continueBtn.addEventListener('click', function() {
+            if (selectedIndices.length !== maxSelect) return;
+            // Seçilen kart indekslerini sakla
+            sessionStorage.setItem('tarotSelectedCards', JSON.stringify(selectedIndices));
+            window.location.href = 'ad.html';
+        });
 
         document.getElementById('menuBtn').addEventListener('click', function() {
             console.log('Menü açılacak');
