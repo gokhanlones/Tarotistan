@@ -13,25 +13,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
             width: 100%; height: 100%;
-            background-color: #121212;
+            background: #ffffff;
             font-family: 'Times New Roman', Times, serif;
             -webkit-tap-highlight-color: transparent;
-        }
-        /* Hafif doku (grain) katmanı */
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/></svg>");
-            pointer-events: none;
-            z-index: 0;
         }
 
         /* ---- Üst banner ---- */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0;
             height: 60px;
-            background: #121212;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: #ffffff;
+            border-bottom: 1px solid #e8e8ed;
             display: flex; align-items: center;
             padding: 0 16px;
             z-index: 10;
@@ -46,20 +38,19 @@
         }
         .hamburger-btn span {
             display: block; width: 22px; height: 2px;
-            background: #ffffff;
+            background: #000;
         }
         .topbar-title {
             flex: 1;
             text-align: center;
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px;
-            color: #ffffff;
+            color: #000;
             margin-right: 40px; /* hamburger genişliği kadar dengele */
         }
 
         /* ---- İçerik ---- */
         .content {
-            position: relative; z-index: 1;
             padding: 76px 16px 88px;
             display: flex; flex-direction: column;
             gap: 12px;
@@ -80,7 +71,9 @@
             overflow: hidden;
             background: #000;
             cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
         }
+        .tarot-card.silver { border: 2px solid #C7CDD1; }
         .tarot-card.premium { border: 2px solid #C9A961; }
         .tarot-card img {
             position: absolute; inset: 0;
@@ -117,8 +110,8 @@
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
-            background: #121212;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
             z-index: 10;
         }
     </style>
@@ -134,7 +127,7 @@
 
     <div class="content">
         <div class="card-row">
-            <div class="tarot-card" id="singleCardOption">
+            <div class="tarot-card silver" id="singleCardOption">
                 <img src="onecard.png" alt="">
                 <div class="card-text">
                     <div class="line-main" id="singleCardTitle"></div>
@@ -143,7 +136,7 @@
                 </div>
             </div>
 
-            <div class="tarot-card" id="threeCardOption">
+            <div class="tarot-card silver" id="threeCardOption">
                 <img src="onecard.png" alt="">
                 <div class="card-text">
                     <div class="line-main" id="threeCardTitle"></div>
