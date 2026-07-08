@@ -15,12 +15,132 @@
             width: 100%; height: 100%;
             background: #ffffff;
             font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---- Üst banner (dashboard ile aynı) ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8e8ed;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+            margin-right: 40px;
+        }
+
+        /* ---- İçerik ---- */
+        .content {
+            padding: 76px 12px 88px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .card-item {
+            aspect-ratio: 9 / 16;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.4s ease-out forwards;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .card-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-item.selected {
+            box-shadow: 0 0 14px 4px rgba(0, 122, 255, 0.75);
+            border: 2px solid #007AFF;
+            transform: scale(1.06);
+            z-index: 2;
+        }
+
+        @keyframes cardAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ---- Alt navigasyon (dashboard ile aynı) ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <!-- TODO: Kart açılım ekranı burada oluşturulacak.
-         sessionStorage.getItem('tarotIntent')       -> kullanıcının yazdığı niyet
-         sessionStorage.getItem('tarotReadingType')   -> 'single' veya 'three' -->
+
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title">TAROTISTAN</div>
+    </div>
+
+    <div class="content">
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <div class="bottom-nav"></div>
+
+    <script>
+        const grid = document.getElementById('cardsGrid');
+        const TOTAL_CARDS = 78;
+
+        for (let i = 0; i < TOTAL_CARDS; i++) {
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.style.animationDelay = (i * 0.025) + 's';
+
+            const img = document.createElement('img');
+            img.src = 'onecard.png';
+            img.alt = 'Tarot Kartı';
+            img.loading = 'lazy';
+
+            card.appendChild(img);
+            grid.appendChild(card);
+
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.card-item.selected').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            });
+        }
+
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            console.log('Menü açılacak');
+        });
+    </script>
 </body>
 </html>
