@@ -219,7 +219,7 @@
             if (selectedCount !== maxSelect) return;
 
             // 1-78 arası tekrarsız rastgele kart ID'leri
-            const deck = Array.from({length: 78}, (_, i) => i + 1); // [1, 2, ..., 78]
+            const deck = Array.from({length: 78}, (_, i) => i); // [0, 1, ..., 77]
             const shuffled = shuffle(deck);
             const drawnIds = shuffled.slice(0, maxSelect);
 
