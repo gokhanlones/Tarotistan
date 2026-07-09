@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROTISTAN</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8e8ed;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+        }
+        .btn-back {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            font-size: 1.4rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .content {
+            padding: 76px 16px 120px;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex; flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .intent-box {
+            width: 100%;
+            background: #fafafa;
+            border: 1px solid #e8e8ed;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .intent-label {
+            font-size: 0.75rem; color: #888;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .intent-text {
+            font-size: 1rem; color: #000;
+            font-style: italic; line-height: 1.4;
+        }
+
+        .cards-area {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .card-slot {
+            width: 140px;
+            aspect-ratio: 9 / 16;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            background: #1a1a1a;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card-slot.reversed {
+            transform: rotate(180deg);
+        }
+        .card-slot.reversed .card-name,
+        .card-slot.reversed .card-position {
+            transform: rotate(180deg);
+        }
+
+        .card-bg {
+            position: absolute; inset: 0;
+            opacity: 0.25;
+        }
+        .card-bg img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        .card-name {
+            position: relative; z-index: 2;
+            font-size: 1rem; font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        }
+        .card-position {
+            position: relative; z-index: 2;
+            font-size: 0.7rem; font-weight: 600;
+            color: #C9A961;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 8px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .card-badge {
+            position: absolute; top: 8px; right: 8px;
+            z-index: 3;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 0.6rem; font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .cards-area.single .card-slot {
+            width: 200px;
+        }
+        .cards-area.single .card-name {
+            font-size: 1.3rem;
+        }
+
+        .ai-section {
+            width: 100%;
+            background: #fafafa;
+            border: 2px dashed #e8e8ed;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .ai-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .ai-title {
+            font-size: 1rem; font-weight: 700;
+            color: #000; margin-bottom: 6px;
+        }
+        .ai-desc {
+            font-size: 0.85rem; color: #888;
+            line-height: 1.5;
+        }
+
+        .bottom-actions {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 80px;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+        .btn-action {
+            flex: 1; max-width: 200px;
+            padding: 14px;
+            background: #000; color: #fff;
+            border: none; border-radius: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-action.secondary {
+            background: #fff; color: #000;
+            border: 2px solid #e8e8ed;
+        }
+
+        .loading-overlay {
+            position: fixed; inset: 0;
+            background: #fff;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 200;
+            gap: 16px;
+        }
+        .loading-overlay.hidden { display: none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            font-size: 0.9rem; color: #555;
+        }
+
+        .error-box {
+            width: 100%; text-align: center;
+            padding: 40px 24px;
+        }
+        .error-box h2 {
+            font-size: 1.2rem; margin-bottom: 12px;
+        }
+        .error-box p {
+            font-size: 0.9rem; color: #555;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Kartlar açılıyor...</div>
+    </div>
+
+    <div class="topbar">
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">←</button>
+        <div class="topbar-title">TAROTISTAN</div>
+        <div style="width:40px;"></div>
+    </div>
+
+    <div class="content" id="contentArea" style="display:none;">
+        <div class="intent-box">
+            <div class="intent-label">Niyetiniz</div>
+            <div class="intent-text" id="intentDisplay"></div>
+        </div>
+
+        <div class="cards-area" id="cardsArea"></div>
+
+        <div class="ai-section" id="aiSection">
+            <div class="ai-icon">✦</div>
+            <div class="ai-title">Yapay Zeka Yorumu</div>
+            <div class="ai-desc">
+                Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>
+                (Entegrasyon sonrası aktif olacaktır)
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-actions" id="bottomActions" style="display:none;">
+        <button class="btn-action secondary" onclick="window.location.href='dashboard.html'">Ana Sayfa</button>
+        <button class="btn-action" onclick="newReading()">Yeni Çekim</button>
+    </div>
+
+    <script>
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            initResult();
+        });
+
+        const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
+        const intentText = sessionStorage.getItem('tarotIntent') || '';
+        const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
+
+        if (!drawnCards.length) {
+            window.location.href = 'dashboard.html';
+        }
+
+        let tarotData = null;
+
+        async function initResult() {
+            try {
+                const response = await fetch('tarot_cards.json');
+                tarotData = await response.json();
+
+                document.getElementById('intentDisplay').textContent = intentText || 'Belirtilmemiş';
+
+                renderCards();
+                saveReading();
+
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('contentArea').style.display = 'flex';
+                document.getElementById('bottomActions').style.display = 'flex';
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingOverlay').innerHTML = `
+                    <div class="error-box">
+                        <h2>Kartlar yüklenemedi</h2>
+                        <p>Lütfen internet bağlantınızı kontrol edin.</p>
+                        <button class="btn-action" onclick="window.location.href='dashboard.html'">Ana Sayfa</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCards() {
+            const area = document.getElementById('cardsArea');
+            area.className = 'cards-area ' + (readingType === 'single' ? 'single' : 'three');
+
+            const positions = ['Geçmiş', 'Şimdi', 'Gelecek'];
+
+            drawnCards.forEach((drawn, index) => {
+                const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
+                if (!cardInfo) return;
+
+                const slot = document.createElement('div');
+                slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
+
+                if (drawn.reversed) {
+                    const badge = document.createElement('div');
+                    badge.className = 'card-badge';
+                    badge.textContent = 'TERS';
+                    slot.appendChild(badge);
+                }
+
+                const bg = document.createElement('div');
+                bg.className = 'card-bg';
+                bg.innerHTML = '<img src="onecard.png" alt="">';
+                slot.appendChild(bg);
+
+                const name = document.createElement('div');
+                name.className = 'card-name';
+                name.textContent = cardInfo.name_tr;
+                slot.appendChild(name);
+
+                if (readingType === 'three') {
+                    const pos = document.createElement('div');
+                    pos.className = 'card-position';
+                    pos.textContent = positions[index];
+                    slot.appendChild(pos);
+                }
+
+                slot.addEventListener('click', function() {
+                    showCardDetail(cardInfo, drawn.reversed, readingType === 'three' ? positions[index] : null);
+                });
+
+                area.appendChild(slot);
+            });
+        }
+
+        function showCardDetail(card, isReversed, position) {
+            const title = position ? `${position} — ${card.name_tr}` : card.name_tr;
+            const status = isReversed ? 'Ters' : 'Düz';
+            const meaning = isReversed ? card.reversed_meaning : card.upright_meaning;
+            alert(`${title} (${status})\n\n${meaning}`);
+        }
+
+        function saveReading() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            db.collection('users').doc(user.uid).collection('readings').add({
+                type: readingType,
+                intent: intentText,
+                cards: drawnCards,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error('Kayıt hatası:', err));
+        }
+
+        function newReading() {
+            sessionStorage.removeItem('tarotDrawnCards');
+            sessionStorage.removeItem('tarotIntent');
+            sessionStorage.removeItem('tarotReadingType');
+            sessionStorage.removeItem('adWatched');
+            sessionStorage.removeItem('adWatchedAt');
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
