@@ -247,26 +247,76 @@
             font-size: 0.9rem; color: #555;
             margin-bottom: 24px;
         }
+
+        /* ---- Kart detay modalı ---- */
+        .detail-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 24px;
+            z-index: 100;
+        }
+        .detail-overlay.active { display: flex; }
+        .detail-box {
+            width: 100%; max-width: 360px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 22px;
+            display: flex; flex-direction: column;
+            gap: 10px;
+            max-height: 80vh;
+        }
+        .detail-position {
+            font-size: 0.75rem; color: #888;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            text-align: center;
+        }
+        .detail-title {
+            font-size: 1.25rem; font-weight: 700;
+            color: #000; text-align: center;
+        }
+        .detail-status {
+            align-self: center;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            padding: 3px 10px; border-radius: 20px;
+            background: #f0f0f0; color: #555;
+        }
+        .detail-status.reversed { background: #ffece9; color: #ff3b30; }
+        .detail-meaning {
+            font-size: 0.95rem; line-height: 1.55; color: #333;
+            overflow-y: auto;
+        }
+        .detail-close {
+            margin-top: 6px;
+            padding: 12px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
-        <div class="loading-text">Kartlar açılıyor...</div>
+        <div class="loading-text" id="loadingText"></div>
     </div>
 
     <div class="topbar">
-        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" aria-label="Menü">
+        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
-        <div class="topbar-title">TAROTISTAN</div>
+        <div class="topbar-title" id="topbarTitle"></div>
         <div style="width:40px;"></div>
     </div>
 
     <div class="content" id="contentArea" style="display:none;">
         <div class="intent-box">
-            <div class="intent-label">Niyetiniz</div>
+            <div class="intent-label" id="intentLabel"></div>
             <div class="intent-text" id="intentDisplay"></div>
         </div>
 
@@ -274,22 +324,40 @@
 
         <div class="ai-section" id="aiSection">
             <div class="ai-icon">✦</div>
-            <div class="ai-title">Yapay Zeka Yorumu</div>
-            <div class="ai-desc">
-                Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>
-                (Entegrasyon sonrası aktif olacaktır)
-            </div>
+            <div class="ai-title" id="aiTitleText"></div>
+            <div class="ai-desc" id="aiDescText"></div>
         </div>
     </div>
 
     <div class="bottom-actions" id="bottomActions" style="display:none;">
-        <button class="btn-action secondary" onclick="window.location.href='dashboard.html'">Ana Sayfa</button>
-        <button class="btn-action" onclick="newReading()">Yeni Çekim</button>
+        <button class="btn-action secondary" id="homeBtnText" onclick="window.location.href='dashboard.html'"></button>
+        <button class="btn-action" id="newReadingBtnText" onclick="newReading()"></button>
+    </div>
+
+    <div class="detail-overlay" id="detailOverlay">
+        <div class="detail-box">
+            <div class="detail-position" id="detailPosition"></div>
+            <div class="detail-title" id="detailTitle"></div>
+            <div class="detail-status" id="detailStatus"></div>
+            <div class="detail-meaning" id="detailMeaning"></div>
+            <button class="detail-close" id="detailCloseBtn"></button>
+        </div>
     </div>
 
     <script>
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // Dil uygula
+        document.getElementById('loadingText').textContent = t('resultLoading');
+        document.getElementById('topbarTitle').textContent = t('dashboardTitle');
+        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
+        document.getElementById('intentLabel').textContent = t('resultIntentLabel');
+        document.getElementById('aiTitleText').textContent = t('aiTitle');
+        document.getElementById('aiDescText').innerHTML = t('aiDesc');
+        document.getElementById('homeBtnText').textContent = t('homeBtn');
+        document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
+        document.getElementById('detailCloseBtn').textContent = t('closeBtn');
 
         auth.onAuthStateChanged(function(user) {
             if (!user) {
@@ -314,7 +382,7 @@
                 const response = await fetch('tarot_cards.json');
                 tarotData = await response.json();
 
-                document.getElementById('intentDisplay').textContent = intentText || 'Belirtilmemiş';
+                document.getElementById('intentDisplay').textContent = intentText || t('resultNotSpecified');
 
                 renderCards();
                 saveReading();
@@ -327,12 +395,16 @@
                 console.error(err);
                 document.getElementById('loadingOverlay').innerHTML = `
                     <div class="error-box">
-                        <h2>Kartlar yüklenemedi</h2>
-                        <p>Lütfen internet bağlantınızı kontrol edin.</p>
-                        <button class="btn-action" onclick="window.location.href='dashboard.html'">Ana Sayfa</button>
+                        <h2>${t('resultErrorTitle')}</h2>
+                        <p>${t('resultErrorDesc')}</p>
+                        <button class="btn-action" onclick="window.location.href='dashboard.html'">${t('homeBtn')}</button>
                     </div>
                 `;
             }
+        }
+
+        function cardName(cardInfo) {
+            return getLang() === 'tr' ? cardInfo.name_tr : cardInfo.name_en;
         }
 
         function renderCards() {
@@ -340,7 +412,7 @@
             const isSingle = readingType === 'single';
             area.className = 'cards-area ' + (isSingle ? 'single' : 'three');
 
-            const positions = ['Geçmiş', 'Şimdi', 'Gelecek'];
+            const positions = [t('positionPast'), t('positionPresent'), t('positionFuture')];
 
             drawnCards.forEach((drawn, index) => {
                 const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
@@ -355,7 +427,7 @@
                 if (drawn.reversed) {
                     const badge = document.createElement('div');
                     badge.className = 'card-badge';
-                    badge.textContent = 'TERS';
+                    badge.textContent = t('resultReversedBadge');
                     slot.appendChild(badge);
                 }
 
@@ -366,7 +438,7 @@
 
                 const name = document.createElement('div');
                 name.className = 'card-name';
-                name.textContent = cardInfo.name_tr;
+                name.textContent = cardName(cardInfo);
                 slot.appendChild(name);
 
                 wrapper.appendChild(slot);
@@ -386,12 +458,30 @@
             });
         }
 
+        const detailOverlay = document.getElementById('detailOverlay');
+
         function showCardDetail(card, isReversed, position) {
-            const title = position ? position + ' — ' + card.name_tr : card.name_tr;
-            const status = isReversed ? 'Ters' : 'Düz';
-            const meaning = isReversed ? card.reversed_meaning : card.upright_meaning;
-            alert(title + ' (' + status + ')\n\n' + meaning);
+            document.getElementById('detailPosition').textContent = position || '';
+            document.getElementById('detailPosition').style.display = position ? 'block' : 'none';
+            document.getElementById('detailTitle').textContent = cardName(card);
+
+            const statusEl = document.getElementById('detailStatus');
+            statusEl.textContent = isReversed ? t('resultReversed') : t('resultUpright');
+            statusEl.classList.toggle('reversed', isReversed);
+
+            document.getElementById('detailMeaning').textContent =
+                isReversed ? card.reversed_meaning : card.upright_meaning;
+
+            detailOverlay.classList.add('active');
         }
+
+        function closeDetail() {
+            detailOverlay.classList.remove('active');
+        }
+        document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+        detailOverlay.addEventListener('click', function(e) {
+            if (e.target === detailOverlay) closeDetail();
+        });
 
         function saveReading() {
             const user = auth.currentUser;
