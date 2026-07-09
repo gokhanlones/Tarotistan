@@ -129,7 +129,7 @@
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
-        <div class="topbar-title">TAROTISTAN</div>
+        <div class="topbar-title" id="topbarTitle"></div>
     </div>
 
     <div class="content">
@@ -138,10 +138,14 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="btn-continue" id="continueBtn">Reklam İzle ve Devam Et</button>
+        <button class="btn-continue" id="continueBtn"></button>
     </div>
 
     <script>
+        document.getElementById('topbarTitle').textContent = t('dashboardTitle');
+        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
+        document.getElementById('continueBtn').textContent = t('cardsContinueBtn');
+
         const readingType = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
 
@@ -159,12 +163,12 @@
         function updateInfo() {
             if (maxSelect === 1) {
                 selectionInfo.textContent = selectedCount === 1
-                    ? 'Kart seçildi. Devam etmek için aşağıdaki butona basın.'
-                    : 'Aklındaki soru için bir kart seç.';
+                    ? t('cardsSelectedSingle')
+                    : t('cardsPickOne');
             } else {
-                selectionInfo.textContent = selectedCount + ' / ' + maxSelect + ' kart seçildi';
+                selectionInfo.textContent = selectedCount + ' / ' + maxSelect + ' ' + t('cardsSelectedOf');
                 if (selectedCount === maxSelect) {
-                    selectionInfo.textContent += ' — Devam etmek için aşağıdaki butona basın.';
+                    selectionInfo.textContent += ' — ' + t('cardsSelectedComplete');
                 }
             }
         }
@@ -191,7 +195,7 @@
 
             const img = document.createElement('img');
             img.src = 'onecard.png';
-            img.alt = 'Tarot Kartı';
+            img.alt = t('cardAlt');
             img.loading = 'lazy';
 
             card.appendChild(img);
