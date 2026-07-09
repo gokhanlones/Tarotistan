@@ -51,7 +51,34 @@ const LANG = {
         yearlyPrice: "Yıllık 399,99 TL",
 
         // Niyet modalı
-        intentTitle: "Niyet"
+        intentTitle: "Niyet",
+
+        // Kart seçim ekranı (cards.html)
+        cardsPickOne: "Aklındaki soru için bir kart seç.",
+        cardsSelectedSingle: "Kart seçildi. Devam etmek için aşağıdaki butona basın.",
+        cardsSelectedOf: "kart seçildi",
+        cardsSelectedComplete: "Devam etmek için aşağıdaki butona basın.",
+        cardsContinueBtn: "Reklam İzle ve Devam Et",
+        cardAlt: "Tarot Kartı",
+        menuLabel: "Menü",
+
+        // Sonuç ekranı (result.html)
+        resultLoading: "Kartlar açılıyor...",
+        resultIntentLabel: "Niyetiniz",
+        resultNotSpecified: "Belirtilmemiş",
+        resultReversedBadge: "TERS",
+        resultUpright: "Düz",
+        resultReversed: "Ters",
+        positionPast: "Geçmiş",
+        positionPresent: "Şimdi",
+        positionFuture: "Gelecek",
+        aiTitle: "Yapay Zeka Yorumu",
+        aiDesc: "Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>(Entegrasyon sonrası aktif olacaktır)",
+        homeBtn: "Ana Sayfa",
+        newReadingBtn: "Yeni Çekim",
+        resultErrorTitle: "Kartlar yüklenemedi",
+        resultErrorDesc: "Lütfen internet bağlantınızı kontrol edin.",
+        closeBtn: "Kapat"
     },
     en: {
         appName: "TAROTISTAN",
@@ -103,7 +130,34 @@ const LANG = {
         yearlyPrice: "Yearly 399.99 TL",
 
         // Intent modal
-        intentTitle: "Intention"
+        intentTitle: "Intention",
+
+        // Card selection screen (cards.html)
+        cardsPickOne: "Pick a card for what's on your mind.",
+        cardsSelectedSingle: "Card selected. Tap the button below to continue.",
+        cardsSelectedOf: "selected",
+        cardsSelectedComplete: "Tap the button below to continue.",
+        cardsContinueBtn: "Watch Ad and Continue",
+        cardAlt: "Tarot Card",
+        menuLabel: "Menu",
+
+        // Result screen (result.html)
+        resultLoading: "Revealing cards...",
+        resultIntentLabel: "Your Intention",
+        resultNotSpecified: "Not specified",
+        resultReversedBadge: "REVERSED",
+        resultUpright: "Upright",
+        resultReversed: "Reversed",
+        positionPast: "Past",
+        positionPresent: "Present",
+        positionFuture: "Future",
+        aiTitle: "AI Interpretation",
+        aiDesc: "This section will feature an in-depth AI-powered interpretation of your drawn cards.<br>(Will be active after integration)",
+        homeBtn: "Home",
+        newReadingBtn: "New Reading",
+        resultErrorTitle: "Couldn't load the cards",
+        resultErrorDesc: "Please check your internet connection.",
+        closeBtn: "Close"
     }
 };
 
