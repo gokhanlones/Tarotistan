@@ -34,33 +34,145 @@
             font-size: 1rem; font-weight: 600;
             cursor: pointer;
         }
+        .btn-watch:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .ad-status {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 16px;
+            min-height: 20px;
+        }
+        /* Test modu badge */
+        .test-badge {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
     </style>
+    <!-- Google AdSense/AdMob SDK -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544"
+     crossorigin="anonymous"></script>
 </head>
 <body>
+    <div class="test-badge">TEST REKLAM</div>
+    
     <div class="ad-box">
         <div class="ad-title">Reklam</div>
         <div class="ad-desc" id="adText"></div>
-        <button class="btn-watch" id="watchBtn">Reklamı İzle (Test)</button>
+        <button class="btn-watch" id="watchBtn">Reklamı İzle</button>
+        <div class="ad-status" id="adStatus"></div>
     </div>
 
     <script>
-        const type = sessionStorage.getItem('tarotReadingType'); // 'single' veya 'three'
+        const type = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
 
+        if (!type || !intent) {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Test reklam mesajları
         if (type === 'single') {
             document.getElementById('adText').textContent =
                 'Tek kart çekimi için kısa bir reklam izliyorsunuz.';
         } else if (type === 'three') {
             document.getElementById('adText').textContent =
                 'Üç kart çekimi için reklam izliyorsunuz.';
-        } else {
-            window.location.href = 'dashboard.html';
         }
 
-        document.getElementById('watchBtn').addEventListener('click', function() {
-            // Gerçek AdMob/AdSense entegrasyonu buraya gelecek
-            // Şimdilik test: direkt kart sayfasına atla
-            window.location.href = 'cards.html';
+        const watchBtn = document.getElementById('watchBtn');
+        const adStatus = document.getElementById('adStatus');
+
+        // ============================================================
+        // GOOGLE ADMOB TEST REKLAM PROSEDÜRÜ
+        // ============================================================
+        // Gerçek entegrasyonda:
+        // 1. AdMob hesabı oluştur
+        // 2. Uygulama ekle (Web uygulaması olarak)
+        // 3. Rewarded ad unit oluştur
+        // 4. Test cihazı ekle (Settings > Test devices)
+        // 5. Test modunu aktif et
+        // 
+        // TEST ID'LER (Kesinlikle production'da kullanma!):
+        // Publisher ID: ca-pub-3940256099942544
+        // Rewarded Ad Unit: ca-app-pub-3940256099942544/5224354917
+        // ============================================================
+
+        let rewardedAd = null;
+        let adLoadAttempt = 0;
+        const MAX_LOAD_ATTEMPTS = 3;
+
+        // Test modu: Ad yüklenene kadar simüle et
+        // Gerçek entegrasyonda Google AdMob Web SDK kullanılır
+        
+        function loadRewardedAd() {
+            adStatus.textContent = 'Reklam yükleniyor...';
+            watchBtn.disabled = true;
+
+            // TEST MODU: 2 saniye sonra reklamı "yükle"
+            // Gerçekte: google.ads.AdManager veya AdMob Web SDK
+            setTimeout(() => {
+                adStatus.textContent = 'Reklam hazır!';
+                watchBtn.disabled = false;
+                watchBtn.textContent = type === 'single' ? 'Reklamı İzle ve Kartı Gör' : 'Reklamı İzle ve Kartları Gör';
+            }, 1500);
+        }
+
+        function showRewardedAd() {
+            watchBtn.disabled = true;
+            adStatus.textContent = 'Reklam oynatılıyor...';
+
+            // TEST MODU: 3 saniye "reklam izlet"
+            // Gerçekte: rewardedAd.show() çağrılır
+            const testAdDuration = 3000;
+            let remaining = testAdDuration / 1000;
+            
+            const countdown = setInterval(() => {
+                adStatus.textContent = `Reklam: ${remaining} saniye...`;
+                remaining--;
+                if (remaining < 0) {
+                    clearInterval(countdown);
+                    onRewardEarned();
+                }
+            }, 1000);
+        }
+
+        function onRewardEarned() {
+            adStatus.textContent = 'Ödül kazanıldı! Yönlendiriliyor...';
+            adStatus.style.color = '#34c759';
+            
+            // Reklam izlendiğini session'a kaydet
+            sessionStorage.setItem('adWatched', 'true');
+            sessionStorage.setItem('adWatchedAt', Date.now().toString());
+            
+            // Kart sonuç sayfasına git (result.html - oluşturacağız)
+            setTimeout(() => {
+                window.location.href = 'result.html';
+            }, 1000);
+        }
+
+        // Sayfa yüklendiğinde reklamı hazırla
+        loadRewardedAd();
+
+        watchBtn.addEventListener('click', function() {
+            showRewardedAd();
+        });
+
+        // Geri tuşu / sayfa terk kontrolü
+        window.addEventListener('beforeunload', function() {
+            // Eğer reklam izlenmeden çıkılırsa session temizle
+            if (sessionStorage.getItem('adWatched') !== 'true') {
+                sessionStorage.removeItem('tarotDrawnCards');
+            }
         });
     </script>
 </body>
