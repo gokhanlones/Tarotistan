@@ -27,19 +27,24 @@
             padding: 0 16px;
             z-index: 10;
         }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
         .topbar-title {
             flex: 1;
             text-align: center;
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px;
             color: #000;
-        }
-        .btn-back {
-            width: 40px; height: 40px;
-            background: none; border: none;
-            font-size: 1.4rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
         }
 
         .content {
@@ -80,8 +85,11 @@
             flex-wrap: nowrap;
         }
         .cards-area.three {
-            justify-content: space-between;
-            gap: 8px;
+            justify-content: center;
+            gap: clamp(6px, 2vw, 16px);
+        }
+        .cards-area.single {
+            justify-content: center;
         }
 
         .card-slot {
@@ -137,6 +145,15 @@
             margin-top: 6px;
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
+        .card-position-outside {
+            font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-top: 8px;
+        }
         .card-badge {
             position: absolute; top: clamp(4px, 1.5vw, 8px); right: clamp(4px, 1.5vw, 8px);
             z-index: 3;
@@ -149,12 +166,9 @@
         }
 
         .cards-area.single .card-slot {
-            flex: 0 0 auto;
-            width: min(200px, 55vw);
+            flex: 1;
             max-width: 200px;
-        }
-        .cards-area.single .card-name {
-            font-size: clamp(0.9rem, 4vw, 1.3rem);
+            min-width: 0;
         }
 
         .ai-section {
@@ -247,7 +261,9 @@
     </div>
 
     <div class="topbar">
-        <button class="btn-back" onclick="window.location.href='dashboard.html'">←</button>
+        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
         <div class="topbar-title">TAROTISTAN</div>
         <div style="width:40px;"></div>
     </div>
@@ -333,6 +349,10 @@
                 const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
                 if (!cardInfo) return;
 
+                // Kart wrapper (kart + alt etiket)
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'flex:1;max-width:200px;min-width:0;display:flex;flex-direction:column;align-items:center;';
+
                 const slot = document.createElement('div');
                 slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
 
@@ -353,18 +373,21 @@
                 name.textContent = cardInfo.name_tr;
                 slot.appendChild(name);
 
+                wrapper.appendChild(slot);
+
+                // Pozisyon etiketi kartın ALTINA
                 if (readingType === 'three') {
-                    const pos = document.createElement('div');
-                    pos.className = 'card-position';
-                    pos.textContent = positions[index];
-                    slot.appendChild(pos);
+                    const posLabel = document.createElement('div');
+                    posLabel.className = 'card-position-outside';
+                    posLabel.textContent = positions[index];
+                    wrapper.appendChild(posLabel);
                 }
 
                 slot.addEventListener('click', function() {
                     showCardDetail(cardInfo, drawn.reversed, readingType === 'three' ? positions[index] : null);
                 });
 
-                area.appendChild(slot);
+                area.appendChild(wrapper);
             });
         }
 
