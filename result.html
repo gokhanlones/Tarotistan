@@ -86,16 +86,27 @@
         }
         .cards-area.three {
             justify-content: center;
-            gap: clamp(6px, 2vw, 16px);
+            gap: 16px;
         }
         .cards-area.single {
             justify-content: center;
         }
 
-        .card-slot {
-            flex: 1;
+        .card-wrapper {
+            width: calc((100% - 32px) / 3);
             max-width: 200px;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cards-area.single .card-wrapper {
+            width: min(200px, 55vw);
+            max-width: 200px;
+        }
+
+        .card-slot {
+            width: 100%;
             aspect-ratio: 9 / 16;
             border-radius: 14px;
             overflow: hidden;
@@ -136,15 +147,6 @@
             word-break: break-word;
             hyphens: auto;
         }
-        .card-position {
-            position: relative; z-index: 2;
-            font-size: clamp(0.55rem, 2vw, 0.7rem); font-weight: 600;
-            color: #C9A961;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 6px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
         .card-position-outside {
             font-size: clamp(0.65rem, 2.5vw, 0.8rem);
             font-weight: 600;
@@ -163,12 +165,6 @@
             padding: clamp(2px, 0.8vw, 3px) clamp(4px, 2vw, 8px);
             border-radius: 4px;
             letter-spacing: 1px;
-        }
-
-        .cards-area.single .card-slot {
-            flex: 1;
-            max-width: 200px;
-            min-width: 0;
         }
 
         .ai-section {
@@ -341,7 +337,8 @@
 
         function renderCards() {
             const area = document.getElementById('cardsArea');
-            area.className = 'cards-area ' + (readingType === 'single' ? 'single' : 'three');
+            const isSingle = readingType === 'single';
+            area.className = 'cards-area ' + (isSingle ? 'single' : 'three');
 
             const positions = ['Geçmiş', 'Şimdi', 'Gelecek'];
 
@@ -349,9 +346,8 @@
                 const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
                 if (!cardInfo) return;
 
-                // Kart wrapper (kart + alt etiket)
                 const wrapper = document.createElement('div');
-                wrapper.style.cssText = 'flex:1;max-width:200px;min-width:0;display:flex;flex-direction:column;align-items:center;';
+                wrapper.className = 'card-wrapper';
 
                 const slot = document.createElement('div');
                 slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
@@ -375,8 +371,7 @@
 
                 wrapper.appendChild(slot);
 
-                // Pozisyon etiketi kartın ALTINA
-                if (readingType === 'three') {
+                if (!isSingle) {
                     const posLabel = document.createElement('div');
                     posLabel.className = 'card-position-outside';
                     posLabel.textContent = positions[index];
@@ -384,7 +379,7 @@
                 }
 
                 slot.addEventListener('click', function() {
-                    showCardDetail(cardInfo, drawn.reversed, readingType === 'three' ? positions[index] : null);
+                    showCardDetail(cardInfo, drawn.reversed, !isSingle ? positions[index] : null);
                 });
 
                 area.appendChild(wrapper);
@@ -392,10 +387,10 @@
         }
 
         function showCardDetail(card, isReversed, position) {
-            const title = position ? `${position} — ${card.name_tr}` : card.name_tr;
+            const title = position ? position + ' — ' + card.name_tr : card.name_tr;
             const status = isReversed ? 'Ters' : 'Düz';
             const meaning = isReversed ? card.reversed_meaning : card.upright_meaning;
-            alert(`${title} (${status})\n\n${meaning}`);
+            alert(title + ' (' + status + ')\n\n' + meaning);
         }
 
         function saveReading() {
