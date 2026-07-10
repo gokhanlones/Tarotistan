@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAROTISTAN</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -44,35 +49,62 @@
             margin-top: 16px;
             min-height: 20px;
         }
-        /* Test modu badge */
         .test-badge {
             position: fixed;
-            top: 8px;
-            right: 8px;
-            background: #ff3b30;
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 4px;
+            top: 8px; right: 8px;
+            background: #ff3b30; color: #fff;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 4px;
             letter-spacing: 1px;
         }
+        .ai-loader {
+            display: none;
+            margin-top: 24px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .ai-loader.active { display: flex; }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ai-loader-text {
+            font-size: 0.9rem; color: #555;
+        }
     </style>
-    <!-- Google AdSense/AdMob SDK -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544"
      crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="test-badge">TEST REKLAM</div>
     
-    <div class="ad-box">
+    <div class="ad-box" id="adBox">
         <div class="ad-title">Reklam</div>
         <div class="ad-desc" id="adText"></div>
         <button class="btn-watch" id="watchBtn">Reklamı İzle</button>
         <div class="ad-status" id="adStatus"></div>
     </div>
 
+    <div class="ai-loader" id="aiLoader">
+        <div class="spinner"></div>
+        <div class="ai-loader-text" id="aiLoaderText">Yapay zeka yorumu hazırlanıyor...</div>
+    </div>
+
     <script>
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const remoteConfig = firebase.remoteConfig();
+
+        // Remote Config ayarları — 1 saat cache
+        remoteConfig.settings = {
+            minimumFetchIntervalMillis: 3600000
+        };
+
         const type = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
 
@@ -80,7 +112,6 @@
             window.location.href = 'dashboard.html';
         }
 
-        // Test reklam mesajları
         if (type === 'single') {
             document.getElementById('adText').textContent =
                 'Tek kart çekimi için kısa bir reklam izliyorsunuz.';
@@ -91,35 +122,13 @@
 
         const watchBtn = document.getElementById('watchBtn');
         const adStatus = document.getElementById('adStatus');
+        const adBox = document.getElementById('adBox');
+        const aiLoader = document.getElementById('aiLoader');
+        const aiLoaderText = document.getElementById('aiLoaderText');
 
-        // ============================================================
-        // GOOGLE ADMOB TEST REKLAM PROSEDÜRÜ
-        // ============================================================
-        // Gerçek entegrasyonda:
-        // 1. AdMob hesabı oluştur
-        // 2. Uygulama ekle (Web uygulaması olarak)
-        // 3. Rewarded ad unit oluştur
-        // 4. Test cihazı ekle (Settings > Test devices)
-        // 5. Test modunu aktif et
-        // 
-        // TEST ID'LER (Kesinlikle production'da kullanma!):
-        // Publisher ID: ca-pub-3940256099942544
-        // Rewarded Ad Unit: ca-app-pub-3940256099942544/5224354917
-        // ============================================================
-
-        let rewardedAd = null;
-        let adLoadAttempt = 0;
-        const MAX_LOAD_ATTEMPTS = 3;
-
-        // Test modu: Ad yüklenene kadar simüle et
-        // Gerçek entegrasyonda Google AdMob Web SDK kullanılır
-        
         function loadRewardedAd() {
             adStatus.textContent = 'Reklam yükleniyor...';
             watchBtn.disabled = true;
-
-            // TEST MODU: 2 saniye sonra reklamı "yükle"
-            // Gerçekte: google.ads.AdManager veya AdMob Web SDK
             setTimeout(() => {
                 adStatus.textContent = 'Reklam hazır!';
                 watchBtn.disabled = false;
@@ -130,12 +139,8 @@
         function showRewardedAd() {
             watchBtn.disabled = true;
             adStatus.textContent = 'Reklam oynatılıyor...';
-
-            // TEST MODU: 3 saniye "reklam izlet"
-            // Gerçekte: rewardedAd.show() çağrılır
             const testAdDuration = 3000;
             let remaining = testAdDuration / 1000;
-            
             const countdown = setInterval(() => {
                 adStatus.textContent = `Reklam: ${remaining} saniye...`;
                 remaining--;
@@ -146,30 +151,142 @@
             }, 1000);
         }
 
-        function onRewardEarned() {
-            adStatus.textContent = 'Ödül kazanıldı! Yönlendiriliyor...';
-            adStatus.style.color = '#34c759';
-            
-            // Reklam izlendiğini session'a kaydet
+        async function onRewardEarned() {
             sessionStorage.setItem('adWatched', 'true');
             sessionStorage.setItem('adWatchedAt', Date.now().toString());
-            
-            // Kart sonuç sayfasına git (result.html - oluşturacağız)
-            setTimeout(() => {
-                window.location.href = 'result.html';
-            }, 1000);
+
+            adBox.style.display = 'none';
+            aiLoader.classList.add('active');
+            adStatus.textContent = '';
+
+            await generateAiReadingAndSave();
         }
 
-        // Sayfa yüklendiğinde reklamı hazırla
-        loadRewardedAd();
+        async function generateAiReadingAndSave() {
+            const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
+            const intentText = sessionStorage.getItem('tarotIntent') || '';
+            const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
 
-        watchBtn.addEventListener('click', function() {
-            showRewardedAd();
+            if (!drawnCards.length) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            try {
+                // 1. Kart verilerini çek
+                const response = await fetch('tarot_cards.json');
+                const tarotData = await response.json();
+
+                // 2. API Key'i Remote Config'den çek
+                aiLoaderText.textContent = 'Ayarlar yükleniyor...';
+                await remoteConfig.fetchAndActivate();
+                const geminiApiKey = remoteConfig.getString('gemini_api_key');
+
+                // 3. Prompt oluştur
+                const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
+                let prompt = `Sen deneyimli, sezgisel ve şifahi bir tarot yorumcususun. Aşağıdaki çekime göre derinlemesine, kişiselleştirilmiş ve profesyonel bir yorum yap.\n\n`;
+                prompt += `Kullanıcının Niyeti: "${intentText}"\n\n`;
+                prompt += `Çekilen Kartlar:\n`;
+
+                drawnCards.forEach((drawn, index) => {
+                    const card = tarotData.cards.find(c => c.id === drawn.id);
+                    if (!card) return;
+                    const position = positions[index] || '';
+                    const status = drawn.reversed ? 'Ters' : 'Düz';
+                    const meaning = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
+                    prompt += `${index + 1}. ${position ? position + ' - ' : ''}${card.name_tr} (${status})\n`;
+                    prompt += `   Anlam: ${meaning}\n\n`;
+                });
+
+                prompt += `\nLütfen şu formatta yanıt ver:\n`;
+                prompt += `1. Genel Enerji: Tüm kartların birlikte oluşturduğu temel tema (2-3 cümle)\n`;
+                prompt += `2. Kart Yorumları: Her kartı kullanıcının niyetiyle bağlantılı olarak yorumla (her biri 3-4 cümle)\n`;
+                prompt += `3. Sonuç / Tavsiye: Kullanıcıya pratik, olumlu ve yapıcı bir öneri (2-3 cümle)\n`;
+                prompt += `Yorum Türkçe olsun, samimi ama saygılı bir dille yaz. Fazla teknik tarot jargonuna girme, anlaşılır ol.`;
+
+                // 4. Gemini API'ye istek at
+                let aiText = '';
+                if (geminiApiKey) {
+                    aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
+                    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: prompt }]
+                            }]
+                        })
+                    });
+                    const geminiData = await geminiRes.json();
+                    if (geminiData.candidates && geminiData.candidates[0] && geminiData.candidates[0].content && geminiData.candidates[0].content.parts) {
+                        aiText = geminiData.candidates[0].content.parts[0].text || '';
+                    } else {
+                        console.warn('Gemini beklenmeyen yanıt:', geminiData);
+                        aiText = '';
+                    }
+                } else {
+                    console.warn('Remote Config\'de gemini_api_key bulunamadı.');
+                    aiText = '';
+                }
+
+                // 5. Firestore'a kaydet
+                const user = auth.currentUser;
+                if (!user) throw new Error('Kullanıcı oturumu bulunamadı');
+
+                const readingData = {
+                    type: readingType,
+                    intent: intentText,
+                    cards: drawnCards,
+                    aiInterpretation: aiText,
+                    aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: aiText ? 'completed' : 'pending'
+                };
+
+                const docRef = await db.collection('users').doc(user.uid).collection('readings').add(readingData);
+
+                // 6. Result sayfasına yönlendir
+                window.location.href = 'result.html?id=' + docRef.id;
+
+            } catch (err) {
+                console.error('AI / Firestore hatası:', err);
+                aiLoaderText.textContent = 'Yorum hazırlanırken hata oluştu. Yönlendiriliyor...';
+                aiLoaderText.style.color = '#ff3b30';
+
+                const user = auth.currentUser;
+                if (user) {
+                    const fallbackData = {
+                        type: readingType,
+                        intent: intentText,
+                        cards: drawnCards,
+                        aiInterpretation: '',
+                        aiGeneratedAt: null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'error',
+                        error: err.message
+                    };
+                    const docRef = await db.collection('users').doc(user.uid).collection('readings').add(fallbackData);
+                    setTimeout(() => {
+                        window.location.href = 'result.html?id=' + docRef.id;
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
+            }
+        }
+
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+            }
         });
 
-        // Geri tuşu / sayfa terk kontrolü
+        loadRewardedAd();
+        watchBtn.addEventListener('click', showRewardedAd);
+
         window.addEventListener('beforeunload', function() {
-            // Eğer reklam izlenmeden çıkılırsa session temizle
             if (sessionStorage.getItem('adWatched') !== 'true') {
                 sessionStorage.removeItem('tarotDrawnCards');
             }
