@@ -245,16 +245,18 @@
                     aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
                     log('4. HF API isteği atılıyor...');
                     
-                    const modelUrl = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+                    // ESKİ: https://api-inference.huggingface.co/... -> HF tarafından kapatıldı (410 / Failed to fetch)
+                    // YENİ: router.huggingface.co üzerinden OpenAI-uyumlu chat completions formatı
+                    const modelUrl = 'https://router.huggingface.co/v1/chat/completions';
                     log('   Model URL: ' + modelUrl);
-                    
+
                     const requestBody = {
-                        inputs: `<s>[INST] ${prompt} [/INST]`,
-                        parameters: {
-                            max_new_tokens: 1024,
-                            temperature: 0.7,
-                            return_full_text: false
-                        }
+                        model: 'mistralai/Mistral-7B-Instruct-v0.2',
+                        messages: [
+                            { role: 'user', content: prompt }
+                        ],
+                        max_tokens: 1024,
+                        temperature: 0.7
                     };
                     log('   Request body hazırlandı');
 
@@ -266,20 +268,17 @@
                         },
                         body: JSON.stringify(requestBody)
                     });
-                    
+
                     log('   HF Response status: ' + hfRes.status);
                     log('   HF Response ok: ' + hfRes.ok);
-                    
+
                     const hfData = await hfRes.json();
                     log('   HF Response data tipi: ' + typeof hfData);
                     log('   HF Response data: ' + JSON.stringify(hfData).substring(0, 800));
-                    
-                    if (Array.isArray(hfData) && hfData[0] && hfData[0].generated_text) {
-                        aiText = hfData[0].generated_text.trim();
-                        log('   AI text alındı (array), uzunluk: ' + aiText.length);
-                    } else if (hfData.generated_text) {
-                        aiText = hfData.generated_text.trim();
-                        log('   AI text alındı (object), uzunluk: ' + aiText.length);
+
+                    if (hfData.choices && hfData.choices[0] && hfData.choices[0].message && hfData.choices[0].message.content) {
+                        aiText = hfData.choices[0].message.content.trim();
+                        log('   AI text alındı, uzunluk: ' + aiText.length);
                     } else if (hfData.error) {
                         log('   HF API HATASI: ' + JSON.stringify(hfData.error));
                         throw new Error('HF API: ' + JSON.stringify(hfData.error));
