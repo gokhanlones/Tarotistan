@@ -76,6 +76,22 @@
         .ai-loader-text {
             font-size: 0.9rem; color: #555;
         }
+        .debug-box {
+            display: none;
+            width: 100%; max-width: 340px;
+            margin-top: 16px;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            color: #00ff00;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .debug-box.active { display: block; }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544"
      crossorigin="anonymous"></script>
@@ -94,6 +110,8 @@
         <div class="spinner"></div>
         <div class="ai-loader-text" id="aiLoaderText">Yapay zeka yorumu hazırlanıyor...</div>
     </div>
+
+    <div class="debug-box" id="debugBox"></div>
 
     <script>
         const auth = firebase.auth();
@@ -124,6 +142,13 @@
         const adBox = document.getElementById('adBox');
         const aiLoader = document.getElementById('aiLoader');
         const aiLoaderText = document.getElementById('aiLoaderText');
+        const debugBox = document.getElementById('debugBox');
+
+        function log(msg) {
+            console.log(msg);
+            debugBox.innerHTML += msg + '\n';
+            debugBox.classList.add('active');
+        }
 
         function loadRewardedAd() {
             adStatus.textContent = 'Reklam yükleniyor...';
@@ -172,14 +197,23 @@
             }
 
             try {
+                log('=== BAŞLADI ===');
+                log('Kart sayısı: ' + drawnCards.length);
+                log('Çekim tipi: ' + readingType);
+
                 // 1. Kart verilerini çek
+                log('1. tarot_cards.json fetch ediliyor...');
                 const response = await fetch('tarot_cards.json');
+                log('   Status: ' + response.status);
                 const tarotData = await response.json();
+                log('   Kart verisi yüklendi: ' + tarotData.cards.length + ' kart');
 
                 // 2. API Key'i Remote Config'den çek
-                aiLoaderText.textContent = 'Ayarlar yükleniyor...';
+                log('2. Remote Config fetch ediliyor...');
                 await remoteConfig.fetchAndActivate();
                 const hfApiKey = remoteConfig.getString('huggingface_api_key');
+                log('   API Key uzunluk: ' + hfApiKey.length);
+                log('   API Key son 10: ' + hfApiKey.slice(-10));
 
                 // 3. Prompt oluştur
                 const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
@@ -203,46 +237,66 @@
                 prompt += `3. Sonuç / Tavsiye: Kullanıcıya pratik, olumlu ve yapıcı bir öneri (2-3 cümle)\n`;
                 prompt += `Yorum Türkçe olsun, samimi ama saygılı bir dille yaz. Fazla teknik tarot jargonuna girme, anlaşılır ol.`;
 
+                log('3. Prompt oluşturuldu, uzunluk: ' + prompt.length);
+
                 // 4. Hugging Face Inference API'ye istek at
                 let aiText = '';
                 if (hfApiKey) {
                     aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
+                    log('4. HF API isteği atılıyor...');
                     
-                    const hfRes = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
+                    const modelUrl = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+                    log('   Model URL: ' + modelUrl);
+                    
+                    const requestBody = {
+                        inputs: `<s>[INST] ${prompt} [/INST]`,
+                        parameters: {
+                            max_new_tokens: 1024,
+                            temperature: 0.7,
+                            return_full_text: false
+                        }
+                    };
+                    log('   Request body hazırlandı');
+
+                    const hfRes = await fetch(modelUrl, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${hfApiKey}`,
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            inputs: `<s>[INST] ${prompt} [/INST]`,
-                            parameters: {
-                                max_new_tokens: 1024,
-                                temperature: 0.7,
-                                return_full_text: false
-                            }
-                        })
+                        body: JSON.stringify(requestBody)
                     });
                     
+                    log('   HF Response status: ' + hfRes.status);
+                    log('   HF Response ok: ' + hfRes.ok);
+                    
                     const hfData = await hfRes.json();
-                    console.log('HF yanıt:', JSON.stringify(hfData).substring(0, 500));
+                    log('   HF Response data tipi: ' + typeof hfData);
+                    log('   HF Response data: ' + JSON.stringify(hfData).substring(0, 800));
                     
                     if (Array.isArray(hfData) && hfData[0] && hfData[0].generated_text) {
                         aiText = hfData[0].generated_text.trim();
+                        log('   AI text alındı (array), uzunluk: ' + aiText.length);
                     } else if (hfData.generated_text) {
                         aiText = hfData.generated_text.trim();
+                        log('   AI text alındı (object), uzunluk: ' + aiText.length);
                     } else if (hfData.error) {
-                        console.error('HF API hatası:', hfData.error);
-                        throw new Error(hfData.error);
+                        log('   HF API HATASI: ' + JSON.stringify(hfData.error));
+                        throw new Error('HF API: ' + JSON.stringify(hfData.error));
+                    } else {
+                        log('   Beklenmeyen yanıt yapısı');
+                        aiText = '';
                     }
                 } else {
-                    console.warn('Remote Config\'de huggingface_api_key bulunamadı.');
+                    log('   API Key bulunamadı!');
                     aiText = '';
                 }
 
                 // 5. Firestore'a kaydet
+                log('5. Firestore kaydı yapılıyor...');
                 const user = auth.currentUser;
                 if (!user) throw new Error('Kullanıcı oturumu bulunamadı');
+                log('   Kullanıcı: ' + user.uid);
 
                 const readingData = {
                     type: readingType,
@@ -255,17 +309,24 @@
                 };
 
                 const docRef = await db.collection('users').doc(user.uid).collection('readings').add(readingData);
+                log('   Firestore kaydı başarılı, doc ID: ' + docRef.id);
 
                 // 6. Result sayfasına yönlendir
+                log('6. Yönlendirme: result.html?id=' + docRef.id);
                 window.location.href = 'result.html?id=' + docRef.id;
 
             } catch (err) {
-                console.error('AI / Firestore hatası:', err);
-                aiLoaderText.textContent = 'Yorum hazırlanırken hata oluştu. Yönlendiriliyor...';
+                log('=== HATA ===');
+                log('Hata adı: ' + err.name);
+                log('Hata mesajı: ' + err.message);
+                log('Hata stack: ' + (err.stack || 'yok'));
+                
+                aiLoaderText.textContent = 'Hata: ' + err.message;
                 aiLoaderText.style.color = '#ff3b30';
 
                 const user = auth.currentUser;
                 if (user) {
+                    log('Fallback Firestore kaydı yapılıyor...');
                     const fallbackData = {
                         type: readingType,
                         intent: intentText,
@@ -277,18 +338,21 @@
                         error: err.message
                     };
                     const docRef = await db.collection('users').doc(user.uid).collection('readings').add(fallbackData);
+                    log('Fallback kayıt başarılı: ' + docRef.id);
                     setTimeout(() => {
                         window.location.href = 'result.html?id=' + docRef.id;
-                    }, 1500);
+                    }, 3000);
                 } else {
+                    log('Kullanıcı yok, dashboarda yönlendiriliyor');
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
-                    }, 1500);
+                    }, 3000);
                 }
             }
         }
 
         auth.onAuthStateChanged(function(user) {
+            log('Auth state: ' + (user ? user.email : 'null'));
             if (!user) {
                 window.location.href = 'auth.html';
             }
