@@ -119,7 +119,7 @@
         const remoteConfig = firebase.remoteConfig();
 
         remoteConfig.settings = {
-            minimumFetchIntervalMillis: 3600000
+            minimumFetchIntervalMillis: 0 // GEÇİCİ TEST: token güncellemesi doğrulanınca 3600000'e geri al
         };
 
         const type = sessionStorage.getItem('tarotReadingType');
