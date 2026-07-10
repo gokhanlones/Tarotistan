@@ -100,7 +100,6 @@
         const db = firebase.firestore();
         const remoteConfig = firebase.remoteConfig();
 
-        // Remote Config ayarları — 1 saat cache
         remoteConfig.settings = {
             minimumFetchIntervalMillis: 3600000
         };
@@ -180,7 +179,7 @@
                 // 2. API Key'i Remote Config'den çek
                 aiLoaderText.textContent = 'Ayarlar yükleniyor...';
                 await remoteConfig.fetchAndActivate();
-                const geminiApiKey = remoteConfig.getString('gemini_api_key');
+                const hfApiKey = remoteConfig.getString('huggingface_api_key');
 
                 // 3. Prompt oluştur
                 const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
@@ -204,28 +203,40 @@
                 prompt += `3. Sonuç / Tavsiye: Kullanıcıya pratik, olumlu ve yapıcı bir öneri (2-3 cümle)\n`;
                 prompt += `Yorum Türkçe olsun, samimi ama saygılı bir dille yaz. Fazla teknik tarot jargonuna girme, anlaşılır ol.`;
 
-                // 4. Gemini API'ye istek at
+                // 4. Hugging Face Inference API'ye istek at
                 let aiText = '';
-                if (geminiApiKey) {
+                if (hfApiKey) {
                     aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
-                    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
+                    
+                    const hfRes = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Authorization': `Bearer ${hfApiKey}`,
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: prompt }]
-                            }]
+                            inputs: `<s>[INST] ${prompt} [/INST]`,
+                            parameters: {
+                                max_new_tokens: 1024,
+                                temperature: 0.7,
+                                return_full_text: false
+                            }
                         })
                     });
-                    const geminiData = await geminiRes.json();
-                    if (geminiData.candidates && geminiData.candidates[0] && geminiData.candidates[0].content && geminiData.candidates[0].content.parts) {
-                        aiText = geminiData.candidates[0].content.parts[0].text || '';
-                    } else {
-                        console.warn('Gemini beklenmeyen yanıt:', geminiData);
-                        aiText = '';
+                    
+                    const hfData = await hfRes.json();
+                    console.log('HF yanıt:', JSON.stringify(hfData).substring(0, 500));
+                    
+                    if (Array.isArray(hfData) && hfData[0] && hfData[0].generated_text) {
+                        aiText = hfData[0].generated_text.trim();
+                    } else if (hfData.generated_text) {
+                        aiText = hfData.generated_text.trim();
+                    } else if (hfData.error) {
+                        console.error('HF API hatası:', hfData.error);
+                        throw new Error(hfData.error);
                     }
                 } else {
-                    console.warn('Remote Config\'de gemini_api_key bulunamadı.');
+                    console.warn('Remote Config\'de huggingface_api_key bulunamadı.');
                     aiText = '';
                 }
 
