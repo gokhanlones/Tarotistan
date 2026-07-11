@@ -254,7 +254,10 @@
                         ],
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 1024
+                            maxOutputTokens: 2048,
+                            thinkingConfig: {
+                                thinkingBudget: 0
+                            }
                         }
                     };
                     log('   Request body hazırlandı');
@@ -277,6 +280,9 @@
 
                     const candidate = geminiData.candidates && geminiData.candidates[0];
                     const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
+                    if (candidate) {
+                        log('   finishReason: ' + candidate.finishReason);
+                    }
 
                     if (part && part.text) {
                         aiText = part.text.trim();
