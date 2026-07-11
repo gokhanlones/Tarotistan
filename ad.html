@@ -211,7 +211,7 @@
                 // 2. API Key'i Remote Config'den çek (aynı parametre, artık Gemini key'i tutuyor)
                 log('2. Remote Config fetch ediliyor...');
                 await remoteConfig.fetchAndActivate();
-                const geminiApiKey = remoteConfig.getString('huggingface_api_key');
+                const geminiApiKey = remoteConfig.getString('gemini_api_key');
                 log('   API Key uzunluk: ' + geminiApiKey.length);
                 log('   API Key son 10: ' + geminiApiKey.slice(-10));
 
