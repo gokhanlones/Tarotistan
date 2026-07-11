@@ -149,8 +149,8 @@
         }
         .card-position-outside {
             font-size: clamp(0.65rem, 2.5vw, 0.8rem);
-            font-weight: 600;
-            color: #555;
+            font-weight: 700;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             text-align: center;
@@ -182,6 +182,20 @@
             text-align: justify;
             white-space: pre-wrap;
             word-break: break-word;
+        }
+        .ai-text p {
+            margin: 0 0 12px 0;
+        }
+        .ai-text p:last-child {
+            margin-bottom: 0;
+        }
+        .ai-header {
+            font-size: 1rem; font-weight: 700;
+            color: #000; text-align: center;
+            margin: 18px 0 8px 0;
+        }
+        .ai-header:first-child {
+            margin-top: 0;
         }
 
         .bottom-actions {
@@ -415,10 +429,45 @@
             }
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         function renderAiText(text) {
-            document.getElementById('aiDescText').textContent = text && text.trim()
-                ? text.trim()
-                : t('aiFallback');
+            const target = document.getElementById('aiDescText');
+            const trimmed = text && text.trim();
+
+            if (!trimmed) {
+                target.innerHTML = '<p>' + escapeHtml(t('aiFallback')) + '</p>';
+                return;
+            }
+
+            const lines = trimmed.split('\n');
+            let html = '';
+
+            lines.forEach(rawLine => {
+                const line = rawLine.trim();
+                if (!line) return;
+
+                const escaped = escapeHtml(line);
+                // Satırın tamamı **başlık** veya ## başlık şeklindeyse: gerçek başlık olarak render et
+                const boldHeaderMatch = escaped.match(/^\*\*(.+?)\*\*:?$/);
+                const hashHeaderMatch = escaped.match(/^#{1,3}\s*(.+?)$/);
+
+                if (boldHeaderMatch) {
+                    html += '<div class="ai-header">' + boldHeaderMatch[1] + '</div>';
+                } else if (hashHeaderMatch) {
+                    html += '<div class="ai-header">' + hashHeaderMatch[1] + '</div>';
+                } else {
+                    // Satır içi **kalın** ifadeleri <strong>'a çevir
+                    const withBold = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    html += '<p>' + withBold + '</p>';
+                }
+            });
+
+            target.innerHTML = html;
         }
 
         function cardName(cardInfo) {
