@@ -435,6 +435,18 @@
             return div.innerHTML;
         }
 
+        const AI_KNOWN_HEADERS = ['Genel Enerji', 'Kart Yorumları', 'Sonuç ve Tavsiye', 'Sonuç / Tavsiye', 'General Energy', 'Card Interpretations', 'Conclusion and Advice'];
+
+        function normalizeHeaderCandidate(line) {
+            // Baştaki numaralandırma/işaretleri ve sondaki iki noktayı temizleyip karşılaştırmaya hazırla
+            return line.replace(/^[\s\-*#\d.)]+/, '').replace(/:+\s*$/, '').trim();
+        }
+
+        function matchKnownHeader(line) {
+            const normalized = normalizeHeaderCandidate(line);
+            return AI_KNOWN_HEADERS.find(h => h.toLowerCase() === normalized.toLowerCase());
+        }
+
         function renderAiText(text) {
             const target = document.getElementById('aiDescText');
             const trimmed = text && text.trim();
@@ -451,8 +463,14 @@
                 const line = rawLine.trim();
                 if (!line) return;
 
+                const knownHeader = matchKnownHeader(line);
+                if (knownHeader) {
+                    html += '<div class="ai-header">' + escapeHtml(knownHeader) + '</div>';
+                    return;
+                }
+
+                // Eski kayıtlarla (markdown formatlı) geriye dönük uyumluluk
                 const escaped = escapeHtml(line);
-                // Satırın tamamı **başlık** veya ## başlık şeklindeyse: gerçek başlık olarak render et
                 const boldHeaderMatch = escaped.match(/^\*\*(.+?)\*\*:?$/);
                 const hashHeaderMatch = escaped.match(/^#{1,3}\s*(.+?)$/);
 
@@ -461,8 +479,9 @@
                 } else if (hashHeaderMatch) {
                     html += '<div class="ai-header">' + hashHeaderMatch[1] + '</div>';
                 } else {
-                    // Satır içi **kalın** ifadeleri <strong>'a çevir
-                    const withBold = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    // Kaçak yıldız/numaralandırma işaretlerini temizle, satır içi **kalın** ifadeleri <strong>'a çevir
+                    const cleaned = escaped.replace(/^[\s\-*#]+/, '').replace(/^\d+\.\s*/, '');
+                    const withBold = cleaned.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
                     html += '<p>' + withBold + '</p>';
                 }
             });
