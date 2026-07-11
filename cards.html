@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAROTS</title>
+    <title>TAROTISTAN</title>
     <script src="lang.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -46,7 +46,13 @@
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px;
             color: #000;
-            margin-right: 40px;
+        }
+        .topbar-counter {
+            min-width: 40px;
+            text-align: right;
+            font-size: 1rem; font-weight: 700;
+            color: #000;
+            flex-shrink: 0;
         }
 
         /* ---- İçerik ---- */
@@ -54,13 +60,6 @@
             padding: 76px 12px 88px;
             max-width: 600px;
             margin: 0 auto;
-        }
-        .selection-info {
-            text-align: center;
-            font-size: 0.95rem;
-            color: #555;
-            margin-bottom: 16px;
-            min-height: 24px;
         }
         .cards-grid {
             display: grid;
@@ -129,10 +128,10 @@
             <span></span><span></span><span></span>
         </button>
         <div class="topbar-title" id="topbarTitle"></div>
+        <div class="topbar-counter" id="topbarCounter"></div>
     </div>
 
     <div class="content">
-        <div class="selection-info" id="selectionInfo"></div>
         <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
@@ -156,20 +155,11 @@
         let selectedCount = 0;
 
         const grid = document.getElementById('cardsGrid');
-        const selectionInfo = document.getElementById('selectionInfo');
+        const topbarCounter = document.getElementById('topbarCounter');
         const continueBtn = document.getElementById('continueBtn');
 
         function updateInfo() {
-            if (maxSelect === 1) {
-                selectionInfo.textContent = selectedCount === 1
-                    ? t('cardsSelectedSingle')
-                    : t('cardsPickOne');
-            } else {
-                selectionInfo.textContent = selectedCount + ' / ' + maxSelect + ' ' + t('cardsSelectedOf');
-                if (selectedCount === maxSelect) {
-                    selectionInfo.textContent += ' — ' + t('cardsSelectedComplete');
-                }
-            }
+            topbarCounter.textContent = selectedCount + '/' + (maxSelect - selectedCount);
         }
 
         function updateContinueButton() {
