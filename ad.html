@@ -208,12 +208,12 @@
                 const tarotData = await response.json();
                 log('   Kart verisi yüklendi: ' + tarotData.cards.length + ' kart');
 
-                // 2. API Key'i Remote Config'den çek
+                // 2. API Key'i Remote Config'den çek (aynı parametre, artık Gemini key'i tutuyor)
                 log('2. Remote Config fetch ediliyor...');
                 await remoteConfig.fetchAndActivate();
-                const hfApiKey = remoteConfig.getString('huggingface_api_key');
-                log('   API Key uzunluk: ' + hfApiKey.length);
-                log('   API Key son 10: ' + hfApiKey.slice(-10));
+                const geminiApiKey = remoteConfig.getString('huggingface_api_key');
+                log('   API Key uzunluk: ' + geminiApiKey.length);
+                log('   API Key son 10: ' + geminiApiKey.slice(-10));
 
                 // 3. Prompt oluştur
                 const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
@@ -239,49 +239,51 @@
 
                 log('3. Prompt oluşturuldu, uzunluk: ' + prompt.length);
 
-                // 4. Hugging Face Inference API'ye istek at
+                // 4. Gemini API'ye istek at
                 let aiText = '';
-                if (hfApiKey) {
+                if (geminiApiKey) {
                     aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
-                    log('4. HF API isteği atılıyor...');
-                    
-                    // ESKİ: https://api-inference.huggingface.co/... -> HF tarafından kapatıldı (410 / Failed to fetch)
-                    // YENİ: router.huggingface.co üzerinden OpenAI-uyumlu chat completions formatı
-                    const modelUrl = 'https://router.huggingface.co/v1/chat/completions';
+                    log('4. Gemini API isteği atılıyor...');
+
+                    const modelUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
                     log('   Model URL: ' + modelUrl);
 
                     const requestBody = {
-                        model: 'mistralai/Mistral-7B-Instruct-v0.2',
-                        messages: [
-                            { role: 'user', content: prompt }
+                        contents: [
+                            { role: 'user', parts: [{ text: prompt }] }
                         ],
-                        max_tokens: 1024,
-                        temperature: 0.7
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1024
+                        }
                     };
                     log('   Request body hazırlandı');
 
-                    const hfRes = await fetch(modelUrl, {
+                    const geminiRes = await fetch(modelUrl, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${hfApiKey}`,
+                            'x-goog-api-key': geminiApiKey,
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(requestBody)
                     });
 
-                    log('   HF Response status: ' + hfRes.status);
-                    log('   HF Response ok: ' + hfRes.ok);
+                    log('   Gemini Response status: ' + geminiRes.status);
+                    log('   Gemini Response ok: ' + geminiRes.ok);
 
-                    const hfData = await hfRes.json();
-                    log('   HF Response data tipi: ' + typeof hfData);
-                    log('   HF Response data: ' + JSON.stringify(hfData).substring(0, 800));
+                    const geminiData = await geminiRes.json();
+                    log('   Gemini Response data tipi: ' + typeof geminiData);
+                    log('   Gemini Response data: ' + JSON.stringify(geminiData).substring(0, 800));
 
-                    if (hfData.choices && hfData.choices[0] && hfData.choices[0].message && hfData.choices[0].message.content) {
-                        aiText = hfData.choices[0].message.content.trim();
+                    const candidate = geminiData.candidates && geminiData.candidates[0];
+                    const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
+
+                    if (part && part.text) {
+                        aiText = part.text.trim();
                         log('   AI text alındı, uzunluk: ' + aiText.length);
-                    } else if (hfData.error) {
-                        log('   HF API HATASI: ' + JSON.stringify(hfData.error));
-                        throw new Error('HF API: ' + JSON.stringify(hfData.error));
+                    } else if (geminiData.error) {
+                        log('   Gemini API HATASI: ' + JSON.stringify(geminiData.error));
+                        throw new Error('Gemini API: ' + JSON.stringify(geminiData.error));
                     } else {
                         log('   Beklenmeyen yanıt yapısı');
                         aiText = '';
