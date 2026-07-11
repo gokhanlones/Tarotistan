@@ -58,7 +58,7 @@ const LANG = {
         cardsSelectedSingle: "Kart seçildi. Devam etmek için aşağıdaki butona basın.",
         cardsSelectedOf: "kart seçildi",
         cardsSelectedComplete: "Devam etmek için aşağıdaki butona basın.",
-        cardsContinueBtn: "Reklam İzle ve Devam Et",
+        cardsContinueBtn: "Gönder",
         cardAlt: "Tarot Kartı",
         menuLabel: "Menü",
 
@@ -138,7 +138,7 @@ const LANG = {
         cardsSelectedSingle: "Card selected. Tap the button below to continue.",
         cardsSelectedOf: "selected",
         cardsSelectedComplete: "Tap the button below to continue.",
-        cardsContinueBtn: "Watch Ad and Continue",
+        cardsContinueBtn: "Submit",
         cardAlt: "Tarot Card",
         menuLabel: "Menu",
 
