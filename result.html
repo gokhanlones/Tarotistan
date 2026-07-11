@@ -176,18 +176,6 @@
             text-align: center;
             margin-bottom: 16px;
         }
-        .ai-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
-        }
-        .ai-title {
-            font-size: 1rem; font-weight: 700;
-            color: #000; margin-bottom: 6px;
-        }
-        .ai-desc {
-            font-size: 0.85rem; color: #888;
-            line-height: 1.5;
-        }
         .ai-text {
             font-size: 0.92rem; color: #333;
             line-height: 1.65;
@@ -330,8 +318,6 @@
         <div class="cards-area" id="cardsArea"></div>
 
         <div class="ai-section" id="aiSection">
-            <div class="ai-icon">✦</div>
-            <div class="ai-title" id="aiTitleText"></div>
             <div class="ai-text" id="aiDescText"></div>
         </div>
     </div>
@@ -360,7 +346,6 @@
         document.getElementById('topbarTitle').textContent = t('dashboardTitle');
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('intentLabel').textContent = t('resultIntentLabel');
-        document.getElementById('aiTitleText').textContent = t('aiTitle');
         document.getElementById('homeBtnText').textContent = t('homeBtn');
         document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
         document.getElementById('detailCloseBtn').textContent = t('closeBtn');
