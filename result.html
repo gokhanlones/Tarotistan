@@ -188,6 +188,13 @@
             font-size: 0.85rem; color: #888;
             line-height: 1.5;
         }
+        .ai-text {
+            font-size: 0.92rem; color: #333;
+            line-height: 1.65;
+            text-align: left;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
 
         .bottom-actions {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -325,7 +332,7 @@
         <div class="ai-section" id="aiSection">
             <div class="ai-icon">✦</div>
             <div class="ai-title" id="aiTitleText"></div>
-            <div class="ai-desc" id="aiDescText"></div>
+            <div class="ai-text" id="aiDescText"></div>
         </div>
     </div>
 
@@ -354,7 +361,6 @@
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('intentLabel').textContent = t('resultIntentLabel');
         document.getElementById('aiTitleText').textContent = t('aiTitle');
-        document.getElementById('aiDescText').innerHTML = t('aiDesc');
         document.getElementById('homeBtnText').textContent = t('homeBtn');
         document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
         document.getElementById('detailCloseBtn').textContent = t('closeBtn');
@@ -370,6 +376,7 @@
         const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
         const intentText = sessionStorage.getItem('tarotIntent') || '';
         const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
+        const readingId = new URLSearchParams(window.location.search).get('id');
 
         if (!drawnCards.length) {
             window.location.href = 'dashboard.html';
@@ -382,10 +389,30 @@
                 const response = await fetch('tarot_cards.json');
                 tarotData = await response.json();
 
-                document.getElementById('intentDisplay').textContent = intentText || t('resultNotSpecified');
+                // Varsayılan olarak sessionStorage verisini kullan (id yoksa / doküman bulunamazsa)
+                let cardsForRender = drawnCards;
+                let typeForRender = readingType;
+                let intentForRender = intentText;
+                let aiTextForRender = '';
 
-                renderCards();
-                saveReading();
+                if (readingId) {
+                    const user = auth.currentUser;
+                    const docSnap = await db.collection('users').doc(user.uid)
+                        .collection('readings').doc(readingId).get();
+
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        cardsForRender = data.cards || cardsForRender;
+                        typeForRender = data.type || typeForRender;
+                        intentForRender = data.intent || intentForRender;
+                        aiTextForRender = data.aiInterpretation || '';
+                    }
+                }
+
+                document.getElementById('intentDisplay').textContent = intentForRender || t('resultNotSpecified');
+
+                renderCards(cardsForRender, typeForRender);
+                renderAiText(aiTextForRender);
 
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 document.getElementById('contentArea').style.display = 'flex';
@@ -403,18 +430,27 @@
             }
         }
 
+        function renderAiText(text) {
+            document.getElementById('aiDescText').textContent = text && text.trim()
+                ? text.trim()
+                : t('aiFallback');
+        }
+
         function cardName(cardInfo) {
             return getLang() === 'tr' ? cardInfo.name_tr : cardInfo.name_en;
         }
 
-        function renderCards() {
+        function renderCards(cardsParam, typeParam) {
+            const cardsToUse = cardsParam || drawnCards;
+            const typeToUse = typeParam || readingType;
+
             const area = document.getElementById('cardsArea');
-            const isSingle = readingType === 'single';
+            const isSingle = typeToUse === 'single';
             area.className = 'cards-area ' + (isSingle ? 'single' : 'three');
 
             const positions = [t('positionPast'), t('positionPresent'), t('positionFuture')];
 
-            drawnCards.forEach((drawn, index) => {
+            cardsToUse.forEach((drawn, index) => {
                 const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
                 if (!cardInfo) return;
 
@@ -482,18 +518,6 @@
         detailOverlay.addEventListener('click', function(e) {
             if (e.target === detailOverlay) closeDetail();
         });
-
-        function saveReading() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            db.collection('users').doc(user.uid).collection('readings').add({
-                type: readingType,
-                intent: intentText,
-                cards: drawnCards,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(err => console.error('Kayıt hatası:', err));
-        }
 
         function newReading() {
             sessionStorage.removeItem('tarotDrawnCards');
