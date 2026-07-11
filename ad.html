@@ -231,10 +231,16 @@
                     prompt += `   Anlam: ${meaning}\n\n`;
                 });
 
-                prompt += `\nLütfen şu formatta yanıt ver:\n`;
-                prompt += `1. Genel Enerji: Tüm kartların birlikte oluşturduğu temel tema (2-3 cümle)\n`;
-                prompt += `2. Kart Yorumları: Her kartı kullanıcının niyetiyle bağlantılı olarak yorumla (her biri 3-4 cümle)\n`;
-                prompt += `3. Sonuç / Tavsiye: Kullanıcıya pratik, olumlu ve yapıcı bir öneri (2-3 cümle)\n`;
+                prompt += `\nYanıtını TAM OLARAK şu formatta ver:\n\n`;
+                prompt += `Genel Enerji\n\n(Tüm kartların birlikte oluşturduğu temel tema, 2-3 cümle)\n\n`;
+                prompt += `Kart Yorumları\n\n(Her kartı kullanıcının niyetiyle bağlantılı olarak yorumla, her biri 3-4 cümle)\n\n`;
+                prompt += `Sonuç ve Tavsiye\n\n(Kullanıcıya pratik, olumlu ve yapıcı bir öneri, 2-3 cümle)\n\n`;
+                prompt += `Kurallar:\n`;
+                prompt += `- Başlıkları (Genel Enerji, Kart Yorumları, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
+                prompt += `- Başlıkların başına numara (1. 2. 3.) veya herhangi bir işaret koyma.\n`;
+                prompt += `- Başlıkların sonuna iki nokta (:) koyma.\n`;
+                prompt += `- Yıldız (*), kare işaret (#) veya başka hiçbir markdown biçimlendirmesi kullanma, düz metin yaz.\n`;
+                prompt += `- Her başlıktan sonra bir satır boşluk bırak, yorumu bir alt satırdan başlat.\n`;
                 prompt += `Yorum Türkçe olsun, samimi ama saygılı bir dille yaz. Fazla teknik tarot jargonuna girme, anlaşılır ol.`;
 
                 log('3. Prompt oluşturuldu, uzunluk: ' + prompt.length);
