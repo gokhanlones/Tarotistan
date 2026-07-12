@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROTISTAN</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---- Üst banner ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8e8ed;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+            margin-right: 40px;
+        }
+
+        /* ---- İçerik ---- */
+        .content {
+            padding: 76px 12px 88px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .card-item {
+            cursor: pointer;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.4s ease-out forwards;
+        }
+        .card-item .thumb {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .card-item .thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-item .name {
+            font-size: 0.7rem; font-weight: 600;
+            color: #000;
+            text-align: center;
+            line-height: 1.2;
+        }
+        @keyframes cardAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---- Alt navigasyon ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 56px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn svg { width: 26px; height: 26px; }
+        .nav-btn img {
+            width: 34px; height: 34px;
+            object-fit: contain; border-radius: 6px;
+        }
+
+        /* ---- Kart detay modalı ---- */
+        .detail-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 24px;
+            z-index: 100;
+        }
+        .detail-overlay.active { display: flex; }
+        .detail-box {
+            width: 100%; max-width: 360px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 22px;
+            display: flex; flex-direction: column;
+            gap: 10px;
+            max-height: 80vh;
+        }
+        .detail-meta {
+            font-size: 0.75rem; color: #888;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            text-align: center;
+        }
+        .detail-title {
+            font-size: 1.25rem; font-weight: 700;
+            color: #000; text-align: center;
+        }
+        .detail-section-label {
+            font-size: 0.8rem; font-weight: 700;
+            color: #000; margin-top: 4px;
+        }
+        .detail-meaning {
+            font-size: 0.92rem; line-height: 1.55; color: #333;
+            overflow-y: auto;
+        }
+        .detail-scroll {
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .detail-close {
+            margin-top: 6px;
+            padding: 12px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ---- Auth kontrol spinner ---- */
+        .auth-check {
+            position: fixed; inset: 0;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+        }
+        .auth-check.hidden { display: none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="auth-check" id="authCheck">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="topbarTitle"></div>
+    </div>
+
+    <div class="content">
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 11.5 12 4l9 7.5"/>
+                <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+            </svg>
+        </button>
+        <button class="nav-btn active" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
+            <img src="cardsinfo.png" alt="">
+        </button>
+    </div>
+
+    <div class="detail-overlay" id="detailOverlay">
+        <div class="detail-box">
+            <div class="detail-meta" id="detailMeta"></div>
+            <div class="detail-title" id="detailTitle"></div>
+            <div class="detail-scroll">
+                <div>
+                    <div class="detail-section-label" id="uprightLabel"></div>
+                    <div class="detail-meaning" id="uprightText"></div>
+                </div>
+                <div>
+                    <div class="detail-section-label" id="reversedLabel"></div>
+                    <div class="detail-meaning" id="reversedText"></div>
+                </div>
+            </div>
+            <button class="detail-close" id="detailCloseBtn"></button>
+        </div>
+    </div>
+
+    <script>
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            document.getElementById('authCheck').classList.add('hidden');
+        });
+
+        document.getElementById('topbarTitle').textContent = t('cardsInfoTitle');
+        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
+        document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
+        document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
+        document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
+        document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
+
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            console.log('Menü açılacak');
+        });
+
+        let tarotCards = [];
+
+        function cardName(card) {
+            return getLang() === 'tr' ? card.name_tr : card.name_en;
+        }
+
+        function arcanaLabel(card) {
+            return card.arcana === 'major' ? t('cardsInfoMajor') : t('cardsInfoMinor');
+        }
+
+        async function loadCards() {
+            try {
+                const response = await fetch('tarot_cards.json');
+                const data = await response.json();
+                tarotCards = data.cards;
+                renderGrid();
+            } catch (err) {
+                console.error('Kart verisi yüklenemedi:', err);
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            tarotCards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'card-item';
+                item.style.animationDelay = (index * 0.02) + 's';
+
+                item.innerHTML = `
+                    <div class="thumb"><img src="onecard.png" alt=""></div>
+                    <div class="name">${cardName(card)}</div>
+                `;
+
+                item.addEventListener('click', function() {
+                    openDetail(card);
+                });
+
+                grid.appendChild(item);
+            });
+        }
+
+        function openDetail(card) {
+            document.getElementById('detailMeta').textContent =
+                arcanaLabel(card) + ' · ' + card.element + ' · ' + card.planet;
+            document.getElementById('detailTitle').textContent = cardName(card);
+            document.getElementById('uprightText').textContent = card.upright_meaning;
+            document.getElementById('reversedText').textContent = card.reversed_meaning;
+            document.getElementById('detailOverlay').classList.add('active');
+        }
+
+        function closeDetail() {
+            document.getElementById('detailOverlay').classList.remove('active');
+        }
+
+        document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+        document.getElementById('detailOverlay').addEventListener('click', function(e) {
+            if (e.target === document.getElementById('detailOverlay')) closeDetail();
+        });
+
+        loadCards();
+    </script>
+</body>
+</html>
