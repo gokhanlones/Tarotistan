@@ -225,5 +225,3 @@ function setLang(code) {
 function t(key) {
     return LANG[getLang()][key] || key;
 }
-    return LANG[getLang()][key] || key;
-}
