@@ -71,6 +71,19 @@
             background: #000;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            transition: opacity 0.3s, filter 0.3s;
+        }
+        .tarot-card.disabled {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .tarot-card.disabled .card-text {
+            opacity: 0.6;
+        }
+        .tarot-card.disabled::after {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 35%, rgba(0,0,0,0.8) 100%);
         }
         .tarot-card img {
             position: absolute; inset: 0;
@@ -101,6 +114,25 @@
         .tarot-card .line-meta {
             color: #ffffff; font-size: 0.72rem; font-weight: 400;
             opacity: 0.85;
+        }
+        .cooldown-badge {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 8px;
+            text-align: center;
+            line-height: 1.3;
+            white-space: nowrap;
+            display: none;
+        }
+        .tarot-card.disabled .cooldown-badge {
+            display: block;
         }
 
         /* ---- Alt navigasyon ---- */
@@ -267,6 +299,7 @@
                     <div class="line-sub" id="singleCardLabel"></div>
                     <div class="line-meta" id="singleCardAds"></div>
                 </div>
+                <div class="cooldown-badge" id="singleCooldown">24 saat dolmadı</div>
             </div>
 
             <div class="tarot-card silver" id="threeCardOption">
@@ -276,6 +309,7 @@
                     <div class="line-sub" id="threeCardLabel"></div>
                     <div class="line-meta" id="threeCardAds"></div>
                 </div>
+                <div class="cooldown-badge" id="threeCooldown">24 saat dolmadı</div>
             </div>
         </div>
 
@@ -335,15 +369,84 @@
 
     <script>
         const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 24 saat kontrolü
+        function isWithin24h(timestamp) {
+            if (!timestamp) return false;
+            const now = Date.now();
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            return (now - recordTime) < (24 * 60 * 60 * 1000);
+        }
+
+        function formatRemainingTime(timestamp) {
+            if (!timestamp) return '';
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            const elapsed = Date.now() - recordTime;
+            const remaining = (24 * 60 * 60 * 1000) - elapsed;
+            if (remaining <= 0) return '';
+            const hours = Math.floor(remaining / (60 * 60 * 1000));
+            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+            return hours + 's ' + minutes + 'dk';
+        }
 
         // Auth kontrolü
-        auth.onAuthStateChanged(function(user) {
+        auth.onAuthStateChanged(async function(user) {
             if (!user) {
                 window.location.href = 'auth.html';
                 return;
             }
             document.getElementById('authCheck').classList.add('hidden');
+
+            // Son çekim tarihini kontrol et
+            await checkLastReading(user.uid);
         });
+
+        async function checkLastReading(userId) {
+            try {
+                // Önce sessionStorage'dan kontrol et (splash'tan gelen)
+                const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
+                if (cachedTime) {
+                    const cachedTimestamp = parseInt(cachedTime);
+                    if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
+                        disableCards(new Date(cachedTimestamp));
+                        return;
+                    }
+                }
+
+                // Firestore'dan kontrol et
+                const lastQuery = await db.collection('users').doc(userId)
+                    .collection('readings')
+                    .orderBy('createdAt', 'desc')
+                    .limit(1)
+                    .get();
+
+                if (!lastQuery.empty) {
+                    const lastData = lastQuery.docs[0].data();
+                    if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
+                        disableCards(lastData.createdAt);
+                    }
+                }
+            } catch (e) {
+                console.log('Last reading check error:', e);
+            }
+        }
+
+        function disableCards(lastTimestamp) {
+            const singleCard = document.getElementById('singleCardOption');
+            const threeCard = document.getElementById('threeCardOption');
+            const singleCooldown = document.getElementById('singleCooldown');
+            const threeCooldown = document.getElementById('threeCooldown');
+
+            singleCard.classList.add('disabled');
+            threeCard.classList.add('disabled');
+
+            const remaining = formatRemainingTime(lastTimestamp);
+            if (remaining) {
+                singleCooldown.textContent = remaining;
+                threeCooldown.textContent = remaining;
+            }
+        }
 
         // Dil uygula
         document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
