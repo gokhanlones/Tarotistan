@@ -50,6 +50,7 @@ const LANG = {
         cardsInfoClose: "Kapat",
         navHomeLabel: "Anasayfa",
         navCardsInfoLabel: "Kart Bilgileri",
+        navHistoryLabel: "Geçmiş Okuma",
 
         // Dashboard / Seçici
         dashboardTitle: "TAROTİSTAN",
@@ -153,6 +154,7 @@ const LANG = {
         cardsInfoClose: "Close",
         navHomeLabel: "Home",
         navCardsInfoLabel: "Card Info",
+        navHistoryLabel: "Reading History",
 
         // Dashboard / Selector
         dashboardTitle: "TAROTISTAN",
@@ -221,5 +223,7 @@ function setLang(code) {
 }
 
 function t(key) {
+    return LANG[getLang()][key] || key;
+}
     return LANG[getLang()][key] || key;
 }
