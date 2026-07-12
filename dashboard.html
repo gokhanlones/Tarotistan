@@ -339,14 +339,17 @@
         </div>
     </div>
 
-    <!-- Alt navigasyon (Güncellendi) -->
+    <!-- Alt navigasyon (Garantili Yönlendirme) -->
     <div class="bottom-nav">
-        <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
-            <img src="cardsinfo.png" alt="">
-        </button>
-        <button class="nav-btn" id="navResult" onclick="window.location.href='result.html'">
-            <img src="eye_icon_circle.png" alt="">
-        </button>
+        <!-- Dashboard Linki -->
+        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
+            <img src="cardsinfo.png" alt="Ana Sayfa">
+        </a>
+        
+        <!-- Result Linki -->
+        <a href="result.html" class="nav-btn" id="navResult" style="text-decoration: none; display: flex;">
+            <img src="eye_icon_circle.png" alt="Sonuçlar">
+        </a>
     </div>
 
     <div class="modal-overlay" id="intentOverlay">
