@@ -18,7 +18,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ---- Üst banner ---- */
+        /* ---- Üst banner (dashboard ile aynı) ---- */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0;
             height: 60px;
@@ -95,7 +95,7 @@
             }
         }
 
-        /* ---- Alt navigasyon ---- */
+        /* ---- Alt navigasyon (dashboard ile aynı) ---- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -105,6 +105,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 56px;
         }
         .nav-btn {
             background: none; border: none; padding: 0;
@@ -114,6 +115,7 @@
             cursor: pointer;
         }
         .nav-btn.active { background: #f2f2f5; }
+        .nav-btn svg { width: 26px; height: 26px; }
         .nav-btn img {
             width: 34px; height: 34px;
             object-fit: contain; border-radius: 6px;
@@ -149,59 +151,6 @@
         }
         .btn-continue.visible { display: flex; }
         .btn-continue:disabled { background: #ccc; }
-
-        /* ---- Sidebar ---- */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 150;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: 260px;
-            background: #ffffff;
-            z-index: 151;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid #e8e8ed;
-            font-size: 1.1rem; font-weight: 700;
-            letter-spacing: 2px;
-            color: #000;
-        }
-        .sidebar-menu {
-            display: flex; flex-direction: column;
-        }
-        .sidebar-item {
-            padding: 18px 20px;
-            font-size: 1rem;
-            color: #000;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background 0.15s;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .sidebar-item:active {
-            background: #f5f5f7;
-        }
-        .sidebar-item.active-page {
-            font-weight: 700;
-            background: #fafafa;
-        }
     </style>
 </head>
 <body>
@@ -228,22 +177,12 @@
         <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
             <img src="cardsinfo.png" alt="">
         </button>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TAROTISTAN</div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
-                <span id="sidebarCardsText">Kartlar</span>
-            </div>
-            <div class="sidebar-item" onclick="logout()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span id="sidebarLogoutText">Çıkış</span>
-            </div>
-        </div>
+        <button class="nav-btn" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
+            <img src="bookicon.png" alt="">
+        </button>
+        <button class="nav-btn" id="navHistory" onclick="window.location.href='result.html'">
+            <img src="timeicon.png" alt="">
+        </button>
     </div>
 
     <script>
@@ -251,25 +190,8 @@
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('continueBtn').setAttribute('aria-label', t('cardsContinueBtn'));
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-        document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
-        document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
-
-        // Sidebar
-        function openSidebar() {
-            document.getElementById('sidebarOverlay').classList.add('active');
-            document.getElementById('sidebar').classList.add('active');
-        }
-        function closeSidebar() {
-            document.getElementById('sidebarOverlay').classList.remove('active');
-            document.getElementById('sidebar').classList.remove('active');
-        }
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                window.location.href = 'auth.html';
-            });
-        }
-        document.getElementById('menuBtn').addEventListener('click', openSidebar);
-        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
+        document.getElementById('navHistory').setAttribute('aria-label', t('navHistoryLabel'));
 
         const readingType = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
@@ -293,6 +215,7 @@
             continueBtn.classList.toggle('visible', selectedCount === maxSelect);
         }
 
+        // Fisher-Yates karıştırma
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -301,6 +224,7 @@
             return array;
         }
 
+        // 78 kartı oluştur (hepsi arka yüz)
         const TOTAL_CARDS = 78;
         for (let i = 0; i < TOTAL_CARDS; i++) {
             const card = document.createElement('div');
@@ -332,20 +256,30 @@
 
         updateInfo();
 
+        // Devam butonu — RASTGELE ÇEKİM + TERS/DÜZ
         continueBtn.addEventListener('click', function() {
             if (selectedCount !== maxSelect) return;
 
-            const deck = Array.from({length: 78}, (_, i) => i);
+            // 1-78 arası tekrarsız rastgele kart ID'leri
+            const deck = Array.from({length: 78}, (_, i) => i); // [0, 1, ..., 77]
             const shuffled = shuffle(deck);
             const drawnIds = shuffled.slice(0, maxSelect);
 
+            // Her kart için %50 ters/düz belirle
             const drawnCards = drawnIds.map(id => ({
                 id: id,
-                reversed: Math.random() < 0.5
+                reversed: Math.random() < 0.5  // true = ters, false = düz
             }));
+
+            // Örnek çıktı (tek kart):  [{id: 34, reversed: false}]
+            // Örnek çıktı (üç kart):    [{id: 12, reversed: true}, {id: 67, reversed: false}, {id: 5, reversed: false}]
 
             sessionStorage.setItem('tarotDrawnCards', JSON.stringify(drawnCards));
             window.location.href = 'ad.html';
+        });
+
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            console.log('Menü açılacak');
         });
     </script>
 </body>
