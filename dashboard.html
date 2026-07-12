@@ -107,25 +107,6 @@
             color: #ffffff; font-size: 0.72rem; font-weight: 400;
             opacity: 0.85;
         }
-        .cooldown-badge {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-            background: rgba(0,0,0,0.75);
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 8px;
-            text-align: center;
-            line-height: 1.3;
-            white-space: nowrap;
-            display: none;
-        }
-        .tarot-card.locked .cooldown-badge {
-            display: block;
-        }
 
         /* ---- Alt navigasyon ---- */
         .bottom-nav {
@@ -324,7 +305,6 @@
                     <div class="line-sub" id="singleCardLabel"></div>
                     <div class="line-meta" id="singleCardAds"></div>
                 </div>
-                <div class="cooldown-badge" id="singleCooldown"></div>
             </div>
 
             <div class="tarot-card silver locked" id="threeCardOption">
@@ -334,7 +314,6 @@
                     <div class="line-sub" id="threeCardLabel"></div>
                     <div class="line-meta" id="threeCardAds"></div>
                 </div>
-                <div class="cooldown-badge" id="threeCooldown"></div>
             </div>
         </div>
 
@@ -434,15 +413,11 @@
         function lockCards(message) {
             const singleCard = document.getElementById('singleCardOption');
             const threeCard = document.getElementById('threeCardOption');
-            const singleCooldown = document.getElementById('singleCooldown');
-            const threeCooldown = document.getElementById('threeCooldown');
 
             cooldownRemaining = message || t('cooldownMessage');
 
             singleCard.classList.add('locked');
             threeCard.classList.add('locked');
-            singleCooldown.textContent = cooldownRemaining;
-            threeCooldown.textContent = cooldownRemaining;
         }
 
         function unlockCards() {
