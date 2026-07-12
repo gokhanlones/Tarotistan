@@ -100,7 +100,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 56px;
         }
         .nav-btn {
             background: none; border: none; padding: 0;
@@ -110,7 +109,6 @@
             cursor: pointer;
         }
         .nav-btn.active { background: #f2f2f5; }
-        .nav-btn svg { width: 26px; height: 26px; }
         .nav-btn img {
             width: 34px; height: 34px;
             object-fit: contain; border-radius: 6px;
@@ -256,11 +254,8 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
+        <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
             <img src="cardsinfo.png" alt="">
-        </button>
-        <button class="nav-btn active" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
-            <img src="bookicon.png" alt="">
         </button>
     </div>
 
@@ -312,7 +307,6 @@
         document.getElementById('topbarTitle').textContent = t('cardsInfoTitle');
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
         document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
         document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
         document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
