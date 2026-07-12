@@ -119,7 +119,7 @@
         const remoteConfig = firebase.remoteConfig();
 
         remoteConfig.settings = {
-            minimumFetchIntervalMillis: 0 // GEÇİCİ TEST: token güncellemesi doğrulanınca 3600000'e geri al
+            minimumFetchIntervalMillis: 0
         };
 
         const type = sessionStorage.getItem('tarotReadingType');
@@ -186,6 +186,14 @@
             await generateAiReadingAndSave();
         }
 
+        // 24 saat kontrolü
+        function isOlderThan24h(timestamp) {
+            if (!timestamp) return true;
+            const now = Date.now();
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            return (now - recordTime) > (24 * 60 * 60 * 1000);
+        }
+
         async function generateAiReadingAndSave() {
             const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
             const intentText = sessionStorage.getItem('tarotIntent') || '';
@@ -208,12 +216,11 @@
                 const tarotData = await response.json();
                 log('   Kart verisi yüklendi: ' + tarotData.cards.length + ' kart');
 
-                // 2. API Key'i Remote Config'den çek (aynı parametre, artık Gemini key'i tutuyor)
+                // 2. API Key'i Remote Config'den çek
                 log('2. Remote Config fetch ediliyor...');
                 await remoteConfig.fetchAndActivate();
                 const geminiApiKey = remoteConfig.getString('gemini_api_key');
                 log('   API Key uzunluk: ' + geminiApiKey.length);
-                log('   API Key son 10: ' + geminiApiKey.slice(-10));
 
                 // 3. Prompt oluştur
                 const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
@@ -252,7 +259,6 @@
                     log('4. Gemini API isteği atılıyor...');
 
                     const modelUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-                    log('   Model URL: ' + modelUrl);
 
                     const requestBody = {
                         contents: [
@@ -266,7 +272,6 @@
                             }
                         }
                     };
-                    log('   Request body hazırlandı');
 
                     const geminiRes = await fetch(modelUrl, {
                         method: 'POST',
@@ -278,17 +283,12 @@
                     });
 
                     log('   Gemini Response status: ' + geminiRes.status);
-                    log('   Gemini Response ok: ' + geminiRes.ok);
 
                     const geminiData = await geminiRes.json();
-                    log('   Gemini Response data tipi: ' + typeof geminiData);
                     log('   Gemini Response data: ' + JSON.stringify(geminiData).substring(0, 800));
 
                     const candidate = geminiData.candidates && geminiData.candidates[0];
                     const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
-                    if (candidate) {
-                        log('   finishReason: ' + candidate.finishReason);
-                    }
 
                     if (part && part.text) {
                         aiText = part.text.trim();
@@ -305,24 +305,74 @@
                     aiText = '';
                 }
 
-                // 5. Firestore'a kaydet
-                log('5. Firestore kaydı yapılıyor...');
+                // 5. Firestore'a kaydet veya güncelle (24 saat kuralı)
+                log('5. Firestore kaydı/güncellemesi yapılıyor...');
                 const user = auth.currentUser;
                 if (!user) throw new Error('Kullanıcı oturumu bulunamadı');
                 log('   Kullanıcı: ' + user.uid);
 
-                const readingData = {
-                    type: readingType,
-                    intent: intentText,
-                    cards: drawnCards,
-                    aiInterpretation: aiText,
-                    aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: aiText ? 'completed' : 'pending'
-                };
+                const readingsRef = db.collection('users').doc(user.uid).collection('readings');
 
-                const docRef = await db.collection('users').doc(user.uid).collection('readings').add(readingData);
-                log('   Firestore kaydı başarılı, doc ID: ' + docRef.id);
+                // Son kaydı bul
+                const lastQuery = await readingsRef
+                    .orderBy('createdAt', 'desc')
+                    .limit(1)
+                    .get();
+
+                let docRef;
+
+                if (!lastQuery.empty) {
+                    const lastDoc = lastQuery.docs[0];
+                    const lastData = lastDoc.data();
+                    const canUpdate = isOlderThan24h(lastData.createdAt);
+                    
+                    log('   Son kayıt tarihi: ' + (lastData.createdAt ? lastData.createdAt.toDate().toLocaleString() : 'yok'));
+                    log('   24 saat geçmiş mi: ' + canUpdate);
+
+                    if (canUpdate) {
+                        // 24 saat geçmiş → yeni kayıt
+                        log('   24 saat geçmiş, YENİ kayıt oluşturuluyor...');
+                        const readingData = {
+                            type: readingType,
+                            intent: intentText,
+                            cards: drawnCards,
+                            aiInterpretation: aiText,
+                            aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            status: aiText ? 'completed' : 'pending'
+                        };
+                        docRef = await readingsRef.add(readingData);
+                        log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
+                    } else {
+                        // 24 saat geçmemiş → mevcut kaydı güncelle
+                        log('   24 saat geçmemiş, mevcut kayıt GÜNCELLENİYOR...');
+                        await lastDoc.ref.update({
+                            type: readingType,
+                            intent: intentText,
+                            cards: drawnCards,
+                            aiInterpretation: aiText,
+                            aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            status: aiText ? 'completed' : 'pending'
+                        });
+                        docRef = lastDoc.ref;
+                        log('   Güncelleme başarılı, doc ID: ' + docRef.id);
+                    }
+                } else {
+                    // Hiç kayıt yok → yeni kayıt
+                    log('   Hiç kayıt yok, YENİ kayıt oluşturuluyor...');
+                    const readingData = {
+                        type: readingType,
+                        intent: intentText,
+                        cards: drawnCards,
+                        aiInterpretation: aiText,
+                        aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: aiText ? 'completed' : 'pending'
+                    };
+                    docRef = await readingsRef.add(readingData);
+                    log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
+                }
 
                 // 6. Result sayfasına yönlendir
                 log('6. Yönlendirme: result.html?id=' + docRef.id);
