@@ -72,15 +72,9 @@
             box-shadow: 0 4px 14px rgba(0,0,0,0.18);
             transition: opacity 0.3s, filter 0.3s;
         }
-        /* BAŞLANGIÇTA KARTLAR KİTLİ - Firestore kontrolünden sonra açılır */
-        .tarot-card.locked {
-            opacity: 0.4;
-            filter: grayscale(0.8);
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        /* BAŞLANGIÇTA KARTLAR KİTLİ - Firestore kontrolünden sonra açılır (görünüm normal, sadece rozet var) */
         .tarot-card.locked .card-text {
-            opacity: 0.6;
+            opacity: 0.85;
         }
         .tarot-card img {
             position: absolute; inset: 0;
@@ -188,6 +182,38 @@
             resize: none;
         }
         .intent-input:focus { border-color: #000; outline: none; }
+        .cooldown-remaining {
+            font-size: 0.95rem; color: #555;
+            text-align: center;
+        }
+        .premium-features {
+            width: 100%;
+            display: flex; flex-direction: column; gap: 8px;
+            margin: 2px 0 4px;
+        }
+        .premium-feature-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; color: #333;
+        }
+        .premium-feature-item::before {
+            content: '✦';
+            color: #D4AF37;
+            flex-shrink: 0;
+        }
+        .premium-cta-btn {
+            width: 100%;
+            padding: 14px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .modal-close-text {
+            background: none; border: none;
+            color: #888; font-size: 0.85rem;
+            cursor: pointer; padding: 4px;
+        }
         .char-counter {
             align-self: flex-end;
             font-size: 0.75rem; color: #999;
@@ -312,7 +338,7 @@
             </div>
         </div>
 
-        <div class="card-row">
+        <div class="card-row" id="premiumSection">
             <div class="tarot-card premium" id="monthlyOption">
                 <img src="onecard.png" alt="">
                 <div class="card-text">
@@ -347,6 +373,19 @@
             <button class="send-btn" id="sendIntentBtn" aria-label="Gönder" disabled>
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cooldownOverlay">
+        <div class="modal-box">
+            <div class="modal-title" id="cooldownTitle"></div>
+            <div class="cooldown-remaining" id="cooldownRemainingText"></div>
+            <div class="premium-features">
+                <div class="premium-feature-item" id="premiumFeature1"></div>
+                <div class="premium-feature-item" id="premiumFeature2"></div>
+            </div>
+            <button class="premium-cta-btn" id="premiumCtaBtn"></button>
+            <button class="modal-close-text" id="cooldownCloseBtn"></button>
         </div>
     </div>
 
@@ -390,16 +429,20 @@
         }
 
         // Kartları kilitle/aç
+        let cooldownRemaining = '';
+
         function lockCards(message) {
             const singleCard = document.getElementById('singleCardOption');
             const threeCard = document.getElementById('threeCardOption');
             const singleCooldown = document.getElementById('singleCooldown');
             const threeCooldown = document.getElementById('threeCooldown');
 
+            cooldownRemaining = message || t('cooldownMessage');
+
             singleCard.classList.add('locked');
             threeCard.classList.add('locked');
-            singleCooldown.textContent = message || t('cooldownMessage');
-            threeCooldown.textContent = message || t('cooldownMessage');
+            singleCooldown.textContent = cooldownRemaining;
+            threeCooldown.textContent = cooldownRemaining;
         }
 
         function unlockCards() {
@@ -432,6 +475,11 @@
             document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
             document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
             document.getElementById('intentTitle').textContent = t('intentTitle');
+            document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
+            document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
+            document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
+            document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
+            document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
@@ -536,10 +584,40 @@
         });
 
         document.getElementById('singleCardOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
             openIntentModal('single');
         });
         document.getElementById('threeCardOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
             openIntentModal('three');
+        });
+
+        // Cooldown / Premium modalı
+        const cooldownOverlay = document.getElementById('cooldownOverlay');
+
+        function openCooldownModal() {
+            document.getElementById('cooldownRemainingText').textContent =
+                t('cooldownRemainingPrefix') + ' ' + cooldownRemaining;
+            cooldownOverlay.classList.add('active');
+        }
+
+        function closeCooldownModal() {
+            cooldownOverlay.classList.remove('active');
+        }
+
+        document.getElementById('cooldownCloseBtn').addEventListener('click', closeCooldownModal);
+        cooldownOverlay.addEventListener('click', function(e) {
+            if (e.target === cooldownOverlay) closeCooldownModal();
+        });
+        document.getElementById('premiumCtaBtn').addEventListener('click', function() {
+            closeCooldownModal();
+            document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
 
         // Premium kartlar
