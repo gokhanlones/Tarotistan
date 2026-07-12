@@ -37,6 +37,10 @@ const LANG = {
         termsRequired: "Devam etmek için onaylamanız gerekir",
         continueButton: "Devam Et",
 
+        // Sidebar
+        sidebarCards: "Kartlar",
+        sidebarLogout: "Çıkış",
+
         // Kart Bilgileri sayfası
         cardsInfoTitle: "KART BİLGİLERİ",
         cardsInfoMajor: "Büyük Arkana",
@@ -126,6 +130,10 @@ const LANG = {
         termsAccept: "I have read and agree",
         termsRequired: "You must accept to continue",
         continueButton: "Continue",
+
+        // Sidebar
+        sidebarCards: "Cards",
+        sidebarLogout: "Logout",
 
         // Card Info page
         cardsInfoTitle: "CARD INFO",
