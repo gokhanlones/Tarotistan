@@ -118,6 +118,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 30px; /* Butonlar arası boşluk eklendi, daha dengeli görünmesi için */
         }
         .nav-btn {
             background: none; border: none; padding: 0;
@@ -338,15 +339,13 @@
         </div>
     </div>
 
+    <!-- Alt navigasyon (Güncellendi) -->
     <div class="bottom-nav">
         <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
             <img src="cardsinfo.png" alt="">
         </button>
-        <button class="nav-btn" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
-            <img src="bookicon.png" alt="">
-        </button>
-        <button class="nav-btn" id="navHistory" onclick="window.location.href='result.html'">
-            <img src="timeicon.png" alt="">
+        <button class="nav-btn" id="navResult" onclick="window.location.href='result.html'">
+            <img src="eye_icon_circle.png" alt="">
         </button>
     </div>
 
@@ -441,7 +440,7 @@
                 return;
             }
 
-            // Dil uygula
+            // Dil uygula (İptal edilen butonların JS referansları silindi)
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
             document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
             document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
@@ -461,9 +460,12 @@
             document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
             document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
             document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
+            
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-            document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
-            document.getElementById('navHistory').setAttribute('aria-label', t('navHistoryLabel'));
+            
+            // Eğer dil dosyanızda 'navResultLabel' eklerseniz bu satırı kullanabilirsiniz (Örn: "Sonuçlar" / "Results")
+            // document.getElementById('navResult').setAttribute('aria-label', t('navResultLabel'));
+            
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
