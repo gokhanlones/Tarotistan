@@ -11,301 +11,34 @@
     <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100%;
-            background: #ffffff;
-            font-family: 'Times New Roman', Times, serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
 
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 60px;
-            background: #ffffff;
-            border-bottom: 1px solid #e8e8ed;
-            display: flex; align-items: center;
-            padding: 0 16px;
-            z-index: 10;
-        }
-        .hamburger-btn {
-            width: 40px; height: 40px;
-            background: none; border: none;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer;
-            flex-shrink: 0;
-        }
-        .hamburger-btn span {
-            display: block; width: 22px; height: 2px;
-            background: #000;
-        }
-        .topbar-title {
-            flex: 1;
-            text-align: center;
-            font-size: 1.25rem; font-weight: 700;
-            letter-spacing: 3px;
-            color: #000;
-        }
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; border-bottom: 1px solid #e8e8ed; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
+        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
+        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
 
-        .content {
-            padding: 76px 16px 120px;
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex; flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+        .content { padding: 76px 16px 120px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .intent-box { width: 100%; background: #fafafa; border: 1px solid #e8e8ed; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; text-align: center; }
+        .intent-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .intent-text { font-size: 1rem; color: #000; font-style: italic; line-height: 1.4; }
 
-        .intent-box {
-            width: 100%;
-            background: #fafafa;
-            border: 1px solid #e8e8ed;
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        .intent-label {
-            font-size: 0.75rem; color: #888;
-            text-transform: uppercase; letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-        .intent-text {
-            font-size: 1rem; color: #000;
-            font-style: italic; line-height: 1.4;
-        }
+        .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; flex-wrap: nowrap; }
+        .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; display: flex; flex-direction: column; align-items: center; }
+        .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; text-align: center; cursor: pointer; }
+        .card-name { position: relative; z-index: 2; font-size: 0.9rem; font-weight: 700; color: #fff; }
 
-        .cards-area {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: nowrap;
-        }
-        .cards-area.three {
-            justify-content: center;
-            gap: 16px;
-        }
-        .cards-area.single {
-            justify-content: center;
-        }
+        .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+        .ai-text { font-size: 0.92rem; color: #333; line-height: 1.6; text-align: justify; }
+        
+        .bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #ffffff; border-top: 1px solid #e8e8ed; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 0 16px; gap: 12px; }
+        .btn-action { flex: 1; max-width: 200px; padding: 14px; background: #000; color: #fff; border: none; border-radius: 12px; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; cursor: pointer; }
+        .btn-action.secondary { background: #fff; color: #000; border: 2px solid #e8e8ed; }
 
-        .card-wrapper {
-            width: calc((100% - 32px) / 3);
-            max-width: 200px;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .cards-area.single .card-wrapper {
-            width: min(200px, 55vw);
-            max-width: 200px;
-        }
-
-        .card-slot {
-            width: 100%;
-            aspect-ratio: 9 / 16;
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-            background: #1a1a1a;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: clamp(6px, 2vw, 12px);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .card-slot.reversed {
-            transform: rotate(180deg);
-        }
-        .card-slot.reversed .card-name,
-        .card-slot.reversed .card-position {
-            transform: rotate(180deg);
-        }
-
-        .card-bg {
-            position: absolute; inset: 0;
-            opacity: 0.25;
-        }
-        .card-bg img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-
-        .card-name {
-            position: relative; z-index: 2;
-            font-size: clamp(0.75rem, 3vw, 1rem); font-weight: 700;
-            color: #fff;
-            line-height: 1.3;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-            word-break: break-word;
-            hyphens: auto;
-        }
-        .card-position-outside {
-            font-size: clamp(0.65rem, 2.5vw, 0.8rem);
-            font-weight: 700;
-            color: #000;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-align: center;
-            margin-top: 8px;
-        }
-        .card-badge {
-            position: absolute; top: clamp(4px, 1.5vw, 8px); right: clamp(4px, 1.5vw, 8px);
-            z-index: 3;
-            background: #ff3b30;
-            color: #fff;
-            font-size: clamp(0.5rem, 1.8vw, 0.6rem); font-weight: 700;
-            padding: clamp(2px, 0.8vw, 3px) clamp(4px, 2vw, 8px);
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-
-        .ai-section {
-            width: 100%;
-            background: #fafafa;
-            border: 2px dashed #e8e8ed;
-            border-radius: 14px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .ai-text {
-            font-size: 0.92rem; color: #333;
-            line-height: 1.65;
-            text-align: justify;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .ai-text p {
-            margin: 0 0 12px 0;
-        }
-        .ai-text p:last-child {
-            margin-bottom: 0;
-        }
-        .ai-header {
-            font-size: 1rem; font-weight: 700;
-            color: #000; text-align: center;
-            margin: 18px 0 8px 0;
-        }
-        .ai-header:first-child {
-            margin-top: 0;
-        }
-
-        .bottom-actions {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 80px;
-            background: #ffffff;
-            border-top: 1px solid #e8e8ed;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 16px;
-            gap: 12px;
-        }
-        .btn-action {
-            flex: 1; max-width: 200px;
-            padding: 14px;
-            background: #000; color: #fff;
-            border: none; border-radius: 12px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 0.95rem; font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-action.secondary {
-            background: #fff; color: #000;
-            border: 2px solid #e8e8ed;
-        }
-
-        .loading-overlay {
-            position: fixed; inset: 0;
-            background: #fff;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 200;
-            gap: 16px;
-        }
+        .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 16px; }
         .loading-overlay.hidden { display: none; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text {
-            font-size: 0.9rem; color: #555;
-        }
-
-        .error-box {
-            width: 100%; text-align: center;
-            padding: 40px 24px;
-        }
-        .error-box h2 {
-            font-size: 1.2rem; margin-bottom: 12px;
-        }
-        .error-box p {
-            font-size: 0.9rem; color: #555;
-            margin-bottom: 24px;
-        }
-
-        /* ---- Kart detay modalı ---- */
-        .detail-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: flex-start; justify-content: center;
-            padding: 76px 24px 24px;
-            z-index: 100;
-        }
-        .detail-overlay.active { display: flex; }
-        .detail-box {
-            width: 100%; max-width: 360px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 22px;
-            display: flex; flex-direction: column;
-            gap: 10px;
-            max-height: 80vh;
-        }
-        .detail-position {
-            font-size: 0.75rem; color: #888;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            text-align: center;
-        }
-        .detail-title {
-            font-size: 1.25rem; font-weight: 700;
-            color: #000; text-align: center;
-        }
-        .detail-status {
-            align-self: center;
-            font-size: 0.75rem; font-weight: 700;
-            letter-spacing: 1px; text-transform: uppercase;
-            padding: 3px 10px; border-radius: 20px;
-            background: #f0f0f0; color: #555;
-        }
-        .detail-status.reversed { background: #ffece9; color: #ff3b30; }
-        .detail-meaning {
-            font-size: 0.95rem; line-height: 1.55; color: #333;
-            overflow-y: auto;
-        }
-        .detail-close {
-            margin-top: 6px;
-            padding: 12px;
-            background: #000; color: #fff;
-            border: none; border-radius: 10px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 0.95rem; font-weight: 600;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -316,9 +49,7 @@
     </div>
 
     <div class="topbar">
-        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" id="menuBtn" aria-label="Menü">
-            <span></span><span></span><span></span>
-        </button>
+        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" id="menuBtn"><span></span><span></span><span></span></button>
         <div class="topbar-title" id="topbarTitle"></div>
         <div style="width:40px;"></div>
     </div>
@@ -328,12 +59,8 @@
             <div class="intent-label" id="intentLabel"></div>
             <div class="intent-text" id="intentDisplay"></div>
         </div>
-
         <div class="cards-area" id="cardsArea"></div>
-
-        <div class="ai-section" id="aiSection">
-            <div class="ai-text" id="aiDescText"></div>
-        </div>
+        <div class="ai-section" id="aiSection"><div class="ai-text" id="aiDescText"></div></div>
     </div>
 
     <div class="bottom-actions" id="bottomActions" style="display:none;">
@@ -341,243 +68,75 @@
         <button class="btn-action" id="newReadingBtnText" onclick="newReading()"></button>
     </div>
 
-    <div class="detail-overlay" id="detailOverlay">
-        <div class="detail-box">
-            <div class="detail-position" id="detailPosition"></div>
-            <div class="detail-title" id="detailTitle"></div>
-            <div class="detail-status" id="detailStatus"></div>
-            <div class="detail-meaning" id="detailMeaning"></div>
-            <button class="detail-close" id="detailCloseBtn"></button>
-        </div>
-    </div>
-
     <script>
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Dil uygula
+        // Metinleri yükle
         document.getElementById('loadingText').textContent = t('resultLoading');
         document.getElementById('topbarTitle').textContent = t('dashboardTitle');
-        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('intentLabel').textContent = t('resultIntentLabel');
         document.getElementById('homeBtnText').textContent = t('homeBtn');
         document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
-        document.getElementById('detailCloseBtn').textContent = t('closeBtn');
 
         auth.onAuthStateChanged(function(user) {
-            if (!user) {
-                window.location.href = 'auth.html';
-                return;
-            }
-            initResult();
+            if (!user) { window.location.href = 'auth.html'; return; }
+            initResult(user.uid);
         });
 
-        const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-        const intentText = sessionStorage.getItem('tarotIntent') || '';
-        const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
-        const readingId = new URLSearchParams(window.location.search).get('id');
-
-        if (!drawnCards.length) {
-            window.location.href = 'dashboard.html';
-        }
-
-        let tarotData = null;
-
-        async function initResult() {
+        async function initResult(uid) {
             try {
                 const response = await fetch('tarot_cards.json');
-                tarotData = await response.json();
-
-                // Varsayılan olarak sessionStorage verisini kullan (id yoksa / doküman bulunamazsa)
-                let cardsForRender = drawnCards;
-                let typeForRender = readingType;
-                let intentForRender = intentText;
+                const tarotData = await response.json();
+                
+                let cardsForRender = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
                 let aiTextForRender = '';
+                let intentForRender = sessionStorage.getItem('tarotIntent') || '';
+                let typeForRender = sessionStorage.getItem('tarotReadingType') || 'single';
 
-                if (readingId) {
-                    const user = auth.currentUser;
-                    const docSnap = await db.collection('users').doc(user.uid)
-                        .collection('readings').doc(readingId).get();
+                const urlParams = new URLSearchParams(window.location.search);
+                const readingId = urlParams.get('id');
 
-                    if (docSnap.exists) {
-                        const data = docSnap.data();
-                        cardsForRender = data.cards || cardsForRender;
-                        typeForRender = data.type || typeForRender;
-                        intentForRender = data.intent || intentForRender;
-                        aiTextForRender = data.aiInterpretation || '';
+                // Veri yoksa Firebase'den son okumayı çek
+                if (cardsForRender.length === 0) {
+                    const snap = await db.collection('users').doc(uid).collection('readings').orderBy('createdAt', 'desc').limit(1).get();
+                    if (!snap.empty) {
+                        const data = snap.docs[0].data();
+                        cardsForRender = data.cards;
+                        aiTextForRender = data.aiInterpretation;
+                        intentForRender = data.intent;
+                        typeForRender = data.type;
+                    } else {
+                        window.location.href = 'dashboard.html'; return;
                     }
                 }
 
-                document.getElementById('intentDisplay').textContent = intentForRender || t('resultNotSpecified');
-
-                renderCards(cardsForRender, typeForRender);
-                renderAiText(aiTextForRender);
-
+                document.getElementById('intentDisplay').textContent = intentForRender;
+                renderCards(cardsForRender, typeForRender, tarotData);
+                document.getElementById('aiDescText').textContent = aiTextForRender;
+                
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 document.getElementById('contentArea').style.display = 'flex';
                 document.getElementById('bottomActions').style.display = 'flex';
-
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loadingOverlay').innerHTML = `
-                    <div class="error-box">
-                        <h2>${t('resultErrorTitle')}</h2>
-                        <p>${t('resultErrorDesc')}</p>
-                        <button class="btn-action" onclick="window.location.href='dashboard.html'">${t('homeBtn')}</button>
-                    </div>
-                `;
+            } catch (e) {
+                console.error(e);
+                window.location.href = 'dashboard.html';
             }
         }
 
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        const AI_KNOWN_HEADERS = ['Genel Enerji', 'Kart Yorumları', 'Sonuç ve Tavsiye', 'Sonuç / Tavsiye', 'General Energy', 'Card Interpretations', 'Conclusion and Advice'];
-
-        function normalizeHeaderCandidate(line) {
-            // Baştaki numaralandırma/işaretleri ve sondaki iki noktayı temizleyip karşılaştırmaya hazırla
-            return line.replace(/^[\s\-*#\d.)]+/, '').replace(/:+\s*$/, '').trim();
-        }
-
-        function matchKnownHeader(line) {
-            const normalized = normalizeHeaderCandidate(line);
-            return AI_KNOWN_HEADERS.find(h => h.toLowerCase() === normalized.toLowerCase());
-        }
-
-        function renderAiText(text) {
-            const target = document.getElementById('aiDescText');
-            const trimmed = text && text.trim();
-
-            if (!trimmed) {
-                target.innerHTML = '<p>' + escapeHtml(t('aiFallback')) + '</p>';
-                return;
-            }
-
-            const lines = trimmed.split('\n');
-            let html = '';
-
-            lines.forEach(rawLine => {
-                const line = rawLine.trim();
-                if (!line) return;
-
-                const knownHeader = matchKnownHeader(line);
-                if (knownHeader) {
-                    html += '<div class="ai-header">' + escapeHtml(knownHeader) + '</div>';
-                    return;
-                }
-
-                // Eski kayıtlarla (markdown formatlı) geriye dönük uyumluluk
-                const escaped = escapeHtml(line);
-                const boldHeaderMatch = escaped.match(/^\*\*(.+?)\*\*:?$/);
-                const hashHeaderMatch = escaped.match(/^#{1,3}\s*(.+?)$/);
-
-                if (boldHeaderMatch) {
-                    html += '<div class="ai-header">' + boldHeaderMatch[1] + '</div>';
-                } else if (hashHeaderMatch) {
-                    html += '<div class="ai-header">' + hashHeaderMatch[1] + '</div>';
-                } else {
-                    // Kaçak yıldız/numaralandırma işaretlerini temizle, satır içi **kalın** ifadeleri <strong>'a çevir
-                    const cleaned = escaped.replace(/^[\s\-*#]+/, '').replace(/^\d+\.\s*/, '');
-                    const withBold = cleaned.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
-                    html += '<p>' + withBold + '</p>';
-                }
-            });
-
-            target.innerHTML = html;
-        }
-
-        function cardName(cardInfo) {
-            return getLang() === 'tr' ? cardInfo.name_tr : cardInfo.name_en;
-        }
-
-        function renderCards(cardsParam, typeParam) {
-            const cardsToUse = cardsParam || drawnCards;
-            const typeToUse = typeParam || readingType;
-
+        function renderCards(cards, type, tarotData) {
             const area = document.getElementById('cardsArea');
-            const isSingle = typeToUse === 'single';
-            area.className = 'cards-area ' + (isSingle ? 'single' : 'three');
-
-            const positions = [t('positionPast'), t('positionPresent'), t('positionFuture')];
-
-            cardsToUse.forEach((drawn, index) => {
+            cards.forEach(drawn => {
                 const cardInfo = tarotData.cards.find(c => c.id === drawn.id);
-                if (!cardInfo) return;
-
                 const wrapper = document.createElement('div');
                 wrapper.className = 'card-wrapper';
-
-                const slot = document.createElement('div');
-                slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
-
-                if (drawn.reversed) {
-                    const badge = document.createElement('div');
-                    badge.className = 'card-badge';
-                    badge.textContent = t('resultReversedBadge');
-                    slot.appendChild(badge);
-                }
-
-                const bg = document.createElement('div');
-                bg.className = 'card-bg';
-                bg.innerHTML = '<img src="onecard.png" alt="">';
-                slot.appendChild(bg);
-
-                const name = document.createElement('div');
-                name.className = 'card-name';
-                name.textContent = cardName(cardInfo);
-                slot.appendChild(name);
-
-                wrapper.appendChild(slot);
-
-                if (!isSingle) {
-                    const posLabel = document.createElement('div');
-                    posLabel.className = 'card-position-outside';
-                    posLabel.textContent = positions[index];
-                    wrapper.appendChild(posLabel);
-                }
-
-                slot.addEventListener('click', function() {
-                    showCardDetail(cardInfo, drawn.reversed, !isSingle ? positions[index] : null);
-                });
-
+                wrapper.innerHTML = `<div class="card-slot"><div class="card-name">${cardInfo.name_tr}</div></div>`;
                 area.appendChild(wrapper);
             });
         }
 
-        const detailOverlay = document.getElementById('detailOverlay');
-
-        function showCardDetail(card, isReversed, position) {
-            document.getElementById('detailPosition').textContent = position || '';
-            document.getElementById('detailPosition').style.display = position ? 'block' : 'none';
-            document.getElementById('detailTitle').textContent = cardName(card);
-
-            const statusEl = document.getElementById('detailStatus');
-            statusEl.textContent = isReversed ? t('resultReversed') : t('resultUpright');
-            statusEl.classList.toggle('reversed', isReversed);
-
-            document.getElementById('detailMeaning').textContent =
-                isReversed ? card.reversed_meaning : card.upright_meaning;
-
-            detailOverlay.classList.add('active');
-        }
-
-        function closeDetail() {
-            detailOverlay.classList.remove('active');
-        }
-        document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-        detailOverlay.addEventListener('click', function(e) {
-            if (e.target === detailOverlay) closeDetail();
-        });
-
         function newReading() {
-            sessionStorage.removeItem('tarotDrawnCards');
-            sessionStorage.removeItem('tarotIntent');
-            sessionStorage.removeItem('tarotReadingType');
-            sessionStorage.removeItem('adWatched');
-            sessionStorage.removeItem('adWatchedAt');
+            sessionStorage.clear();
             window.location.href = 'dashboard.html';
         }
     </script>
