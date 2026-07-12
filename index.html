@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tarotistan</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
         * {
             margin: 0;
@@ -112,6 +116,8 @@
             let logoLoaded = false;
             let connectionOk = false;
             let minTimePassed = false;
+            let firestoreChecked = false;
+            let lastReadingTime = null;
 
             const logo = document.getElementById('splashLogo');
             logo.onload = function() {
@@ -147,19 +153,60 @@
                 const isOnline = await checkInternet();
                 if (isOnline) {
                     connectionOk = true;
-                    tryNavigate();
+                    checkFirestoreAndNavigate();
                 } else {
                     setTimeout(startConnectionCheck, CHECK_INTERVAL);
                 }
             }
 
+            // Firestore'dan son çekim tarihini kontrol et
+            async function checkFirestoreAndNavigate() {
+                if (firestoreChecked) return;
+                
+                const auth = firebase.auth();
+                const db = firebase.firestore();
+                
+                auth.onAuthStateChanged(async function(user) {
+                    if (user) {
+                        try {
+                            const lastQuery = await db.collection('users').doc(user.uid)
+                                .collection('readings')
+                                .orderBy('createdAt', 'desc')
+                                .limit(1)
+                                .get();
+                            
+                            if (!lastQuery.empty) {
+                                const lastData = lastQuery.docs[0].data();
+                                if (lastData.createdAt) {
+                                    lastReadingTime = lastData.createdAt.toDate ? lastData.createdAt.toDate().getTime() : new Date(lastData.createdAt).getTime();
+                                    // SessionStorage'a kaydet
+                                    sessionStorage.setItem('tarotLastReadingTime', lastReadingTime.toString());
+                                }
+                            }
+                        } catch (e) {
+                            console.log('Firestore check error:', e);
+                        }
+                    }
+                    firestoreChecked = true;
+                    tryNavigate();
+                });
+                
+                // Auth kontrolü için timeout (kullanıcı giriş yapmamışsa da devam et)
+                setTimeout(() => {
+                    if (!firestoreChecked) {
+                        firestoreChecked = true;
+                        tryNavigate();
+                    }
+                }, 2000);
+            }
+
             window.addEventListener('online', () => {
                 connectionOk = true;
-                tryNavigate();
+                checkFirestoreAndNavigate();
             });
 
             function tryNavigate() {
-                if (connectionOk && logoLoaded && minTimePassed) {
+                if (connectionOk && logoLoaded && minTimePassed && firestoreChecked) {
                     window.location.replace(TARGET_PAGE);
                 }
             }
