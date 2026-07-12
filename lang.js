@@ -64,6 +64,15 @@ const LANG = {
         monthlyPrice: "Aylık 49,99 TL",
         yearlyPrice: "Yıllık 399,99 TL",
 
+        // Cooldown / Premium modalı
+        cooldownMessage: "Şu anda kilitli",
+        cooldownTitle: "Günlük Ücretsiz Hakkın Doldu",
+        cooldownRemainingPrefix: "Bir sonraki ücretsiz okumana kalan süre:",
+        premiumFeature1: "Reklamsız okuma deneyimi",
+        premiumFeature2: "Günde 5 okuma hakkı",
+        premiumCtaBtn: "Premium'a Geç",
+        cooldownCloseBtn: "Kapat",
+
         // Niyet modalı
         intentTitle: "Niyet",
 
@@ -157,6 +166,15 @@ const LANG = {
         dailyLimit: "5 sessions/day",
         monthlyPrice: "Monthly 49.99 TL",
         yearlyPrice: "Yearly 399.99 TL",
+
+        // Cooldown / Premium modal
+        cooldownMessage: "Currently locked",
+        cooldownTitle: "Your Free Daily Reading Is Used Up",
+        cooldownRemainingPrefix: "Time until your next free reading:",
+        premiumFeature1: "Ad-free reading experience",
+        premiumFeature2: "5 readings per day",
+        premiumCtaBtn: "Upgrade to Premium",
+        cooldownCloseBtn: "Close",
 
         // Intent modal
         intentTitle: "Intention",
