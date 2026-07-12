@@ -102,6 +102,23 @@
             background: #ffffff;
             border-top: 1px solid #e8e8ed;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 56px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn svg { width: 26px; height: 26px; }
+        .nav-btn img {
+            width: 34px; height: 34px;
+            object-fit: contain; border-radius: 6px;
         }
         .submit-bar {
             position: fixed;
@@ -156,12 +173,24 @@
         </button>
     </div>
 
-    <div class="bottom-nav"></div>
+    <div class="bottom-nav">
+        <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 11.5 12 4l9 7.5"/>
+                <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+            </svg>
+        </button>
+        <button class="nav-btn" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
+            <img src="cardsinfo.png" alt="">
+        </button>
+    </div>
 
     <script>
         document.getElementById('topbarTitle').textContent = t('dashboardTitle');
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('continueBtn').setAttribute('aria-label', t('cardsContinueBtn'));
+        document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
 
         const readingType = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
