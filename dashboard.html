@@ -342,6 +342,12 @@
         <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
             <img src="cardsinfo.png" alt="">
         </button>
+        <button class="nav-btn" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
+            <img src="bookicon.png" alt="">
+        </button>
+        <button class="nav-btn" id="navHistory" onclick="window.location.href='result.html'">
+            <img src="timeicon.png" alt="">
+        </button>
     </div>
 
     <div class="modal-overlay" id="intentOverlay">
@@ -456,6 +462,8 @@
             document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
             document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+            document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
+            document.getElementById('navHistory').setAttribute('aria-label', t('navHistoryLabel'));
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
