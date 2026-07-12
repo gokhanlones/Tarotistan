@@ -68,7 +68,6 @@
             aspect-ratio: 9 / 16;
             border-radius: 14px;
             overflow: hidden;
-            background: #000;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(0,0,0,0.18);
             transition: opacity 0.3s, filter 0.3s;
@@ -83,14 +82,12 @@
         .tarot-card.locked .card-text {
             opacity: 0.6;
         }
-        .tarot-card.locked::after {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 35%, rgba(0,0,0,0.8) 100%);
-        }
         .tarot-card img {
             position: absolute; inset: 0;
             width: 100%; height: 100%;
             object-fit: cover;
         }
+        /* Gradyan overlay - siyah zemin yerine hafif karartma */
         .tarot-card::after {
             content: '';
             position: absolute; inset: 0;
