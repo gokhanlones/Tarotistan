@@ -37,6 +37,16 @@ const LANG = {
         termsRequired: "Devam etmek için onaylamanız gerekir",
         continueButton: "Devam Et",
 
+        // Kart Bilgileri sayfası
+        cardsInfoTitle: "KART BİLGİLERİ",
+        cardsInfoMajor: "Büyük Arkana",
+        cardsInfoMinor: "Küçük Arkana",
+        cardsInfoUpright: "Düz Anlamı",
+        cardsInfoReversed: "Ters Anlamı",
+        cardsInfoClose: "Kapat",
+        navHomeLabel: "Anasayfa",
+        navCardsInfoLabel: "Kart Bilgileri",
+
         // Dashboard / Seçici
         dashboardTitle: "TAROTİSTAN",
         singleCardTitle: "Aklındaki sorunun cevabı",
@@ -116,6 +126,16 @@ const LANG = {
         termsAccept: "I have read and agree",
         termsRequired: "You must accept to continue",
         continueButton: "Continue",
+
+        // Card Info page
+        cardsInfoTitle: "CARD INFO",
+        cardsInfoMajor: "Major Arcana",
+        cardsInfoMinor: "Minor Arcana",
+        cardsInfoUpright: "Upright Meaning",
+        cardsInfoReversed: "Reversed Meaning",
+        cardsInfoClose: "Close",
+        navHomeLabel: "Home",
+        navCardsInfoLabel: "Card Info",
 
         // Dashboard / Selector
         dashboardTitle: "TAROTISTAN",
