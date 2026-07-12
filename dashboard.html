@@ -73,16 +73,17 @@
             box-shadow: 0 4px 14px rgba(0,0,0,0.18);
             transition: opacity 0.3s, filter 0.3s;
         }
-        .tarot-card.disabled {
+        /* BAŞLANGIÇTA KARTLAR KİTLİ - Firestore kontrolünden sonra açılır */
+        .tarot-card.locked {
             opacity: 0.4;
             filter: grayscale(0.8);
             cursor: not-allowed;
             pointer-events: none;
         }
-        .tarot-card.disabled .card-text {
+        .tarot-card.locked .card-text {
             opacity: 0.6;
         }
-        .tarot-card.disabled::after {
+        .tarot-card.locked::after {
             background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 35%, rgba(0,0,0,0.8) 100%);
         }
         .tarot-card img {
@@ -131,7 +132,7 @@
             white-space: nowrap;
             display: none;
         }
-        .tarot-card.disabled .cooldown-badge {
+        .tarot-card.locked .cooldown-badge {
             display: block;
         }
 
@@ -292,24 +293,25 @@
 
     <div class="content">
         <div class="card-row">
-            <div class="tarot-card silver" id="singleCardOption">
+            <!-- BAŞLANGIÇTA locked - Firestore kontrolünden sonra açılır -->
+            <div class="tarot-card silver locked" id="singleCardOption">
                 <img src="onecard.png" alt="">
                 <div class="card-text">
                     <div class="line-main" id="singleCardTitle"></div>
                     <div class="line-sub" id="singleCardLabel"></div>
                     <div class="line-meta" id="singleCardAds"></div>
                 </div>
-                <div class="cooldown-badge" id="singleCooldown">24 saat dolmadı</div>
+                <div class="cooldown-badge" id="singleCooldown"></div>
             </div>
 
-            <div class="tarot-card silver" id="threeCardOption">
+            <div class="tarot-card silver locked" id="threeCardOption">
                 <img src="onecard.png" alt="">
                 <div class="card-text">
                     <div class="line-main" id="threeCardTitle"></div>
                     <div class="line-sub" id="threeCardLabel"></div>
                     <div class="line-meta" id="threeCardAds"></div>
                 </div>
-                <div class="cooldown-badge" id="threeCooldown">24 saat dolmadı</div>
+                <div class="cooldown-badge" id="threeCooldown"></div>
             </div>
         </div>
 
@@ -390,16 +392,59 @@
             return hours + 's ' + minutes + 'dk';
         }
 
+        // Kartları kilitle/aç
+        function lockCards(message) {
+            const singleCard = document.getElementById('singleCardOption');
+            const threeCard = document.getElementById('threeCardOption');
+            const singleCooldown = document.getElementById('singleCooldown');
+            const threeCooldown = document.getElementById('threeCooldown');
+
+            singleCard.classList.add('locked');
+            threeCard.classList.add('locked');
+            singleCooldown.textContent = message || t('cooldownMessage');
+            threeCooldown.textContent = message || t('cooldownMessage');
+        }
+
+        function unlockCards() {
+            const singleCard = document.getElementById('singleCardOption');
+            const threeCard = document.getElementById('threeCardOption');
+
+            singleCard.classList.remove('locked');
+            threeCard.classList.remove('locked');
+        }
+
         // Auth kontrolü
         auth.onAuthStateChanged(async function(user) {
             if (!user) {
                 window.location.href = 'auth.html';
                 return;
             }
-            document.getElementById('authCheck').classList.add('hidden');
 
-            // Son çekim tarihini kontrol et
+            // Dil uygula
+            document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
+            document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
+            document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
+            document.getElementById('singleCardAds').textContent = t('singleCardAds');
+            document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
+            document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
+            document.getElementById('threeCardAds').textContent = t('threeCardAds');
+            document.getElementById('adFreeMonthly').textContent = t('adFree');
+            document.getElementById('dailyLimitMonthly').textContent = t('dailyLimit');
+            document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
+            document.getElementById('adFreeYearly').textContent = t('adFree');
+            document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
+            document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
+            document.getElementById('intentTitle').textContent = t('intentTitle');
+            document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+
+            // Varsayılan olarak kartlar locked (HTML'de de locked class var)
+            // Şimdi Firestore kontrolü yap
             await checkLastReading(user.uid);
+
+            // Kontrol bitti, spinner'ı kaldır
+            document.getElementById('authCheck').classList.add('hidden');
         });
 
         async function checkLastReading(userId) {
@@ -409,7 +454,9 @@
                 if (cachedTime) {
                     const cachedTimestamp = parseInt(cachedTime);
                     if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
-                        disableCards(new Date(cachedTimestamp));
+                        // 24 saat dolmamış, kartlar kilitli kalsın
+                        const remaining = formatRemainingTime(new Date(cachedTimestamp));
+                        lockCards(remaining);
                         return;
                     }
                 }
@@ -424,48 +471,22 @@
                 if (!lastQuery.empty) {
                     const lastData = lastQuery.docs[0].data();
                     if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
-                        disableCards(lastData.createdAt);
+                        // 24 saat dolmamış, kartlar kilitli kalsın
+                        const remaining = formatRemainingTime(lastData.createdAt);
+                        lockCards(remaining);
+                        return;
                     }
                 }
+
+                // Hiç kayıt yok veya 24 saat geçmiş → kartları aç
+                unlockCards();
+
             } catch (e) {
                 console.log('Last reading check error:', e);
+                // Hata durumunda güvenlik için kartlar kilitli kalsın
+                lockCards(t('cooldownMessage'));
             }
         }
-
-        function disableCards(lastTimestamp) {
-            const singleCard = document.getElementById('singleCardOption');
-            const threeCard = document.getElementById('threeCardOption');
-            const singleCooldown = document.getElementById('singleCooldown');
-            const threeCooldown = document.getElementById('threeCooldown');
-
-            singleCard.classList.add('disabled');
-            threeCard.classList.add('disabled');
-
-            const remaining = formatRemainingTime(lastTimestamp);
-            if (remaining) {
-                singleCooldown.textContent = remaining;
-                threeCooldown.textContent = remaining;
-            }
-        }
-
-        // Dil uygula
-        document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
-        document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
-        document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-        document.getElementById('singleCardAds').textContent = t('singleCardAds');
-        document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
-        document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
-        document.getElementById('threeCardAds').textContent = t('threeCardAds');
-        document.getElementById('adFreeMonthly').textContent = t('adFree');
-        document.getElementById('dailyLimitMonthly').textContent = t('dailyLimit');
-        document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
-        document.getElementById('adFreeYearly').textContent = t('adFree');
-        document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
-        document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
-        document.getElementById('intentTitle').textContent = t('intentTitle');
-        document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-        document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
-        document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
         // Sidebar
         function openSidebar() {
