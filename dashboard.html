@@ -84,14 +84,23 @@
             transform: scale(0.98);
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        .area-img {
+        .area-img-box {
             width: 88px;
-            aspect-ratio: 1 / 1;
+            height: 88px;
             border-radius: 10px;
-            object-fit: contain;
             background: #ffffff;
-            flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .area-img {
+            height: 64px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            opacity: 0.9;
         }
         .area-text {
             display: flex;
@@ -307,7 +316,7 @@
     <div class="content">
         <!-- Tek Kart -->
         <div class="card-area" id="singleCardOption">
-            <img src="onecard.png" class="area-img" alt="">
+            <div class="area-img-box"><img src="onecard.png" class="area-img" alt=""></div>
             <div class="area-text">
                 <div class="area-title" id="singleCardTitle"></div>
                 <div class="area-desc" id="singleCardLabel"></div>
@@ -316,7 +325,7 @@
 
         <!-- Üç Kart -->
         <div class="card-area" id="threeCardOption">
-            <img src="threecards.png" class="area-img" alt="">
+            <div class="area-img-box"><img src="threecards.png" class="area-img" alt=""></div>
             <div class="area-text">
                 <div class="area-title" id="threeCardTitle"></div>
                 <div class="area-desc" id="threeCardLabel"></div>
