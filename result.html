@@ -13,6 +13,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
         
+        /* ÖNEMLİ: Gizleme sınıfı */
+        .hidden { display: none !important; }
+
         .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; border-bottom: 1px solid #e8e8ed; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
         .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
         .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
@@ -27,10 +30,9 @@
         .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
         .cards-area.single .card-wrapper { width: min(200px, 55vw); }
         
-        /* Kart Stili: Beyaz arka plan, siyah çerçeve */
         .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; text-align: center; cursor: pointer; transition: transform 0.2s; }
         .card-slot.reversed { transform: rotate(180deg); }
-        .card-bg { position: absolute; inset: 0; opacity: 0.1; } /* onecard görseli çok silik */
+        .card-bg { position: absolute; inset: 0; opacity: 0.1; }
         .card-bg img { width: 100%; height: 100%; object-fit: cover; }
         .card-name { position: relative; z-index: 2; font-size: clamp(0.75rem, 3vw, 1rem); font-weight: 700; color: #000; }
         .card-badge { position: absolute; top: 4px; right: 4px; z-index: 3; background: #ff3b30; color: #fff; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
@@ -38,7 +40,6 @@
         .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 16px; }
         .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
 
-        /* Modern Bottom Nav */
         .bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #eee; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 0 20px; gap: 15px; }
         .btn-action { flex: 1; max-width: 180px; padding: 14px; background: #000; color: #fff; border: none; border-radius: 14px; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
         .btn-action.secondary { background: #f5f5f5; color: #333; border: 1px solid #e8e8ed; }
@@ -93,14 +94,16 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // 1. Dil tanımlamaları - Eğer hata alırsan console'a bak
-        if (typeof t !== 'function') { console.error("lang.js yüklenemedi!"); }
-        
-        document.getElementById('topbarTitle').textContent = t('dashboardTitle');
-        document.getElementById('intentLabel').textContent = t('resultIntentLabel');
-        document.getElementById('homeBtnText').textContent = t('homeBtn');
-        document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
-        document.getElementById('detailCloseBtn').textContent = t('closeBtn');
+        // Sayfa yüklendiğinde metinleri set et
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof t === 'function') {
+                document.getElementById('topbarTitle').textContent = t('dashboardTitle');
+                document.getElementById('intentLabel').textContent = t('resultIntentLabel');
+                document.getElementById('homeBtnText').textContent = t('homeBtn');
+                document.getElementById('newReadingBtnText').textContent = t('newReadingBtn');
+                document.getElementById('detailCloseBtn').textContent = t('closeBtn');
+            }
+        });
 
         auth.onAuthStateChanged(function(user) {
             if (!user) { window.location.href = 'auth.html'; return; }
@@ -109,19 +112,21 @@
 
         async function initResult(uid) {
             try {
-                // Verileri getir
+                // 1. Kart verilerini çek
                 const response = await fetch('tarot_cards.json');
+                if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
                 const tarotData = await response.json();
                 
+                // 2. Session verilerini al
                 let cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
                 let intent = sessionStorage.getItem('tarotIntent') || '';
                 let type = sessionStorage.getItem('tarotReadingType') || 'single';
                 let aiText = '';
 
+                // 3. Firebase üzerinden veri çekme kontrolü
                 const urlParams = new URLSearchParams(window.location.search);
                 const readingId = urlParams.get('id');
 
-                // Eğer session boşsa ve Firebase ID varsa, oradan çek
                 if (cards.length === 0) {
                     let query = null;
                     if (readingId) {
@@ -143,24 +148,28 @@
                     }
                 }
 
-                // Hâlâ kart yoksa ana sayfaya at
+                // 4. Veri yoksa dashboard'a gönder
                 if (cards.length === 0) {
                     window.location.href = 'dashboard.html';
                     return;
                 }
 
-                document.getElementById('intentDisplay').textContent = intent || t('resultNotSpecified');
+                // 5. Arayüzü doldur
+                document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
                 renderCards(cards, type, tarotData);
-                document.getElementById('aiDescText').textContent = aiText || t('aiFallback');
+                document.getElementById('aiDescText').textContent = aiText || (typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.');
                 
-                // Spinner'ı gizle ve içerikleri göster
+                // 6. Spinner'ı GİZLE
                 document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('loadingOverlay').style.display = 'none'; // Garanti olsun
                 document.getElementById('contentArea').style.display = 'flex';
                 document.getElementById('bottomActions').style.display = 'flex';
 
             } catch (e) {
                 console.error("HATA:", e);
-                // Hata durumunda loading'i kapatıp ana sayfaya dön
+                // Hata olsa bile spinner'ı kaldır ki kullanıcı bir butona tıklayabilsin
+                document.getElementById('loadingOverlay').style.display = 'none';
+                alert("Bir hata oluştu. Ana sayfaya yönlendiriliyorsunuz.");
                 window.location.href = 'dashboard.html';
             }
         }
@@ -178,8 +187,8 @@
                 wrapper.innerHTML = `
                     <div class="card-slot ${isReversed ? 'reversed' : ''}">
                         <div class="card-bg"><img src="onecard.png" alt=""></div>
-                        ${isReversed ? `<div class="card-badge">${t('resultReversedBadge')}</div>` : ''}
-                        <div class="card-name">${getLang() === 'tr' ? info.name_tr : info.name_en}</div>
+                        ${isReversed ? `<div class="card-badge">${(typeof t === 'function' ? t('resultReversedBadge') : 'Ters')}</div>` : ''}
+                        <div class="card-name">${(typeof getLang === 'function' && getLang() === 'tr') ? info.name_tr : info.name_en}</div>
                     </div>
                 `;
                 wrapper.querySelector('.card-slot').onclick = () => showDetail(info, drawn);
@@ -188,7 +197,7 @@
         }
 
         function showDetail(card, drawn) {
-            document.getElementById('detailTitle').textContent = getLang() === 'tr' ? card.name_tr : card.name_en;
+            document.getElementById('detailTitle').textContent = (typeof getLang === 'function' && getLang() === 'tr') ? card.name_tr : card.name_en;
             document.getElementById('detailMeaning').textContent = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
             document.getElementById('detailOverlay').classList.add('active');
         }
