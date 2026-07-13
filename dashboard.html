@@ -1,620 +1,603 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAROTISTAN</title>
-    <script src="lang.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100%;
-            background: #ffffff;
-            font-family: 'Times New Roman', Times, serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>TAROTISTAN</title>
+   <script src="lang.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+   <script src="firebase-config.js"></script>
+   <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+       html, body {
+           width: 100%; height: 100%;
+           background: #ffffff;
+           font-family: 'Times New Roman', Times, serif;
+           -webkit-tap-highlight-color: transparent;
+       }
 
-        /* ---- Üst banner ---- */
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 60px;
-            background: #ffffff;
-            border-bottom: 1px solid #e8e8ed;
-            display: flex; align-items: center;
-            padding: 0 16px;
-            z-index: 10;
-        }
-        .hamburger-btn {
-            width: 40px; height: 40px;
-            background: none; border: none;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer;
-            flex-shrink: 0;
-        }
-        .hamburger-btn span {
-            display: block; width: 22px; height: 2px;
-            background: #000;
-        }
-        .topbar-title {
-            flex: 1;
-            text-align: center;
-            font-size: 1.25rem; font-weight: 700;
-            letter-spacing: 3px;
-            color: #000;
-            margin-right: 40px;
-        }
+       /* ---- Üst banner ---- */
+       .topbar {
+           position: fixed; top: 0; left: 0; right: 0;
+           height: 60px;
+           background: #ffffff;
+           border-bottom: 1px solid #e8e8ed;
+           display: flex; align-items: center;
+           padding: 0 16px;
+           z-index: 10;
+       }
+       .hamburger-btn {
+           width: 40px; height: 40px;
+           background: none; border: none;
+           display: flex; flex-direction: column;
+           justify-content: center; align-items: center;
+           gap: 5px; cursor: pointer;
+           flex-shrink: 0;
+       }
+       .hamburger-btn span {
+           display: block; width: 22px; height: 2px;
+           background: #000;
+       }
+       .topbar-title {
+           flex: 1;
+           text-align: center;
+           font-size: 1.25rem; font-weight: 700;
+           letter-spacing: 3px;
+           color: #000;
+       }
+       .topbar-icon {
+           width: 40px; height: 40px;
+           display: flex; align-items: center; justify-content: center;
+           flex-shrink: 0;
+           cursor: pointer;
+       }
+       .topbar-icon img {
+           width: 28px; height: 28px;
+           object-fit: contain;
+           border-radius: 50%;
+       }
 
-        /* ---- İçerik ---- */
-        .content {
-            padding: 76px 16px 88px;
-            display: flex; flex-direction: column;
-            gap: 12px;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-        .card-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+       /* ---- İçerik ---- */
+       .content {
+           padding: 76px 16px 88px;
+           display: flex; flex-direction: column;
+           gap: 12px;
+           max-width: 480px;
+           margin: 0 auto;
+       }
+       .card-row {
+           display: grid;
+           grid-template-columns: 1fr 1fr;
+           gap: 12px;
+       }
 
-        .tarot-card {
-            position: relative;
-            aspect-ratio: 9 / 16;
-            border-radius: 14px;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-            transition: opacity 0.3s, filter 0.3s;
-        }
-        /* BAŞLANGIÇTA KARTLAR KİTLİ - Firestore kontrolünden sonra açılır (görünüm normal, sadece rozet var) */
-        .tarot-card.locked .card-text {
-            opacity: 0.85;
-        }
-        .tarot-card img {
-            position: absolute; inset: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-        /* Gradyan overlay - siyah zemin yerine hafif karartma */
-        .tarot-card::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.60) 100%);
-        }
-        .tarot-card .card-text {
-            position: absolute; inset: 0;
-            z-index: 2;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 6px; padding: 12px;
-            text-align: center;
-        }
-        .tarot-card .line-main {
-            color: #ffffff; font-size: 0.92rem; font-weight: 600;
-            line-height: 1.3;
-        }
-        .tarot-card .line-sub {
-            color: #ffffff; font-size: 0.85rem; font-weight: 700;
-            letter-spacing: 1.5px; text-transform: uppercase;
-        }
-        .tarot-card .line-meta {
-            color: #ffffff; font-size: 0.72rem; font-weight: 400;
-            opacity: 0.85;
-        }
+       .tarot-card {
+           position: relative;
+           aspect-ratio: 9 / 16;
+           border-radius: 14px;
+           overflow: hidden;
+           cursor: pointer;
+           box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+           transition: opacity 0.3s, filter 0.3s;
+       }
+       .tarot-card.locked .card-text {
+           opacity: 0.85;
+       }
+       .tarot-card img {
+           position: absolute; inset: 0;
+           width: 100%; height: 100%;
+           object-fit: cover;
+       }
+       .tarot-card::after {
+           content: '';
+           position: absolute; inset: 0;
+           background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.60) 100%);
+       }
+       .tarot-card .card-text {
+           position: absolute; inset: 0;
+           z-index: 2;
+           display: flex; flex-direction: column;
+           align-items: center; justify-content: center;
+           gap: 6px; padding: 12px;
+           text-align: center;
+       }
+       .tarot-card .line-main {
+           color: #ffffff; font-size: 0.92rem; font-weight: 600;
+           line-height: 1.3;
+       }
+       .tarot-card .line-sub {
+           color: #ffffff; font-size: 0.85rem; font-weight: 700;
+           letter-spacing: 1.5px; text-transform: uppercase;
+       }
+       .tarot-card .line-meta {
+           color: #ffffff; font-size: 0.72rem; font-weight: 400;
+           opacity: 0.85;
+       }
 
-        /* ---- Alt navigasyon ---- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 68px;
-            background: #ffffff;
-            border-top: 1px solid #e8e8ed;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px; /* Butonlar arası boşluk eklendi, daha dengeli görünmesi için */
-        }
-        .nav-btn {
-            background: none; border: none; padding: 0;
-            width: 44px; height: 44px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
-        .nav-btn.active { background: #f2f2f5; }
-        .nav-btn img {
-            width: 34px; height: 34px;
-            object-fit: contain; border-radius: 6px;
-        }
+       /* ---- Alt navigasyon ---- */
+       .bottom-nav {
+           position: fixed; bottom: 0; left: 0; right: 0;
+           height: 68px;
+           background: #ffffff;
+           border-top: 1px solid #e8e8ed;
+           z-index: 10;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 30px;
+       }
+       .nav-btn {
+           background: none; border: none; padding: 0;
+           width: 44px; height: 44px;
+           border-radius: 10px;
+           display: flex; align-items: center; justify-content: center;
+           cursor: pointer;
+       }
+       .nav-btn.active { background: #f2f2f5; }
+       .nav-btn img {
+           width: 34px; height: 34px;
+           object-fit: contain; border-radius: 6px;
+       }
 
-        /* ---- Niyet modalı ---- */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: flex-start; justify-content: center;
-            padding: 76px 24px 0;
-            z-index: 100;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            width: 100%; max-width: 340px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex; flex-direction: column;
-            align-items: center; gap: 12px;
-        }
-        .modal-title {
-            font-size: 1.3rem; font-weight: 700;
-            color: #000;
-        }
-        .intent-input {
-            width: 100%; min-height: 90px;
-            border: 2px solid #e8e8ed; border-radius: 10px;
-            padding: 12px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1rem; color: #000;
-            resize: none;
-        }
-        .intent-input:focus { border-color: #000; outline: none; }
-        .cooldown-remaining {
-            font-size: 0.95rem; color: #555;
-            text-align: center;
-        }
-        .premium-features {
-            width: 100%;
-            display: flex; flex-direction: column; gap: 8px;
-            margin: 2px 0 4px;
-        }
-        .premium-feature-item {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 0.88rem; color: #333;
-        }
-        .premium-feature-item::before {
-            content: '✦';
-            color: #D4AF37;
-            flex-shrink: 0;
-        }
-        .premium-cta-btn {
-            width: 100%;
-            padding: 14px;
-            background: #000; color: #fff;
-            border: none; border-radius: 10px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1rem; font-weight: 600;
-            cursor: pointer;
-        }
-        .modal-close-text {
-            background: none; border: none;
-            color: #888; font-size: 0.85rem;
-            cursor: pointer; padding: 4px;
-        }
-        .char-counter {
-            align-self: flex-end;
-            font-size: 0.75rem; color: #999;
-            margin-top: -6px;
-        }
-        .send-btn {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: #000; border: none;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-        .send-btn svg { width: 22px; height: 22px; fill: #fff; }
-        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+       /* ---- Niyet modalı ---- */
+       .modal-overlay {
+           position: fixed; inset: 0;
+           background: rgba(0,0,0,0.55);
+           display: none;
+           align-items: flex-start; justify-content: center;
+           padding: 76px 24px 0;
+           z-index: 100;
+       }
+       .modal-overlay.active { display: flex; }
+       .modal-box {
+           width: 100%; max-width: 340px;
+           background: #ffffff;
+           border-radius: 16px;
+           padding: 24px;
+           display: flex; flex-direction: column;
+           align-items: center; gap: 12px;
+       }
+       .modal-title {
+           font-size: 1.3rem; font-weight: 700;
+           color: #000;
+       }
+       .intent-input {
+           width: 100%; min-height: 90px;
+           border: 2px solid #e8e8ed; border-radius: 10px;
+           padding: 12px;
+           font-family: 'Times New Roman', Times, serif;
+           font-size: 1rem; color: #000;
+           resize: none;
+       }
+       .intent-input:focus { border-color: #000; outline: none; }
+       .cooldown-remaining {
+           font-size: 0.95rem; color: #555;
+           text-align: center;
+       }
+       .premium-features {
+           width: 100%;
+           display: flex; flex-direction: column; gap: 8px;
+           margin: 2px 0 4px;
+       }
+       .premium-feature-item {
+           display: flex; align-items: center; gap: 8px;
+           font-size: 0.88rem; color: #333;
+       }
+       .premium-feature-item::before {
+           content: '✦';
+           color: #D4AF37;
+           flex-shrink: 0;
+       }
+       .premium-cta-btn {
+           width: 100%;
+           padding: 14px;
+           background: #000; color: #fff;
+           border: none; border-radius: 10px;
+           font-family: 'Times New Roman', Times, serif;
+           font-size: 1rem; font-weight: 600;
+           cursor: pointer;
+       }
+       .modal-close-text {
+           background: none; border: none;
+           color: #888; font-size: 0.85rem;
+           cursor: pointer; padding: 4px;
+       }
+       .char-counter {
+           align-self: flex-end;
+           font-size: 0.75rem; color: #999;
+           margin-top: -6px;
+       }
+       .send-btn {
+           width: 52px; height: 52px;
+           border-radius: 50%;
+           background: #000; border: none;
+           display: flex; align-items: center; justify-content: center;
+           cursor: pointer;
+           margin-top: 4px;
+       }
+       .send-btn svg { width: 22px; height: 22px; fill: #fff; }
+       .send-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* ---- Sidebar ---- */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 150;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: 260px;
-            background: #ffffff;
-            z-index: 151;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid #e8e8ed;
-            font-size: 1.1rem; font-weight: 700;
-            letter-spacing: 2px;
-            color: #000;
-        }
-        .sidebar-menu {
-            display: flex; flex-direction: column;
-        }
-        .sidebar-item {
-            padding: 18px 20px;
-            font-size: 1rem;
-            color: #000;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background 0.15s;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .sidebar-item:active {
-            background: #f5f5f7;
-        }
-        .sidebar-item.active-page {
-            font-weight: 700;
-            background: #fafafa;
-        }
+       /* ---- Sidebar ---- */
+       .sidebar-overlay {
+           position: fixed; inset: 0;
+           background: rgba(0,0,0,0.45);
+           z-index: 150;
+           display: none;
+           opacity: 0;
+           transition: opacity 0.3s;
+       }
+       .sidebar-overlay.active {
+           display: block;
+           opacity: 1;
+       }
+       .sidebar {
+           position: fixed; top: 0; left: 0; bottom: 0;
+           width: 260px;
+           background: #ffffff;
+           z-index: 151;
+           transform: translateX(-100%);
+           transition: transform 0.3s ease;
+           display: flex; flex-direction: column;
+           box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+       }
+       .sidebar.active {
+           transform: translateX(0);
+       }
+       .sidebar-header {
+           padding: 24px 20px;
+           border-bottom: 1px solid #e8e8ed;
+           font-size: 1.1rem; font-weight: 700;
+           letter-spacing: 2px;
+           color: #000;
+       }
+       .sidebar-menu {
+           display: flex; flex-direction: column;
+       }
+       .sidebar-item {
+           padding: 18px 20px;
+           font-size: 1rem;
+           color: #000;
+           border-bottom: 1px solid #f0f0f0;
+           cursor: pointer;
+           transition: background 0.15s;
+           display: flex; align-items: center; gap: 12px;
+       }
+       .sidebar-item:active {
+           background: #f5f5f7;
+       }
+       .sidebar-item.active-page {
+           font-weight: 700;
+           background: #fafafa;
+       }
 
-        /* ---- Auth kontrol spinner ---- */
-        .auth-check {
-            position: fixed; inset: 0;
-            background: #fff;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200;
-        }
-        .auth-check.hidden { display: none; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+       /* ---- Auth kontrol spinner ---- */
+       .auth-check {
+           position: fixed; inset: 0;
+           background: #fff;
+           display: flex; align-items: center; justify-content: center;
+           z-index: 200;
+       }
+       .auth-check.hidden { display: none; }
+       .spinner {
+           width: 40px; height: 40px;
+           border: 3px solid #e8e8ed;
+           border-top-color: #000;
+           border-radius: 50%;
+           animation: spin 1s linear infinite;
+       }
+       @keyframes spin { to { transform: rotate(360deg); } }
+   </style>
 </head>
 <body>
 
-    <div class="auth-check" id="authCheck">
-        <div class="spinner"></div>
-    </div>
+   <div class="auth-check" id="authCheck">
+       <div class="spinner"></div>
+   </div>
 
-    <div class="topbar">
-        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
-            <span></span><span></span><span></span>
-        </button>
-        <div class="topbar-title" id="dashboardTitle"></div>
-    </div>
+   <div class="topbar">
+       <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+           <span></span><span></span><span></span>
+       </button>
+       <div class="topbar-title" id="dashboardTitle"></div>
+       <div class="topbar-icon" id="topbarIcon">
+           <img src="eye_icon_circle.png" alt="Sonuçlar">
+       </div>
+   </div>
 
-    <div class="content">
-        <div class="card-row">
-            <!-- BAŞLANGIÇTA locked - Firestore kontrolünden sonra açılır -->
-            <div class="tarot-card silver locked" id="singleCardOption">
-                <img src="onecard.png" alt="">
-                <div class="card-text">
-                    <div class="line-main" id="singleCardTitle"></div>
-                    <div class="line-sub" id="singleCardLabel"></div>
-                    <div class="line-meta" id="singleCardAds"></div>
-                </div>
-            </div>
+   <div class="content">
+       <div class="card-row">
+           <div class="tarot-card silver locked" id="singleCardOption">
+               <img src="onecard.png" alt="">
+               <div class="card-text">
+                   <div class="line-main" id="singleCardTitle"></div>
+                   <div class="line-sub" id="singleCardLabel"></div>
+                   <div class="line-meta" id="singleCardAds"></div>
+               </div>
+           </div>
 
-            <div class="tarot-card silver locked" id="threeCardOption">
-                <img src="onecard.png" alt="">
-                <div class="card-text">
-                    <div class="line-main" id="threeCardTitle"></div>
-                    <div class="line-sub" id="threeCardLabel"></div>
-                    <div class="line-meta" id="threeCardAds"></div>
-                </div>
-            </div>
-        </div>
+           <div class="tarot-card silver locked" id="threeCardOption">
+               <img src="onecard.png" alt="">
+               <div class="card-text">
+                   <div class="line-main" id="threeCardTitle"></div>
+                   <div class="line-sub" id="threeCardLabel"></div>
+                   <div class="line-meta" id="threeCardAds"></div>
+               </div>
+           </div>
+       </div>
 
-        <div class="card-row" id="premiumSection">
-            <div class="tarot-card premium" id="monthlyOption">
-                <img src="onecard.png" alt="">
-                <div class="card-text">
-                    <div class="line-main" id="adFreeMonthly"></div>
-                    <div class="line-sub" id="dailyLimitMonthly"></div>
-                    <div class="line-meta" id="monthlyPrice"></div>
-                </div>
-            </div>
+       <div class="card-row" id="premiumSection">
+           <div class="tarot-card premium" id="monthlyOption">
+               <img src="onecard.png" alt="">
+               <div class="card-text">
+                   <div class="line-main" id="adFreeMonthly"></div>
+                   <div class="line-sub" id="dailyLimitMonthly"></div>
+                   <div class="line-meta" id="monthlyPrice"></div>
+               </div>
+           </div>
 
-            <div class="tarot-card premium" id="yearlyOption">
-                <img src="onecard.png" alt="">
-                <div class="card-text">
-                    <div class="line-main" id="adFreeYearly"></div>
-                    <div class="line-sub" id="dailyLimitYearly"></div>
-                    <div class="line-meta" id="yearlyPrice"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+           <div class="tarot-card premium" id="yearlyOption">
+               <img src="onecard.png" alt="">
+               <div class="card-text">
+                   <div class="line-main" id="adFreeYearly"></div>
+                   <div class="line-sub" id="dailyLimitYearly"></div>
+                   <div class="line-meta" id="yearlyPrice"></div>
+               </div>
+           </div>
+       </div>
+   </div>
 
-    <!-- Alt navigasyon (Garantili Yönlendirme) -->
-    <div class="bottom-nav">
-        <!-- Dashboard Linki -->
-        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
-            <img src="cardsinfo.png" alt="Ana Sayfa">
-        </a>
-        
-        <!-- Result Linki -->
-        <a href="result.html" class="nav-btn" id="navResult" style="text-decoration: none; display: flex;">
-            <img src="eye_icon_circle.png" alt="Sonuçlar">
-        </a>
-    </div>
+   <!-- Alt navigasyon -->
+   <div class="bottom-nav">
+       <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
+           <img src="cardsinfo.png" alt="Ana Sayfa">
+       </a>
+   </div>
 
-    <div class="modal-overlay" id="intentOverlay">
-        <div class="modal-box">
-            <div class="modal-title" id="intentTitle"></div>
-            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
-            <div class="char-counter" id="charCounter">0/200</div>
-            <button class="send-btn" id="sendIntentBtn" aria-label="Gönder" disabled>
-                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-            </button>
-        </div>
-    </div>
+   <div class="modal-overlay" id="intentOverlay">
+       <div class="modal-box">
+           <div class="modal-title" id="intentTitle"></div>
+           <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
+           <div class="char-counter" id="charCounter">0/200</div>
+           <button class="send-btn" id="sendIntentBtn" aria-label="Gönder" disabled>
+               <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+           </button>
+       </div>
+   </div>
 
-    <div class="modal-overlay" id="cooldownOverlay">
-        <div class="modal-box">
-            <div class="modal-title" id="cooldownTitle"></div>
-            <div class="cooldown-remaining" id="cooldownRemainingText"></div>
-            <div class="premium-features">
-                <div class="premium-feature-item" id="premiumFeature1"></div>
-                <div class="premium-feature-item" id="premiumFeature2"></div>
-            </div>
-            <button class="premium-cta-btn" id="premiumCtaBtn"></button>
-            <button class="modal-close-text" id="cooldownCloseBtn"></button>
-        </div>
-    </div>
+   <div class="modal-overlay" id="cooldownOverlay">
+       <div class="modal-box">
+           <div class="modal-title" id="cooldownTitle"></div>
+           <div class="cooldown-remaining" id="cooldownRemainingText"></div>
+           <div class="premium-features">
+               <div class="premium-feature-item" id="premiumFeature1"></div>
+               <div class="premium-feature-item" id="premiumFeature2"></div>
+           </div>
+           <button class="premium-cta-btn" id="premiumCtaBtn"></button>
+           <button class="modal-close-text" id="cooldownCloseBtn"></button>
+       </div>
+   </div>
 
-    <!-- Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TAROTISTAN</div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
-                <span id="sidebarCardsText">Kartlar</span>
-            </div>
-            <div class="sidebar-item" onclick="logout()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span id="sidebarLogoutText">Çıkış</span>
-            </div>
-        </div>
-    </div>
+   <!-- Sidebar -->
+   <div class="sidebar-overlay" id="sidebarOverlay"></div>
+   <div class="sidebar" id="sidebar">
+       <div class="sidebar-header">TAROTISTAN</div>
+       <div class="sidebar-menu">
+           <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
+               <span id="sidebarCardsText">Kartlar</span>
+           </div>
+           <div class="sidebar-item" onclick="logout()">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+               <span id="sidebarLogoutText">Çıkış</span>
+           </div>
+       </div>
+   </div>
 
-    <script>
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+   <script>
+       const auth = firebase.auth();
+       const db = firebase.firestore();
 
-        // 24 saat kontrolü
-        function isWithin24h(timestamp) {
-            if (!timestamp) return false;
-            const now = Date.now();
-            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
-            return (now - recordTime) < (24 * 60 * 60 * 1000);
-        }
+       function isWithin24h(timestamp) {
+           if (!timestamp) return false;
+           const now = Date.now();
+           const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+           return (now - recordTime) < (24 * 60 * 60 * 1000);
+       }
 
-        function formatRemainingTime(timestamp) {
-            if (!timestamp) return '';
-            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
-            const elapsed = Date.now() - recordTime;
-            const remaining = (24 * 60 * 60 * 1000) - elapsed;
-            if (remaining <= 0) return '';
-            const hours = Math.floor(remaining / (60 * 60 * 1000));
-            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-            return hours + 's ' + minutes + 'dk';
-        }
+       function formatRemainingTime(timestamp) {
+           if (!timestamp) return '';
+           const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+           const elapsed = Date.now() - recordTime;
+           const remaining = (24 * 60 * 60 * 1000) - elapsed;
+           if (remaining <= 0) return '';
+           const hours = Math.floor(remaining / (60 * 60 * 1000));
+           const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+           return hours + 's ' + minutes + 'dk';
+       }
 
-        // Kartları kilitle/aç
-        let cooldownRemaining = '';
+       let cooldownRemaining = '';
 
-        function lockCards(message) {
-            const singleCard = document.getElementById('singleCardOption');
-            const threeCard = document.getElementById('threeCardOption');
+       function lockCards(message) {
+           const singleCard = document.getElementById('singleCardOption');
+           const threeCard = document.getElementById('threeCardOption');
+           cooldownRemaining = message || t('cooldownMessage');
+           singleCard.classList.add('locked');
+           threeCard.classList.add('locked');
+       }
 
-            cooldownRemaining = message || t('cooldownMessage');
+       function unlockCards() {
+           const singleCard = document.getElementById('singleCardOption');
+           const threeCard = document.getElementById('threeCardOption');
+           singleCard.classList.remove('locked');
+           threeCard.classList.remove('locked');
+       }
 
-            singleCard.classList.add('locked');
-            threeCard.classList.add('locked');
-        }
+       auth.onAuthStateChanged(async function(user) {
+           if (!user) {
+               window.location.href = 'auth.html';
+               return;
+           }
 
-        function unlockCards() {
-            const singleCard = document.getElementById('singleCardOption');
-            const threeCard = document.getElementById('threeCardOption');
+           document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
+           document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
+           document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
+           document.getElementById('singleCardAds').textContent = t('singleCardAds');
+           document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
+           document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
+           document.getElementById('threeCardAds').textContent = t('threeCardAds');
+           document.getElementById('adFreeMonthly').textContent = t('adFree');
+           document.getElementById('dailyLimitMonthly').textContent = t('dailyLimit');
+           document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
+           document.getElementById('adFreeYearly').textContent = t('adFree');
+           document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
+           document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
+           document.getElementById('intentTitle').textContent = t('intentTitle');
+           document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
+           document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
+           document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
+           document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
+           document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
+           document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+           document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+           document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
-            singleCard.classList.remove('locked');
-            threeCard.classList.remove('locked');
-        }
+           await checkLastReading(user.uid);
+           document.getElementById('authCheck').classList.add('hidden');
+       });
 
-        // Auth kontrolü
-        auth.onAuthStateChanged(async function(user) {
-            if (!user) {
-                window.location.href = 'auth.html';
-                return;
-            }
+       async function checkLastReading(userId) {
+           try {
+               const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
+               if (cachedTime) {
+                   const cachedTimestamp = parseInt(cachedTime);
+                   if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
+                       const remaining = formatRemainingTime(new Date(cachedTimestamp));
+                       lockCards(remaining);
+                       return;
+                   }
+               }
 
-            // Dil uygula (İptal edilen butonların JS referansları silindi)
-            document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
-            document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
-            document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-            document.getElementById('singleCardAds').textContent = t('singleCardAds');
-            document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
-            document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
-            document.getElementById('threeCardAds').textContent = t('threeCardAds');
-            document.getElementById('adFreeMonthly').textContent = t('adFree');
-            document.getElementById('dailyLimitMonthly').textContent = t('dailyLimit');
-            document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
-            document.getElementById('adFreeYearly').textContent = t('adFree');
-            document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
-            document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
-            document.getElementById('intentTitle').textContent = t('intentTitle');
-            document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
-            document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
-            document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
-            document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
-            document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
-            
-            document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-            
-            // Eğer dil dosyanızda 'navResultLabel' eklerseniz bu satırı kullanabilirsiniz (Örn: "Sonuçlar" / "Results")
-            // document.getElementById('navResult').setAttribute('aria-label', t('navResultLabel'));
-            
-            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
-            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+               const lastQuery = await db.collection('users').doc(userId)
+                   .collection('readings')
+                   .orderBy('createdAt', 'desc')
+                   .limit(1)
+                   .get();
 
-            // Varsayılan olarak kartlar locked (HTML'de de locked class var)
-            // Şimdi Firestore kontrolü yap
-            await checkLastReading(user.uid);
+               if (!lastQuery.empty) {
+                   const lastData = lastQuery.docs[0].data();
+                   if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
+                       const remaining = formatRemainingTime(lastData.createdAt);
+                       lockCards(remaining);
+                       return;
+                   }
+               }
 
-            // Kontrol bitti, spinner'ı kaldır
-            document.getElementById('authCheck').classList.add('hidden');
-        });
+               unlockCards();
 
-        async function checkLastReading(userId) {
-            try {
-                // Önce sessionStorage'dan kontrol et (splash'tan gelen)
-                const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
-                if (cachedTime) {
-                    const cachedTimestamp = parseInt(cachedTime);
-                    if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
-                        // 24 saat dolmamış, kartlar kilitli kalsın
-                        const remaining = formatRemainingTime(new Date(cachedTimestamp));
-                        lockCards(remaining);
-                        return;
-                    }
-                }
+           } catch (e) {
+               console.log('Last reading check error:', e);
+               lockCards(t('cooldownMessage'));
+           }
+       }
 
-                // Firestore'dan kontrol et
-                const lastQuery = await db.collection('users').doc(userId)
-                    .collection('readings')
-                    .orderBy('createdAt', 'desc')
-                    .limit(1)
-                    .get();
+       function openSidebar() {
+           document.getElementById('sidebarOverlay').classList.add('active');
+           document.getElementById('sidebar').classList.add('active');
+       }
+       function closeSidebar() {
+           document.getElementById('sidebarOverlay').classList.remove('active');
+           document.getElementById('sidebar').classList.remove('active');
+       }
+       function logout() {
+           auth.signOut().then(() => {
+               window.location.href = 'auth.html';
+           });
+       }
+       document.getElementById('menuBtn').addEventListener('click', openSidebar);
+       document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
-                if (!lastQuery.empty) {
-                    const lastData = lastQuery.docs[0].data();
-                    if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
-                        // 24 saat dolmamış, kartlar kilitli kalsın
-                        const remaining = formatRemainingTime(lastData.createdAt);
-                        lockCards(remaining);
-                        return;
-                    }
-                }
+       // ---- Banner'daki eye_icon_circle.png tıklama ----
+       document.getElementById('topbarIcon').addEventListener('click', function() {
+           window.location.href = 'result.html';
+       });
 
-                // Hiç kayıt yok veya 24 saat geçmiş → kartları aç
-                unlockCards();
+       let currentReadingType = null;
+       const intentOverlay = document.getElementById('intentOverlay');
+       const intentInput = document.getElementById('intentInput');
+       const charCounter = document.getElementById('charCounter');
 
-            } catch (e) {
-                console.log('Last reading check error:', e);
-                // Hata durumunda güvenlik için kartlar kilitli kalsın
-                lockCards(t('cooldownMessage'));
-            }
-        }
+       function openIntentModal(type) {
+           currentReadingType = type;
+           intentInput.value = '';
+           charCounter.textContent = '0/200';
+           sendBtn.disabled = true;
+           intentOverlay.classList.add('active');
+           intentInput.focus();
+       }
+       function closeIntentModal() {
+           intentOverlay.classList.remove('active');
+       }
+       const sendBtn = document.getElementById('sendIntentBtn');
+       intentInput.addEventListener('input', function() {
+           charCounter.textContent = intentInput.value.length + '/200';
+           sendBtn.disabled = intentInput.value.trim().length === 0;
+       });
+       intentOverlay.addEventListener('click', function(e) {
+           if (e.target === intentOverlay) closeIntentModal();
+       });
+       sendBtn.addEventListener('click', function() {
+           const intentText = intentInput.value.trim();
+           if (!intentText) return;
+           sessionStorage.setItem('tarotIntent', intentText);
+           sessionStorage.setItem('tarotReadingType', currentReadingType);
+           window.location.href = 'cards.html';
+       });
 
-        // Sidebar
-        function openSidebar() {
-            document.getElementById('sidebarOverlay').classList.add('active');
-            document.getElementById('sidebar').classList.add('active');
-        }
-        function closeSidebar() {
-            document.getElementById('sidebarOverlay').classList.remove('active');
-            document.getElementById('sidebar').classList.remove('active');
-        }
-        function logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'auth.html';
-            });
-        }
-        document.getElementById('menuBtn').addEventListener('click', openSidebar);
-        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+       document.getElementById('singleCardOption').addEventListener('click', function() {
+           if (this.classList.contains('locked')) {
+               openCooldownModal();
+               return;
+           }
+           openIntentModal('single');
+       });
+       document.getElementById('threeCardOption').addEventListener('click', function() {
+           if (this.classList.contains('locked')) {
+               openCooldownModal();
+               return;
+           }
+           openIntentModal('three');
+       });
 
-        // ---- Niyet modalı ----
-        let currentReadingType = null;
-        const intentOverlay = document.getElementById('intentOverlay');
-        const intentInput = document.getElementById('intentInput');
-        const charCounter = document.getElementById('charCounter');
+       const cooldownOverlay = document.getElementById('cooldownOverlay');
 
-        function openIntentModal(type) {
-            currentReadingType = type;
-            intentInput.value = '';
-            charCounter.textContent = '0/200';
-            sendBtn.disabled = true;
-            intentOverlay.classList.add('active');
-            intentInput.focus();
-        }
-        function closeIntentModal() {
-            intentOverlay.classList.remove('active');
-        }
-        const sendBtn = document.getElementById('sendIntentBtn');
-        intentInput.addEventListener('input', function() {
-            charCounter.textContent = intentInput.value.length + '/200';
-            sendBtn.disabled = intentInput.value.trim().length === 0;
-        });
-        intentOverlay.addEventListener('click', function(e) {
-            if (e.target === intentOverlay) closeIntentModal();
-        });
-        sendBtn.addEventListener('click', function() {
-            const intentText = intentInput.value.trim();
-            if (!intentText) return;
-            sessionStorage.setItem('tarotIntent', intentText);
-            sessionStorage.setItem('tarotReadingType', currentReadingType);
-            window.location.href = 'cards.html';
-        });
+       function openCooldownModal() {
+           document.getElementById('cooldownRemainingText').textContent =
+               t('cooldownRemainingPrefix') + ' ' + cooldownRemaining;
+           cooldownOverlay.classList.add('active');
+       }
 
-        document.getElementById('singleCardOption').addEventListener('click', function() {
-            if (this.classList.contains('locked')) {
-                openCooldownModal();
-                return;
-            }
-            openIntentModal('single');
-        });
-        document.getElementById('threeCardOption').addEventListener('click', function() {
-            if (this.classList.contains('locked')) {
-                openCooldownModal();
-                return;
-            }
-            openIntentModal('three');
-        });
+       function closeCooldownModal() {
+           cooldownOverlay.classList.remove('active');
+       }
 
-        // Cooldown / Premium modalı
-        const cooldownOverlay = document.getElementById('cooldownOverlay');
+       document.getElementById('cooldownCloseBtn').addEventListener('click', closeCooldownModal);
+       cooldownOverlay.addEventListener('click', function(e) {
+           if (e.target === cooldownOverlay) closeCooldownModal();
+       });
+       document.getElementById('premiumCtaBtn').addEventListener('click', function() {
+           closeCooldownModal();
+           document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+       });
 
-        function openCooldownModal() {
-            document.getElementById('cooldownRemainingText').textContent =
-                t('cooldownRemainingPrefix') + ' ' + cooldownRemaining;
-            cooldownOverlay.classList.add('active');
-        }
-
-        function closeCooldownModal() {
-            cooldownOverlay.classList.remove('active');
-        }
-
-        document.getElementById('cooldownCloseBtn').addEventListener('click', closeCooldownModal);
-        cooldownOverlay.addEventListener('click', function(e) {
-            if (e.target === cooldownOverlay) closeCooldownModal();
-        });
-        document.getElementById('premiumCtaBtn').addEventListener('click', function() {
-            closeCooldownModal();
-            document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-
-        // Premium kartlar
-        document.getElementById('monthlyOption').addEventListener('click', function() {
-            alert('Premium üyelik yakında!');
-        });
-        document.getElementById('yearlyOption').addEventListener('click', function() {
-            alert('Premium üyelik yakında!');
-        });
-    </script>
+       document.getElementById('monthlyOption').addEventListener('click', function() {
+           alert('Premium üyelik yakında!');
+       });
+       document.getElementById('yearlyOption').addEventListener('click', function() {
+           alert('Premium üyelik yakında!');
+       });
+   </script>
 </body>
 </html>
