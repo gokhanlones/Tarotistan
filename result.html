@@ -110,20 +110,46 @@
             initResult(user.uid);
         });
 
+        // Firestore sorgularına zaman aşımı ekler (varsayılan 10 saniye)
+        function withTimeout(promise, ms) {
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('timeout')), ms)
+            );
+            return Promise.race([promise, timeout]);
+        }
+
+        // Spinner'ı gizleyip içeriği gösterir
+        function showContent() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('contentArea').style.display = 'flex';
+            document.getElementById('bottomActions').style.display = 'flex';
+        }
+
+        // Hiç okuma yoksa boş durum gösterir (dashboard'a redirect etmez)
+        function showEmptyState() {
+            document.getElementById('intentDisplay').textContent =
+                (typeof t === 'function' ? t('resultNotSpecified') : 'Henüz okuma yapılmamış');
+            document.getElementById('aiDescText').textContent =
+                (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
+            document.getElementById('cardsArea').innerHTML = '';
+            showContent();
+        }
+
         async function initResult(uid) {
             try {
                 // 1. Kart verilerini çek
                 const response = await fetch('tarot_cards.json');
                 if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
                 const tarotData = await response.json();
-                
+
                 // 2. Session verilerini al
                 let cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
                 let intent = sessionStorage.getItem('tarotIntent') || '';
                 let type = sessionStorage.getItem('tarotReadingType') || 'single';
                 let aiText = '';
 
-                // 3. Firebase üzerinden veri çekme kontrolü
+                // 3. Session boşsa Firestore'dan çek (10 sn timeout ile)
                 const urlParams = new URLSearchParams(window.location.search);
                 const readingId = urlParams.get('id');
 
@@ -132,45 +158,51 @@
                     if (readingId) {
                         query = db.collection('users').doc(uid).collection('readings').doc(readingId);
                     } else {
-                        const last = await db.collection('users').doc(uid).collection('readings').orderBy('createdAt', 'desc').limit(1).get();
+                        const last = await withTimeout(
+                            db.collection('users').doc(uid)
+                                .collection('readings')
+                                .orderBy('createdAt', 'desc')
+                                .limit(1)
+                                .get(),
+                            10000
+                        );
                         if (!last.empty) query = last.docs[0].ref;
                     }
 
                     if (query) {
-                        const snap = await query.get();
+                        const snap = await withTimeout(query.get(), 10000);
                         if (snap.exists) {
                             const data = snap.data();
-                            cards = data.cards;
-                            intent = data.intent;
-                            type = data.type;
-                            aiText = data.aiInterpretation;
+                            cards = data.cards || [];
+                            intent = data.intent || '';
+                            type = data.type || 'single';
+                            aiText = data.aiInterpretation || '';
                         }
                     }
                 }
 
-                // 4. Veri yoksa dashboard'a gönder
+                // 4. Hiç veri yoksa boş durum göster (redirect etme!)
                 if (cards.length === 0) {
-                    window.location.href = 'dashboard.html';
+                    showEmptyState();
                     return;
                 }
 
                 // 5. Arayüzü doldur
-                document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
+                document.getElementById('intentDisplay').textContent =
+                    intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
                 renderCards(cards, type, tarotData);
-                document.getElementById('aiDescText').textContent = aiText || (typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.');
-                
-                // 6. Spinner'ı GİZLE
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                document.getElementById('loadingOverlay').style.display = 'none'; // Garanti olsun
-                document.getElementById('contentArea').style.display = 'flex';
-                document.getElementById('bottomActions').style.display = 'flex';
+                document.getElementById('aiDescText').textContent =
+                    aiText || (typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.');
+
+                // 6. Spinner'ı gizle
+                showContent();
 
             } catch (e) {
                 console.error("HATA:", e);
-                // Hata olsa bile spinner'ı kaldır ki kullanıcı bir butona tıklayabilsin
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert("Bir hata oluştu. Ana sayfaya yönlendiriliyorsunuz.");
-                window.location.href = 'dashboard.html';
+                // Spinner'ı her durumda gizle; alert + redirect yerine sayfada göster
+                document.getElementById('aiDescText').textContent =
+                    (typeof t === 'function' ? t('aiFallback') : 'Sonuçlar yüklenemedi. Lütfen tekrar deneyin.');
+                showContent();
             }
         }
 
