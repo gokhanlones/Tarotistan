@@ -68,7 +68,7 @@
             margin: 0 auto;
         }
 
-        /* ---- Kart Alanı (YENİ) ---- */
+        /* ---- Kart Alanı ---- */
         .card-area {
             display: flex;
             align-items: center;
@@ -97,6 +97,8 @@
             flex-direction: column;
             gap: 4px;
             flex: 1;
+            text-align: center;
+            justify-content: center;
         }
         .area-title {
             font-size: 1rem;
@@ -108,11 +110,6 @@
             font-size: 0.82rem;
             color: #333333;
             line-height: 1.45;
-        }
-        .area-meta {
-            font-size: 0.72rem;
-            color: #888888;
-            margin-top: 2px;
         }
 
         /* ---- Alt navigasyon ---- */
@@ -313,7 +310,6 @@
             <div class="area-text">
                 <div class="area-title" id="singleCardTitle"></div>
                 <div class="area-desc" id="singleCardLabel"></div>
-                <div class="area-meta" id="singleCardAds"></div>
             </div>
         </div>
 
@@ -323,27 +319,24 @@
             <div class="area-text">
                 <div class="area-title" id="threeCardTitle"></div>
                 <div class="area-desc" id="threeCardLabel"></div>
-                <div class="area-meta" id="threeCardAds"></div>
             </div>
         </div>
 
-        <!-- Aylık Premium -->
-        <div class="card-area" id="monthlyOption">
+        <!-- Test Reklam Alanı 1 -->
+        <div class="card-area" id="adArea1" style="cursor: default;">
             <img src="onecard.png" class="area-img" alt="">
             <div class="area-text">
-                <div class="area-title" id="adFreeMonthly"></div>
-                <div class="area-desc" id="dailyLimitMonthly"></div>
-                <div class="area-meta" id="monthlyPrice"></div>
+                <div class="area-title">Test Reklam</div>
+                <div class="area-desc">Google AdMob test reklam alanı</div>
             </div>
         </div>
 
-        <!-- Yıllık Premium -->
-        <div class="card-area" id="yearlyOption">
+        <!-- Test Reklam Alanı 2 -->
+        <div class="card-area" id="adArea2" style="cursor: default;">
             <img src="onecard.png" class="area-img" alt="">
             <div class="area-text">
-                <div class="area-title" id="adFreeYearly"></div>
-                <div class="area-desc" id="dailyLimitYearly"></div>
-                <div class="area-meta" id="yearlyPrice"></div>
+                <div class="area-title">Test Reklam</div>
+                <div class="area-desc">Google AdMob test reklam alanı</div>
             </div>
         </div>
     </div>
@@ -443,16 +436,8 @@
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
             document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
             document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-            document.getElementById('singleCardAds').textContent = t('singleCardAds');
             document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
             document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
-            document.getElementById('threeCardAds').textContent = t('threeCardAds');
-            document.getElementById('adFreeMonthly').textContent = t('adFree');
-            document.getElementById('dailyLimitMonthly').textContent = t('dailyLimit');
-            document.getElementById('monthlyPrice').textContent = t('monthlyPrice');
-            document.getElementById('adFreeYearly').textContent = t('adFree');
-            document.getElementById('dailyLimitYearly').textContent = t('dailyLimit');
-            document.getElementById('yearlyPrice').textContent = t('yearlyPrice');
             document.getElementById('intentTitle').textContent = t('intentTitle');
             document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
             document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
@@ -588,13 +573,6 @@
         document.getElementById('premiumCtaBtn').addEventListener('click', function() {
             closeCooldownModal();
             document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-
-        document.getElementById('monthlyOption').addEventListener('click', function() {
-            alert('Premium üyelik yakında!');
-        });
-        document.getElementById('yearlyOption').addEventListener('click', function() {
-            alert('Premium üyelik yakında!');
         });
     </script>
 </body>
