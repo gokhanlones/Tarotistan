@@ -98,7 +98,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 56px;
         }
         .nav-btn {
             background: none; border: none; padding: 0;
@@ -108,7 +107,6 @@
             cursor: pointer;
         }
         .nav-btn.active { background: #f2f2f5; }
-        .nav-btn svg { width: 26px; height: 26px; }
         .nav-btn img {
             width: 34px; height: 34px;
             object-fit: contain; border-radius: 6px;
@@ -193,7 +191,7 @@
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
-        <div class="topbar-title" id="topbarTitle"></div>
+        <div class="topbar-title">TAROT'S</div>
     </div>
 
     <div class="content">
@@ -201,14 +199,8 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
-            <img src="cardsinfo.png" alt="">
-        </button>
-        <button class="nav-btn active" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
-            <img src="bookicon.png" alt="">
-        </button>
-        <button class="nav-btn" id="navHistory" onclick="window.location.href='result.html'">
-            <img src="timeicon.png" alt="">
+        <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
+            <img src="cardsinfo.png" alt="Ana Sayfa">
         </button>
     </div>
 
@@ -241,11 +233,9 @@
             document.getElementById('authCheck').classList.add('hidden');
         });
 
-        document.getElementById('topbarTitle').textContent = t('cardsInfoTitle');
+        // Metin ve çeviri atamaları
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
-        document.getElementById('navHistory').setAttribute('aria-label', t('navHistoryLabel'));
         document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
         document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
         document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
