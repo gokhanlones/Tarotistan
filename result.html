@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAROTISTAN</title>
+    <title>TAROT'S</title>
     <script src="lang.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -15,7 +15,7 @@
         
         .hidden { display: none !important; }
 
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; border-bottom: 1px solid #e8e8ed; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
         .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
         .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
         .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
@@ -27,7 +27,8 @@
         
         .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
         .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
-        .cards-area.single .card-wrapper { width: min(200px, 55vw); }
+        .cards-area.single { justify-content: center; }
+        .cards-area.single .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
         
         .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
         .card-slot.reversed { transform: rotate(180deg); }
@@ -39,8 +40,9 @@
 
         .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 16px; }
         .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
+        .ai-empty { font-size: 0.92rem; color: #888; text-align: center; font-style: italic; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; border-top: 1px solid #e8e8ed; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 30px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 30px; }
         .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .nav-btn.active { background: #f2f2f5; }
         .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
@@ -95,6 +97,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        function isWithin24h(timestamp) {
+            if (!timestamp) return false;
+            const now = Date.now();
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            return (now - recordTime) < (24 * 60 * 60 * 1000);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof t === 'function') {
                 document.getElementById('topbarTitle').textContent = t('dashboardTitle');
@@ -140,6 +149,7 @@
                 let intent = sessionStorage.getItem('tarotIntent') || '';
                 let type = sessionStorage.getItem('tarotReadingType') || 'single';
                 let aiText = '';
+                let readingTimestamp = null;
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const readingId = urlParams.get('id');
@@ -154,7 +164,7 @@
                                 .collection('readings')
                                 .orderBy('createdAt', 'desc')
                                 .limit(1)
-                                .get(),
+                            .get(),
                             10000
                         );
                         if (!last.empty) query = last.docs[0].ref;
@@ -168,6 +178,7 @@
                             intent = data.intent || '';
                             type = data.type || 'single';
                             aiText = data.aiInterpretation || '';
+                            readingTimestamp = data.createdAt || null;
                         }
                     }
                 }
@@ -180,8 +191,21 @@
                 document.getElementById('intentDisplay').textContent =
                     intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
                 renderCards(cards, type, tarotData);
-                document.getElementById('aiDescText').textContent =
-                    aiText || (typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.');
+
+                // AI yorumu 24 saat kontrolü
+                const aiSection = document.getElementById('aiSection');
+                const aiDescText = document.getElementById('aiDescText');
+
+                if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
+                    aiDescText.textContent = aiText;
+                    aiDescText.className = 'ai-text';
+                } else if (aiText && aiText.trim() !== '' && readingTimestamp && !isWithin24h(readingTimestamp)) {
+                    aiDescText.textContent = typeof t === 'function' ? t('aiExpired') : 'Yapay zeka yorumunun süresi dolmuş.';
+                    aiDescText.className = 'ai-empty';
+                } else {
+                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
+                    aiDescText.className = 'ai-empty';
+                }
 
                 showContent();
 
