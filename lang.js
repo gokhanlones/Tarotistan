@@ -1,6 +1,6 @@
 const LANG = {
     tr: {
-        appName: "TAROTISTAN",
+        appName: "TAROT'S",
         login: "Giriş Yap",
         register: "Kayıt Ol",
         email: "E-posta",
@@ -22,7 +22,7 @@ const LANG = {
         
         // Terms
         termsTitle: "Gizlilik Politikası ve Kullanım Şartları",
-        termsText: `Tarotistan uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
+        termsText: `Tarot's uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
 
 1. KİŞİSEL VERİLER: E-posta adresiniz ve çekim geçmişiniz güvenli bir şekilde saklanır. Bilgileriniz üçüncü taraflarla paylaşılmaz.
 
@@ -39,6 +39,7 @@ const LANG = {
 
         // Sidebar
         sidebarCards: "Kartlar",
+        sidebarBirthInfo: "Doğum Bilgileri",
         sidebarLogout: "Çıkış",
 
         // Kart Bilgileri sayfası
@@ -53,7 +54,7 @@ const LANG = {
         navHistoryLabel: "Geçmiş Okuma",
 
         // Dashboard / Seçici
-        dashboardTitle: "TAROTİSTAN",
+        dashboardTitle: "TAROT'S",
         singleCardTitle: "Aklındaki sorunun cevabı",
         singleCardLabel: "I Kart",
         singleCardAds: "1 Reklam",
@@ -64,6 +65,10 @@ const LANG = {
         dailyLimit: "Günlük 5 oturum",
         monthlyPrice: "Aylık 49,99 TL",
         yearlyPrice: "Yıllık 399,99 TL",
+
+        // Günlük burç alanı
+        dailyHoroscopeAreaTitle: "Günlük Burç Yorumu",
+        dailyHoroscopeAreaDesc: "Doğum bilgilerinizi giriniz",
 
         // Cooldown / Premium modalı
         cooldownMessage: "Şu anda kilitli",
@@ -98,7 +103,8 @@ const LANG = {
         positionFuture: "Gelecek",
         aiTitle: "Yapay Zeka Yorumu",
         aiDesc: "Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>(Entegrasyon sonrası aktif olacaktır)",
-        aiFallback: "Bu çekim için yapay zeka yorumu oluşturulamadı.",
+        aiFallback: "Bu çekim için yapay zeka yorumu bulunmuyor.",
+        aiExpired: "Yapay zeka yorumunun süresi dolmuş.",
         homeBtn: "Ana Sayfa",
         newReadingBtn: "Yeni Çekim",
         resultErrorTitle: "Kartlar yüklenemedi",
@@ -106,7 +112,7 @@ const LANG = {
         closeBtn: "Kapat"
     },
     en: {
-        appName: "TAROTISTAN",
+        appName: "TAROT'S",
         login: "Login",
         register: "Register",
         email: "Email",
@@ -126,7 +132,7 @@ const LANG = {
         invalidCode: "Invalid or expired code",
         
         termsTitle: "Privacy Policy and Terms of Use",
-        termsText: `By using the Tarotistan app, you agree to the following terms:
+        termsText: `By using the Tarot's app, you agree to the following terms:
 
 1. PERSONAL DATA: Your email address and draw history are stored securely. Your information is not shared with third parties.
 
@@ -143,6 +149,7 @@ const LANG = {
 
         // Sidebar
         sidebarCards: "Cards",
+        sidebarBirthInfo: "Birth Information",
         sidebarLogout: "Logout",
 
         // Card Info page
@@ -157,7 +164,7 @@ const LANG = {
         navHistoryLabel: "Reading History",
 
         // Dashboard / Selector
-        dashboardTitle: "TAROTISTAN",
+        dashboardTitle: "TAROT'S",
         singleCardTitle: "The answer to what's on your mind",
         singleCardLabel: "I Card",
         singleCardAds: "1 Ad",
@@ -168,6 +175,10 @@ const LANG = {
         dailyLimit: "5 sessions/day",
         monthlyPrice: "Monthly 49.99 TL",
         yearlyPrice: "Yearly 399.99 TL",
+
+        // Günlük burç alanı
+        dailyHoroscopeAreaTitle: "Daily Horoscope",
+        dailyHoroscopeAreaDesc: "Enter your birth information",
 
         // Cooldown / Premium modal
         cooldownMessage: "Currently locked",
@@ -202,7 +213,8 @@ const LANG = {
         positionFuture: "Future",
         aiTitle: "AI Interpretation",
         aiDesc: "This section will feature an in-depth AI-powered interpretation of your drawn cards.<br>(Will be active after integration)",
-        aiFallback: "An AI interpretation couldn't be generated for this reading.",
+        aiFallback: "No AI interpretation available for this reading.",
+        aiExpired: "AI interpretation has expired.",
         homeBtn: "Home",
         newReadingBtn: "New Reading",
         resultErrorTitle: "Couldn't load the cards",
