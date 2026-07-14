@@ -169,7 +169,7 @@
 
     <div class="submit-bar" id="submitBar">
         <button class="btn-continue" id="continueBtn">
-            <img src="eye_icon_circle.png" alt="">
+            <img src="eye_result.png" alt="">
         </button>
     </div>
 
@@ -177,21 +177,13 @@
         <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
             <img src="cardsinfo.png" alt="">
         </button>
-        <button class="nav-btn" id="navCardsInfo" onclick="window.location.href='cardsinfo.html'">
-            <img src="bookicon.png" alt="">
-        </button>
-        <button class="nav-btn" id="navHistory" onclick="window.location.href='result.html'">
-            <img src="timeicon.png" alt="">
-        </button>
     </div>
 
     <script>
-        document.getElementById('topbarTitle').textContent = t('dashboardTitle');
+        document.getElementById('topbarTitle').textContent = 'TAROTİSTAN';
         document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('continueBtn').setAttribute('aria-label', t('cardsContinueBtn'));
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-        document.getElementById('navCardsInfo').setAttribute('aria-label', t('navCardsInfoLabel'));
-        document.getElementById('navHistory').setAttribute('aria-label', t('navHistoryLabel'));
 
         const readingType = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
