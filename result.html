@@ -10,72 +10,196 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
-        
-        .hidden { display: none !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        /* ---- Üst Bar ---- */
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
-        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.3s ease; }
-        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; transition: all 0.3s ease; transform-origin: center; }
-        .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
-        .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
-        
-        /* ---- Sidebar ---- */
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
-        .sidebar-overlay.active { display: block; opacity: 1; }
-        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #ffffff; z-index: 151; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.12); }
-        .sidebar.active { transform: translateX(0); }
-        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; color: #000; }
-        .sidebar-menu { display: flex; flex-direction: column; }
-        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; display: flex; align-items: center; gap: 12px; }
-        
-        /* ---- İçerik ---- */
-        .content { padding: 76px 16px 88px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .intent-box { width: 100%; background: #fafafa; border: 1px solid #e8e8ed; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; text-align: center; }
-        .intent-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .intent-text { font-size: 1rem; color: #000; font-style: italic; line-height: 1.4; }
-        
-        .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
-        .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
-        .cards-area.single { justify-content: center; }
-        
-        .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
-        .card-slot.reversed { transform: rotate(180deg); }
-        .card-bg { position: absolute; inset: 0; }
-        .card-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .card-slot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.60) 100%); }
-        .card-name { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; padding: 10px 8px; font-size: clamp(0.65rem, 2.5vw, 0.85rem); font-weight: 700; color: #fff; text-align: center; line-height: 1.2; }
-        .card-badge { position: absolute; top: 4px; right: 4px; z-index: 3; background: #ff3b30; color: #fff; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+        }
 
-        .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 16px; }
-        .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
-        .ai-empty { font-size: 0.92rem; color: #888; text-align: center; font-style: italic; }
+        /* İçerik */
+        .content {
+            padding: 76px 12px 88px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .card-item {
+            cursor: pointer;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.4s ease-out forwards;
+        }
+        .card-item .thumb {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .card-item .thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-item .name {
+            font-size: 0.7rem; font-weight: 600;
+            color: #000;
+            text-align: center;
+            line-height: 1.2;
+        }
+        @keyframes cardAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        /* ---- Alt Nav ve İkon Ayarları ---- */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; border-top: 1px solid #f0f0f0; }
-        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
-        .nav-btn img { width: 28px; height: 28px; object-fit: contain; }
-        
-        /* ---- Yükleme ve Detay ---- */
-        .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; }
+        /* Alt navigasyon (Birebir örnekteki gibi) */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img {
+            width: 34px; height: 34px;
+            object-fit: contain; border-radius: 6px;
+        }
+
+        /* Modal */
+        .detail-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 24px;
+            z-index: 100;
+        }
+        .detail-overlay.active { display: flex; }
+        .detail-box {
+            width: 100%; max-width: 360px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 22px;
+            display: flex; flex-direction: column;
+            gap: 10px;
+            max-height: 80vh;
+        }
+        .detail-meta { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
+        .detail-title { font-size: 1.25rem; font-weight: 700; color: #000; text-align: center; }
+        .detail-section-label { font-size: 0.8rem; font-weight: 700; color: #000; margin-top: 4px; }
+        .detail-meaning { font-size: 0.92rem; line-height: 1.55; color: #333; overflow-y: auto; }
+        .detail-scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+
+        /* Sidebar (Örnekteki CSS ile birebir aynı) */
+        .sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 260px;
+            background: #ffffff;
+            z-index: 151;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e8e8ed;
+            font-size: 1.1rem; font-weight: 700;
+            letter-spacing: 2px;
+            color: #000;
+        }
+        .sidebar-menu {
+            display: flex; flex-direction: column;
+        }
+        .sidebar-item {
+            padding: 18px 20px;
+            font-size: 1rem;
+            color: #000;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .sidebar-item:active {
+            background: #f5f5f7;
+        }
+        .sidebar-item.active-page {
+            font-weight: 700;
+            background: #fafafa;
+        }
+
+        /* Spinner */
+        .auth-check { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
+        .auth-check.hidden { display: none; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: flex-start; justify-content: center; padding: 76px 24px 24px; z-index: 100; }
-        .detail-overlay.active { display: flex; }
-        .detail-box { width: 100%; max-width: 360px; background: #ffffff; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; }
-        .detail-title { font-size: 1.25rem; font-weight: 700; color: #000; text-align: center; }
-        .detail-meaning { font-size: 0.95rem; line-height: 1.55; color: #333; overflow-y: auto; }
-        .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="loading-overlay" id="loadingOverlay">
+    <div class="auth-check" id="authCheck">
         <div class="spinner"></div>
     </div>
 
@@ -83,168 +207,140 @@
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
-        <div class="topbar-title" id="topbarTitle"></div>
+        <div class="topbar-title">TAROT'S</div>
     </div>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TAROT'S</div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='dashboard.html'">Anasayfa</div>
-            <div class="sidebar-item" onclick="logout()">Çıkış</div>
-        </div>
+    <div class="content">
+        <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
-    <div class="content" id="contentArea" style="display:none;">
-        <div class="intent-box">
-            <div class="intent-label" id="intentLabel"></div>
-            <div class="intent-text" id="intentDisplay"></div>
-        </div>
-        <div class="cards-area" id="cardsArea"></div>
-        <div class="ai-section" id="aiSection"><div class="ai-text" id="aiDescText"></div></div>
-    </div>
-
+    <!-- Alt navigasyon: Örnekteki yapıyla birebir -->
     <div class="bottom-nav">
-        <a href="dashboard.html" class="nav-btn" id="navHome">
+        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
             <img src="cardsinfo.png" alt="Ana Sayfa">
         </a>
     </div>
 
     <div class="detail-overlay" id="detailOverlay">
         <div class="detail-box">
+            <div class="detail-meta" id="detailMeta"></div>
             <div class="detail-title" id="detailTitle"></div>
-            <div class="detail-meaning" id="detailMeaning"></div>
+            <div class="detail-scroll">
+                <div>
+                    <div class="detail-section-label" id="uprightLabel"></div>
+                    <div class="detail-meaning" id="uprightText"></div>
+                </div>
+                <div>
+                    <div class="detail-section-label" id="reversedLabel"></div>
+                    <div class="detail-meaning" id="reversedText"></div>
+                </div>
+            </div>
             <button class="detail-close" id="detailCloseBtn"></button>
+        </div>
+    </div>
+
+    <!-- Sidebar: Örnekteki yapıyla birebir -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item active-page" onclick="window.location.href='cardsinfo.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
+                <span id="sidebarCardsText">Kartlar</span>
+            </div>
+            <div class="sidebar-item" id="sidebarBirthItem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <span id="sidebarBirthText">Doğum Bilgileri</span>
+            </div>
+            <div class="sidebar-item" onclick="logout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span id="sidebarLogoutText">Çıkış</span>
+            </div>
         </div>
     </div>
 
     <script>
         const auth = firebase.auth();
-        const db = firebase.firestore();
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        function toggleSidebar() {
-            if (sidebar.classList.contains('active')) {
-                sidebarOverlay.classList.remove('active');
-                sidebar.classList.remove('active');
-                menuBtn.classList.remove('active');
-            } else {
-                sidebarOverlay.classList.add('active');
-                sidebar.classList.add('active');
-                menuBtn.classList.add('active');
-            }
-        }
-
-        menuBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-
-        function isWithin24h(timestamp) {
-            if (!timestamp) return false;
-            const now = Date.now();
-            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
-            return (now - recordTime) < (24 * 60 * 60 * 1000);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof t === 'function') {
-                document.getElementById('topbarTitle').textContent = t('dashboardTitle');
-                document.getElementById('intentLabel').textContent = t('resultIntentLabel');
-                document.getElementById('detailCloseBtn').textContent = t('closeBtn');
-            }
-        });
-
         auth.onAuthStateChanged(function(user) {
-            if (!user) { window.location.href = 'auth.html'; return; }
-            initResult(user.uid);
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            document.getElementById('authCheck').classList.add('hidden');
         });
 
-        function withTimeout(promise, ms) {
-            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
-            return Promise.race([promise, timeout]);
+        // Sidebar Fonksiyonları (Birebir örnekteki gibi)
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.add('active');
+            document.getElementById('sidebar').classList.add('active');
         }
-
-        function showContent() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('contentArea').style.display = 'flex';
+        function closeSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.getElementById('sidebar').classList.remove('active');
         }
+        
+        // Event listenerlar
+        document.getElementById('menuBtn').addEventListener('click', openSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
-        function showEmptyState() {
-            document.getElementById('intentDisplay').textContent = (typeof t === 'function' ? t('resultNotSpecified') : 'Henüz okuma yapılmamış');
-            document.getElementById('aiDescText').textContent = (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
-            document.getElementById('cardsArea').innerHTML = '';
-            showContent();
-        }
-
-        async function initResult(uid) {
-            try {
-                const response = await fetch('tarot_cards.json');
-                if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
-                const tarotData = await response.json();
-                let cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-                let intent = sessionStorage.getItem('tarotIntent') || '';
-                let type = sessionStorage.getItem('tarotReadingType') || 'single';
-                let aiText = '';
-                let readingTimestamp = null;
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const readingId = urlParams.get('id');
-
-                if (cards.length === 0) {
-                    let query = readingId ? db.collection('users').doc(uid).collection('readings').doc(readingId) : null;
-                    if (!readingId) {
-                        const last = await withTimeout(db.collection('users').doc(uid).collection('readings').orderBy('createdAt', 'desc').limit(1).get(), 10000);
-                        if (!last.empty) query = last.docs[0].ref;
-                    }
-                    if (query) {
-                        const snap = await withTimeout(query.get(), 10000);
-                        if (snap.exists) {
-                            const data = snap.data();
-                            cards = data.cards || []; intent = data.intent || ''; type = data.type || 'single'; aiText = data.aiInterpretation || ''; readingTimestamp = data.createdAt || null;
-                        }
-                    }
-                }
-                if (cards.length === 0) { showEmptyState(); return; }
-
-                document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
-                renderCards(cards, type, tarotData);
-
-                const aiDescText = document.getElementById('aiDescText');
-                if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-                    aiDescText.textContent = aiText; aiDescText.className = 'ai-text';
-                } else {
-                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.'; aiDescText.className = 'ai-empty';
-                }
-                showContent();
-            } catch (e) { console.error("HATA:", e); showContent(); }
-        }
-
-        function renderCards(cards, type, tarotData) {
-            const area = document.getElementById('cardsArea');
-            area.className = 'cards-area ' + (type === 'single' ? 'single' : 'three');
-            cards.forEach(drawn => {
-                const info = tarotData.cards.find(c => c.id === drawn.id);
-                if (!info) return;
-                const wrapper = document.createElement('div');
-                wrapper.className = 'card-wrapper';
-                wrapper.innerHTML = `<div class="card-slot ${drawn.reversed ? 'reversed' : ''}"><div class="card-bg"><img src="onecard.png" alt=""></div>${drawn.reversed ? `<div class="card-badge">${(typeof t === 'function' ? t('resultReversedBadge') : 'Ters')}</div>` : ''}<div class="card-name">${(typeof getLang === 'function' && getLang() === 'tr') ? info.name_tr : info.name_en}</div></div>`;
-                wrapper.querySelector('.card-slot').onclick = () => showDetail(info, drawn);
-                area.appendChild(wrapper);
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'auth.html';
             });
         }
 
-        function showDetail(card, drawn) {
-            document.getElementById('detailTitle').textContent = (typeof getLang === 'function' && getLang() === 'tr') ? card.name_tr : card.name_en;
-            document.getElementById('detailMeaning').textContent = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
+        // Metin ve çeviri atamaları
+        document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+        document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
+        document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+        document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
+        document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
+        document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
+
+        let tarotCards = [];
+
+        function cardName(card) { return getLang() === 'tr' ? card.name_tr : card.name_en; }
+        function arcanaLabel(card) { return card.arcana === 'major' ? t('cardsInfoMajor') : t('cardsInfoMinor'); }
+
+        async function loadCards() {
+            try {
+                const response = await fetch('tarot_cards.json');
+                const data = await response.json();
+                tarotCards = data.cards;
+                renderGrid();
+            } catch (err) { console.error('Kart verisi yüklenemedi:', err); }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            tarotCards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'card-item';
+                item.style.animationDelay = (index * 0.02) + 's';
+                item.innerHTML = `<div class="thumb"><img src="onecard.png" alt=""></div><div class="name">${cardName(card)}</div>`;
+                item.addEventListener('click', () => openDetail(card));
+                grid.appendChild(item);
+            });
+        }
+
+        function openDetail(card) {
+            document.getElementById('detailMeta').textContent = arcanaLabel(card) + ' \u00B7 ' + card.element + ' \u00B7 ' + card.planet;
+            document.getElementById('detailTitle').textContent = cardName(card);
+            document.getElementById('uprightText').textContent = card.upright_meaning;
+            document.getElementById('reversedText').textContent = card.reversed_meaning;
             document.getElementById('detailOverlay').classList.add('active');
         }
 
         function closeDetail() { document.getElementById('detailOverlay').classList.remove('active'); }
-        document.getElementById('detailCloseBtn').onclick = closeDetail;
-        document.getElementById('detailOverlay').onclick = (e) => { if(e.target.id === 'detailOverlay') closeDetail(); };
-        function logout() { auth.signOut().then(() => window.location.href = 'auth.html'); }
+        document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+        document.getElementById('detailOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('detailOverlay')) closeDetail(); });
+
+        loadCards();
     </script>
 </body>
 </html>
