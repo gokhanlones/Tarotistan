@@ -605,10 +605,10 @@
         });
 
         // Sidebar doğum bilgileri tıklayınca şimdilik sidebar kapat (ileride sayfa yönlendirmesi yapılacak)
-        document.getElementById('sidebarBirthItem').addEventListener('click', function() {
-            // Şimdilik sadece kapat, ileride doğum bilgileri sayfasına yönlendirilecek
-            closeSidebar();
+            document.getElementById('sidebarBirthItem').addEventListener('click', function() {
+            window.location.href = 'dogum.html';
         });
+
 
         let currentReadingType = null;
         const intentOverlay = document.getElementById('intentOverlay');
