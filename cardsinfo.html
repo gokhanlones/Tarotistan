@@ -34,11 +34,19 @@
             justify-content: center; align-items: center;
             gap: 5px; cursor: pointer;
             flex-shrink: 0;
+            transition: all 0.3s ease;
         }
         .hamburger-btn span {
             display: block; width: 22px; height: 2px;
             background: #000;
+            transition: all 0.3s ease;
+            transform-origin: center;
         }
+        /* Hamburger aktif (X) durumu */
+        .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
         .topbar-title {
             flex: 1;
             text-align: center;
@@ -163,6 +171,32 @@
             flex-shrink: 0;
         }
 
+        /* ---- Sidebar ---- */
+        .sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 260px;
+            background: #ffffff;
+            z-index: 151;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+        }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; color: #000; }
+        .sidebar-menu { display: flex; flex-direction: column; }
+        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .sidebar-item:active { background: #f5f5f7; }
+
         /* ---- Auth kontrol spinner ---- */
         .auth-check {
             position: fixed; inset: 0;
@@ -222,8 +256,21 @@
         </div>
     </div>
 
+    <!-- Sidebar Eklentisi -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">TAROT'S</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='dashboard.html'">Anasayfa</div>
+            <div class="sidebar-item" onclick="logout()">Çıkış</div>
+        </div>
+    </div>
+
     <script>
         const auth = firebase.auth();
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
 
         auth.onAuthStateChanged(function(user) {
             if (!user) {
@@ -233,16 +280,37 @@
             document.getElementById('authCheck').classList.add('hidden');
         });
 
+        // Sidebar Mantığı
+        function openSidebar() {
+            sidebarOverlay.classList.add('active');
+            sidebar.classList.add('active');
+            menuBtn.classList.add('active');
+        }
+        function closeSidebar() {
+            sidebarOverlay.classList.remove('active');
+            sidebar.classList.remove('active');
+            menuBtn.classList.remove('active');
+        }
+        menuBtn.addEventListener('click', function() {
+            if (sidebar.classList.contains('active')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'auth.html';
+            });
+        }
+
         // Metin ve çeviri atamaları
-        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
         document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
         document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
         document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
-
-        document.getElementById('menuBtn').addEventListener('click', function() {
-            console.log('Menü açılacak');
-        });
 
         let tarotCards = [];
 
