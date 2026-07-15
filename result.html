@@ -15,7 +15,8 @@
         
         .hidden { display: none !important; }
 
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
+        /* ---- Üst Bar ---- */
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
         .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.3s ease; }
         .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; transition: all 0.3s ease; transform-origin: center; }
         .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -23,7 +24,7 @@
         .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
         
-        /* Sidebar Stilleri */
+        /* ---- Sidebar ---- */
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.active { display: block; opacity: 1; }
         .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #ffffff; z-index: 151; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.12); }
@@ -32,6 +33,7 @@
         .sidebar-menu { display: flex; flex-direction: column; }
         .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         
+        /* ---- İçerik ---- */
         .content { padding: 76px 16px 88px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .intent-box { width: 100%; background: #fafafa; border: 1px solid #e8e8ed; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; text-align: center; }
         .intent-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
@@ -53,11 +55,12 @@
         .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
         .ai-empty { font-size: 0.92rem; color: #888; text-align: center; font-style: italic; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 30px; }
-        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        /* İkon Boyut Düzenlemesi */
-        .nav-btn img { width: 26px; height: 26px; object-fit: contain; }
+        /* ---- Alt Nav ve İkon Ayarları ---- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; border-top: 1px solid #f0f0f0; }
+        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
+        .nav-btn img { width: 28px; height: 28px; object-fit: contain; }
         
+        /* ---- Yükleme ve Detay ---- */
         .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -102,7 +105,7 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="dashboard.html" class="nav-btn" id="navHome" style="text-decoration: none; display: flex;">
+        <a href="dashboard.html" class="nav-btn" id="navHome">
             <img src="cardsinfo.png" alt="Ana Sayfa">
         </a>
     </div>
