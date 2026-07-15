@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAROT'S - Sonuç</title>
+    <!-- Gerekli Scriptler -->
     <script src="lang.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -14,8 +15,8 @@
         html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
         .hidden { display: none !important; }
 
-        /* ---- Üst Bar (Dashboard ile aynı) ---- */
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
+        /* ---- Topbar (Dashboard ile aynı) ---- */
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
         .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
         .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
         .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
@@ -30,38 +31,30 @@
         .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         .sidebar-item:active { background: #f5f5f7; }
 
-        /* ---- İçerik ---- */
-        .content { padding: 76px 16px 88px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        /* ---- İçerik Stilleri ---- */
+        .content { padding: 76px 16px 88px; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        .result-box { width: 100%; border: 1.5px solid #c8c8c8; border-radius: 14px; padding: 20px; background: #ffffff; }
+        .result-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; color: #000; }
+        .result-text { font-size: 0.95rem; line-height: 1.6; color: #333; }
         
-        /* Kart ve AI Stilleri */
-        .intent-box { width: 100%; border: 1.5px solid #c8c8c8; border-radius: 14px; padding: 16px; margin-bottom: 24px; text-align: center; background: #ffffff; }
-        .intent-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .intent-text { font-size: 1rem; color: #000; font-style: italic; line-height: 1.4; }
-        
-        .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
-        .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
-        .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; border: 1px solid #e8e8ed; position: relative; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.18); overflow: hidden; }
-        .card-bg img { width: 100%; height: 100%; object-fit: cover; }
-        .card-name { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px; font-size: 0.8rem; font-weight: 700; color: #fff; text-align: center; background: linear-gradient(transparent, rgba(0,0,0,0.7)); }
-        
-        .ai-section { width: 100%; border: 1.5px solid #c8c8c8; border-radius: 14px; padding: 20px; }
-        .ai-text { font-size: 0.95rem; color: #333; line-height: 1.6; white-space: pre-wrap; }
+        .cards-display-area { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+        .card-img { width: 80px; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* ---- Alt Nav (Dashboard ile aynı) ---- */
+        /* ---- Bottom Nav (Dashboard ile aynı) ---- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; border-top: 1px solid #f0f0f0; }
-        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
+        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .nav-btn.active { background: #f2f2f5; }
         .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
 
-        /* ---- Spinner ---- */
-        .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
+        /* ---- Auth Spinner ---- */
+        .auth-check { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="loading-overlay" id="loadingOverlay">
+    <div class="auth-check" id="authCheck">
         <div class="spinner"></div>
     </div>
 
@@ -70,7 +63,7 @@
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
-        <div class="topbar-title" id="topbarTitle"></div>
+        <div class="topbar-title" id="resultPageTitle">Sonuç</div>
     </div>
 
     <!-- Sidebar -->
@@ -93,13 +86,12 @@
         </div>
     </div>
 
-    <div class="content" id="contentArea" style="display:none;">
-        <div class="intent-box">
-            <div class="intent-label" id="intentLabel"></div>
-            <div class="intent-text" id="intentDisplay"></div>
+    <!-- İçerik -->
+    <div class="content">
+        <div class="result-box">
+            <div class="result-title" id="interpretationTitle">Yorumunuz</div>
+            <div class="result-text" id="interpretationBody">Yükleniyor...</div>
         </div>
-        <div class="cards-area" id="cardsArea"></div>
-        <div class="ai-section" id="aiSection"><div class="ai-text" id="aiDescText"></div></div>
     </div>
 
     <!-- Bottom Nav -->
@@ -113,21 +105,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // UI Güncelleme (Dil desteği için)
-        auth.onAuthStateChanged(function(user) {
-            if (!user) { window.location.href = 'auth.html'; return; }
-            
-            // Metinleri dashboard ile aynı şekilde yükle
-            document.getElementById('topbarTitle').textContent = t('resultPageTitle') || 'Sonuç';
-            document.getElementById('intentLabel').textContent = t('resultIntentLabel') || 'Niyetiniz';
-            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
-            document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
-            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
-            
-            initResult(user.uid);
-        });
-
-        // Sidebar İşlevleri
+        // 1. Sidebar ve Menu İşlevleri
         function openSidebar() {
             document.getElementById('sidebarOverlay').classList.add('active');
             document.getElementById('sidebar').classList.add('active');
@@ -136,22 +114,49 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
             document.getElementById('sidebar').classList.remove('active');
         }
-        function logout() { auth.signOut().then(() => window.location.href = 'auth.html'); }
-        
+        function logout() {
+            auth.signOut().then(() => window.location.href = 'auth.html');
+        }
+
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-        document.getElementById('sidebarBirthItem').addEventListener('click', closeSidebar);
 
-        // Veri Yükleme (Önceki logic korunarak)
-        async function initResult(uid) {
+        // 2. Auth ve Veri Yükleme
+        auth.onAuthStateChanged(async function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Dil dosyaları veya t() fonksiyonu ile metinleri güncelle
+            document.getElementById('resultPageTitle').textContent = t('resultPageTitle') || 'Sonuç';
+            document.getElementById('interpretationTitle').textContent = t('interpretationTitle') || 'Yorumunuz';
+            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+            document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
+            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+
+            await fetchInterpretation(user.uid);
+            document.getElementById('authCheck').classList.add('hidden');
+        });
+
+        async function fetchInterpretation(userId) {
             try {
-                // ... (Önceki veri çekme fonksiyonlarınız aynı kalabilir)
-                // Kodunuzdaki mevcut veri çekme ve render logic'inizi buraya aynen bırakabilirsiniz.
-                // Sadece showContent() fonksiyonunu çağırmayı unutmayın.
-                
-                document.getElementById('loadingOverlay').style.display = 'none';
-                document.getElementById('contentArea').style.display = 'flex';
-            } catch (e) { console.error(e); }
+                const querySnapshot = await db.collection('users').doc(userId)
+                    .collection('readings')
+                    .orderBy('createdAt', 'desc')
+                    .limit(1)
+                    .get();
+
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
+                    document.getElementById('interpretationBody').innerText = data.aiInterpretation || 'Yorum içeriği bulunamadı.';
+                } else {
+                    document.getElementById('interpretationBody').innerText = 'Henüz kayıtlı bir falınız bulunmamaktadır.';
+                }
+            } catch (e) {
+                console.error("Hata:", e);
+                document.getElementById('interpretationBody').innerText = 'Veriler yüklenirken bir hata oluştu.';
+            }
         }
     </script>
 </body>
