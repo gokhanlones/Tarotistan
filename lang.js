@@ -1,251 +1,253 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAROT'S</title>
-    <script src="lang.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
+const LANG = {
+    tr: {
+        appName: "TAROT'S",
+        login: "Giriş Yap",
+        register: "Kayıt Ol",
+        email: "E-posta",
+        password: "Şifre",
+        passwordConfirm: "Şifre Tekrar",
+        googleContinue: "Google ile devam et",
+        showPassword: "Göster",
+        hidePassword: "Gizle",
+        passwordsNotMatch: "Şifreler eşleşmiyor",
+        
+        verifyTitle: "Email Doğrulama",
+        verifySent: "6 haneli kod gönderildi",
+        verifyPlaceholder: "Kodu girin",
+        verifyButton: "Doğrula",
+        resendCode: "Tekrar gönder",
+        resendWait: "sn sonra tekrar gönder",
+        invalidCode: "Geçersiz veya süresi dolmuş kod",
+        
+        termsTitle: "Gizlilik Politikası ve Kullanım Şartları",
+        termsText: `Tarot's uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
 
-        .hidden { display: none !important; }
+1. KİŞİSEL VERİLER: E-posta adresiniz ve çekim geçmişiniz güvenli bir şekilde saklanır. Bilgileriniz üçüncü taraflarla paylaşılmaz.
 
-        /* ---- Üst Bar ---- */
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
-        .back-btn { width: 40px; height: 40px; background: none; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-        .back-btn svg { width: 22px; height: 22px; stroke: #000; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
+2. KULLANIM: Uygulama eğlence ve kişisel gelişim amaçlıdır. Tıbbi, hukuki veya finansal kararlar için kullanılmamalıdır.
 
-        /* ---- İçerik ---- */
-        .content { padding: 76px 16px 32px; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-        .desc-text { font-size: 0.9rem; color: #555; text-align: center; line-height: 1.5; margin-bottom: 8px; }
+3. REKLAMLAR: Ücretsiz kullanımda ödüllü reklamlar gösterilir. Premium üyelikle reklamsız deneyim sunulur.
 
-        /* ---- Form ---- */
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-label { font-size: 0.85rem; font-weight: 600; color: #000; }
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-group { flex: 1; }
-        .form-input {
-            width: 100%; padding: 12px 14px;
-            border: 2px solid #e8e8ed; border-radius: 10px;
-            font-size: 1rem; background: #fafafa;
-            outline: none; transition: all 0.3s;
-            font-family: 'Times New Roman', Times, serif;
-        }
-        .form-input:focus { border-color: #000; background: #fff; }
-        .form-input::placeholder { color: #aaa; }
+4. ÜYELİK: Premium üyelik aylık veya yıllık olarak satın alınabilir. İptal istediğiniz an yapılabilir.
 
-        .btn-primary {
-            width: 100%; padding: 16px;
-            background: #000; color: #fff;
-            border: none; border-radius: 12px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1rem; font-weight: 600;
-            cursor: pointer; margin-top: 8px;
-        }
-        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+5. SORUMLULUK REDDİ: Tarot çekimleri yorum niteliğindedir, bağlayıcı değildir.`,
+        termsAccept: "Okudum, kabul ediyorum",
+        termsRequired: "Devam etmek için onaylamanız gerekir",
+        continueButton: "Devam Et",
 
-        .success-msg {
-            font-size: 0.9rem; color: #28a745;
-            text-align: center; margin-top: 8px;
-        }
-        .error-msg {
-            font-size: 0.9rem; color: #e74c3c;
-            text-align: center; margin-top: 8px;
-        }
+        sidebarCards: "Kartlar",
+        sidebarBirthInfo: "Doğum Bilgileri",
+        sidebarLogout: "Çıkış",
 
-        /* ---- Auth kontrol spinner ---- */
-        .auth-check { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
-        .auth-check.hidden { display: none; }
-        .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-</head>
-<body>
+        birthInfoTitle: "Doğum Bilgileri",
+        birthInfoDesc: "Burç yorumları için doğum bilgilerinizi girin.",
+        birthDay: "Gün",
+        birthMonth: "Ay",
+        birthYear: "Yıl",
+        birthHour: "Saat",
+        birthMinute: "Dakika",
+        birthCity: "Doğum Yeri (Şehir)",
+        birthCountry: "Ülke",
+        birthLatitude: "Enlem",
+        birthLongitude: "Boylam",
+        birthSaveBtn: "Kaydet",
+        birthSaved: "Doğum bilgileriniz kaydedildi.",
+        birthRequired: "Lütfen tüm alanları doldurun.",
+        birthBackBtn: "Geri Dön",
 
-    <div class="auth-check" id="authCheck">
-        <div class="spinner"></div>
-    </div>
+        cardsInfoTitle: "KART BİLGİLERİ",
+        cardsInfoMajor: "Büyük Arkana",
+        cardsInfoMinor: "Küçük Arkana",
+        cardsInfoUpright: "Düz Anlamı",
+        cardsInfoReversed: "Ters Anlamı",
+        cardsInfoClose: "Kapat",
+        navHomeLabel: "Anasayfa",
+        navCardsInfoLabel: "Kart Bilgileri",
+        navHistoryLabel: "Geçmiş Okuma",
 
-    <div class="topbar">
-        <button class="back-btn" id="backBtn" aria-label="Geri">
-            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="topbar-title" id="pageTitle"></div>
-    </div>
+        dashboardTitle: "TAROT'S",
+        singleCardTitle: "Aklındaki sorunun cevabı",
+        singleCardLabel: "I Kart",
+        singleCardAds: "1 Reklam",
+        threeCardTitle: "Geçmiş, Şimdi, Gelecek",
+        threeCardLabel: "III Kart",
+        threeCardAds: "3 Reklam",
+        adFree: "Reklamsız",
+        dailyLimit: "Günlük 5 oturum",
+        monthlyPrice: "Aylık 49,99 TL",
+        yearlyPrice: "Yıllık 399,99 TL",
 
-    <div class="content" id="contentArea" style="display:none;">
-        <div class="desc-text" id="descText"></div>
+        dailyHoroscopeAreaTitle: "Günlük Burç Yorumu",
+        dailyHoroscopeAreaDesc: "Doğum bilgilerinizi giriniz",
 
-        <!-- Doğum Tarihi -->
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label" id="labelDay"></label>
-                <input type="number" class="form-input" id="birthDay" min="1" max="31" placeholder="1-31">
-            </div>
-            <div class="form-group">
-                <label class="form-label" id="labelMonth"></label>
-                <input type="number" class="form-input" id="birthMonth" min="1" max="12" placeholder="1-12">
-            </div>
-            <div class="form-group">
-                <label class="form-label" id="labelYear"></label>
-                <input type="number" class="form-input" id="birthYear" min="1900" max="2026" placeholder="1990">
-            </div>
-        </div>
+        cooldownMessage: "Şu anda kilitli",
+        cooldownTitle: "Günlük Ücretsiz Hakkın Doldu",
+        cooldownRemainingPrefix: "Bir sonraki ücretsiz okumana kalan süre:",
+        premiumFeature1: "Reklamsız okuma deneyimi",
+        premiumFeature2: "Günde 5 okuma hakkı",
+        premiumCtaBtn: "Premium'a Geç",
+        cooldownCloseBtn: "Kapat",
 
-        <!-- Doğum Saati -->
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label" id="labelHour"></label>
-                <input type="number" class="form-input" id="birthHour" min="0" max="23" placeholder="0-23">
-            </div>
-            <div class="form-group">
-                <label class="form-label" id="labelMinute"></label>
-                <input type="number" class="form-input" id="birthMinute" min="0" max="59" placeholder="0-59">
-            </div>
-        </div>
+        intentTitle: "Niyet",
 
-        <!-- Doğum Yeri -->
-        <div class="form-group">
-            <label class="form-label" id="labelCity"></label>
-            <input type="text" class="form-input" id="birthCity" placeholder="">
-        </div </div>
-        <div class="form-group">
-            <label class="form-label" id="labelCountry"></label>
-            <input type="text" class="form-input" id="birthCountry" placeholder="">
-        </div>
+        cardsPickOne: "Aklındaki soru için bir kart seç.",
+        cardsSelectedSingle: "Kart seçildi. Devam etmek için aşağıdaki butona basın.",
+        cardsSelectedOf: "kart seçildi",
+        cardsSelectedComplete: "Devam etmek için aşağıdaki butona basın.",
+        cardsContinueBtn: "Gönder",
+        cardAlt: "Tarot Kartı",
+        menuLabel: "Menü",
 
-        <!-- Enlem / Boylam -->
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label" id="labelLatitude"></label>
-                <input type="number" class="form-input" id="birthLatitude" step="0.0001" placeholder="41.0082">
-            </div>
-            <div class="form-group">
-                <label class="form-label" id="labelLongitude"></label>
-                <input type="number" class="form-input" id="birthLongitude" step="0.0001" placeholder="28.9784">
-            </div>
-        </div>
+        resultLoading: "Kartlar açılıyor...",
+        resultIntentLabel: "Niyetiniz",
+        resultNotSpecified: "Belirtilmemiş",
+        resultReversedBadge: "TERS",
+        resultUpright: "Düz",
+        resultReversed: "Ters",
+        positionPast: "Geçmiş",
+        positionPresent: "Şimdi",
+        positionFuture: "Gelecek",
+        aiTitle: "Yapay Zeka Yorumu",
+        aiDesc: "Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>(Entegrasyon sonrası aktif olacaktır)",
+        aiFallback: "Bu çekim için yapay zeka yorumu bulunmuyor.",
+        aiExpired: "Yapay zeka yorumunun süresi dolmuş.",
+        homeBtn: "Ana Sayfa",
+        newReadingBtn: "Yeni Çekim",
+        resultErrorTitle: "Kartlar yüklenemedi",
+        resultErrorDesc: "Lütfen internet bağlantınızı kontrol edin.",
+        closeBtn: "Kapat"
+    },
+    en: {
+        appName: "TAROT'S",
+        login: "Login",
+        register: "Register",
+        email: "Email",
+        password: "Password",
+        passwordConfirm: "Confirm Password",
+        googleContinue: "Continue with Google",
+        showPassword: "Show",
+        hidePassword: "Hide",
+        passwordsNotMatch: "Passwords do not match",
+        
+        verifyTitle: "Email Verification",
+        verifySent: "6-digit code sent",
+        verifyPlaceholder: "Enter code",
+        verifyButton: "Verify",
+        resendCode: "Resend",
+        resendWait: "s to resend",
+        invalidCode: "Invalid or expired code",
+        
+        termsTitle: "Privacy Policy and Terms of Use",
+        termsText: `By using the Tarot's app, you agree to the following terms:
 
-        <button class="btn-primary" id="saveBtn"></button>
-        <div class="success-msg hidden" id="successMsg"></div>
-        <div class="error-msg hidden" id="errorMsg"></div>
-    </div>
+1. PERSONAL DATA: Your email address and draw history are stored securely. Your information is not shared with third parties.
 
-    <script>
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+2. USAGE: The app is for entertainment and personal growth purposes only. It should not be used for medical, legal, or financial decisions.
 
-        document.getElementById('pageTitle').textContent = t('birthInfoTitle');
-        document.getElementById('descText').textContent = t('birthInfoDesc');
-        document.getElementById('labelDay').textContent = t('birthDay');
-        document.getElementById('labelMonth').textContent = t('birthMonth');
-        document.getElementById('labelYear').textContent = t('birthYear');
-        document.getElementById('labelHour').textContent = t('birthHour');
-        document.getElementById('labelMinute').textContent = t('birthMinute');
-        document.getElementById('labelCity').textContent = t('birthCity');
-        document.getElementById('labelCountry').textContent = t('birthCountry');
-        document.getElementById('labelLatitude').textContent = t('birthLatitude');
-        document.getElementById('labelLongitude').textContent = t('birthLongitude');
-        document.getElementById('saveBtn').textContent = t('birthSaveBtn');
+3. ADS: Rewarded ads are shown in free usage. Premium membership offers an ad-free experience.
 
-        document.getElementById('backBtn').addEventListener('click', function() {
-            const prev = document.referrer;
-            if (prev && prev.includes('dashboard.html')) {
-                window.location.href = 'dashboard.html';
-            } else if (prev && prev.includes('cardsinfo.html')) {
-                window.location.href = 'cardsinfo.html';
-            } else if (prev && prev.includes('result.html')) {
-                window.location.href = 'result.html';
-            } else {
-                window.location.href = 'dashboard.html';
-            }
-        });
+4. MEMBERSHIP: Premium membership can be purchased monthly or yearly. Cancellation can be done at any time.
 
-        auth.onAuthStateChanged(async function(user) {
-            if (!user) {
-                window.location.href = 'auth.html';
-                return;
-            }
-            await loadBirthInfo(user.uid);
-            document.getElementById('authCheck').classList.add('hidden');
-            document.getElementById('contentArea').style.display = 'flex';
-        });
+5. DISCLAIMER: Tarot draws are for interpretive purposes only and are not binding.`,
+        termsAccept: "I have read and agree",
+        termsRequired: "You must accept to continue",
+        continueButton: "Continue",
 
-        async function loadBirthInfo(uid) {
-            try {
-                const doc = await db.collection('users').doc(uid).get();
-                if (doc.exists && doc.data().birthInfo) {
-                    const b = doc.data().birthInfo;
-                    if (b.day) document.getElementById('birthDay').value = b.day;
-                    if (b.month) document.getElementById('birthMonth').value = b.month;
-                    if (b.year) document.getElementById('birthYear').value = b.year;
-                    if (b.hour !== undefined) document.getElementById('birthHour').value = b.hour;
-                    if (b.minute !== undefined) document.getElementById('birthMinute').value = b.minute;
-                    if (b.city) document.getElementById('birthCity').value = b.city;
-                    if (b.country) document.getElementById('birthCountry').value = b.country;
-                    if (b.latitude) document.getElementById('birthLatitude').value = b.latitude;
-                    if (b.longitude) document.getElementById('birthLongitude').value = b.longitude;
-                }
-            } catch (e) { console.log('Doğum bilgisi yükleme hatası:', e); }
-        }
+        sidebarCards: "Cards",
+        sidebarBirthInfo: "Birth Information",
+        sidebarLogout: "Logout",
 
-        document.getElementById('saveBtn').addEventListener('click', async function() {
-            const user = auth.currentUser;
-            if (!user) return;
+        birthInfoTitle: "Birth Information",
+        birthInfoDesc: "Enter your birth details for horoscope readings.",
+        birthDay: "Day",
+        birthMonth: "Month",
+        birthYear: "Year",
+        birthHour: "Hour",
+        birthMinute: "Minute",
+        birthCity: "Birth City",
+        birthCountry: "Country",
+        birthLatitude: "Latitude",
+        birthLongitude: "Longitude",
+        birthSaveBtn: "Save",
+        birthSaved: "Birth information saved.",
+        birthRequired: "Please fill in all fields.",
+        birthBackBtn: "Go Back",
 
-            const day = parseInt(document.getElementById('birthDay').value);
-            const month = parseInt(document.getElementById('birthMonth').value);
-            const year = parseInt(document.getElementById('birthYear').value);
-            const hour = parseInt(document.getElementById('birthHour').value);
-            const minute = parseInt(document.getElementById('birthMinute').value);
-            const city = document.getElementById('birthCity').value.trim();
-            const country = document.getElementById('birthCountry').value.trim();
-            const latitude = parseFloat(document.getElementById('birthLatitude').value);
-            const longitude = parseFloat(document.getElementById('birthLongitude').value);
+        cardsInfoTitle: "CARD INFO",
+        cardsInfoMajor: "Major Arcana",
+        cardsInfoMinor: "Minor Arcana",
+        cardsInfoUpright: "Upright Meaning",
+        cardsInfoReversed: "Reversed Meaning",
+        cardsInfoClose: "Close",
+        navHomeLabel: "Home",
+        navCardsInfoLabel: "Card Info",
+        navHistoryLabel: "Reading History",
 
-            const successMsg = document.getElementById('successMsg');
-            const errorMsg = document.getElementById('errorMsg');
+        dashboardTitle: "TAROT'S",
+        singleCardTitle: "The answer to what's on your mind",
+        singleCardLabel: "I Card",
+        singleCardAds: "1 Ad",
+        threeCardTitle: "Past, Present, Future",
+        threeCardLabel: "III Card",
+        threeCardAds: "3 Ads",
+        adFree: "Ad-free",
+        dailyLimit: "5 sessions/day",
+        monthlyPrice: "Monthly 49.99 TL",
+        yearlyPrice: "Yearly 399.99 TL",
 
-            if (!day || !month || !year || hour === '' || minute === '' || !city || !country || !latitude || !longitude) {
-                errorMsg.textContent = t('birthRequired');
-                errorMsg.classList.remove('hidden');
-                successMsg.classList.add('hidden');
-                return;
-            }
+        dailyHoroscopeAreaTitle: "Daily Horoscope",
+        dailyHoroscopeAreaDesc: "Enter your birth information",
 
-            const birthData = {
-                day: day, month: month, year: year,
-                hour: hour, minute: minute,
-                city: city, country: country,
-                latitude: latitude, longitude: longitude,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
+        cooldownMessage: "Currently locked",
+        cooldownTitle: "Your Free Daily Reading Is Used Up",
+        cooldownRemainingPrefix: "Time until your next free reading:",
+        premiumFeature1: "Ad-free reading experience",
+        premiumFeature2: "5 readings per day",
+        premiumCtaBtn: "Upgrade to Premium",
+        cooldownCloseBtn: "Close",
 
-            try {
-                await db.collection('users').doc(user.uid).set({ birthInfo: birthData }, { merge: true });
-                errorMsg.classList.add('hidden');
-                successMsg.textContent = t('birthSaved');
-                successMsg.classList.remove('hidden');
+        intentTitle: "Intention",
 
-                setTimeout(() => {
-                    const prev = document.referrer;
-                    if (prev && prev.includes('dashboard.html')) window.location.href = 'dashboard.html';
-                    else if (prev && prev.includes('cardsinfo.html')) window.location.href = 'cardsinfo.html';
-                    else if (prev && prev.includes('result.html')) window.location.href = 'result.html';
-                    else window.location.href = 'dashboard.html';
-                }, 1500);
-            } catch (err) {
-                errorMsg.textContent = err.message;
-                errorMsg.classList.remove('hidden');
-                successMsg.classList.add('hidden');
-            }
-        });
-    </script>
-</body>
-</html>
+        cardsPickOne: "Pick a card for what's on your mind.",
+        cardsSelectedSingle: "Card selected. Tap the button below to continue.",
+        cardsSelectedOf: "selected",
+        cardsSelectedComplete: "Tap the button below to continue.",
+        cardsContinueBtn: "Submit",
+        cardAlt: "Tarot Card",
+        menuLabel: "Menu",
+
+        resultLoading: "Revealing cards...",
+        resultIntentLabel: "Your Intention",
+        resultNotSpecified: "Not specified",
+        resultReversedBadge: "REVERSED",
+        resultUpright: "Upright",
+        resultReversed: "Reversed",
+        positionPast: "Past",
+        positionPresent: "Present",
+        positionFuture: "Future",
+        aiTitle: "AI Interpretation",
+        aiDesc: "This section will feature an in-depth AI-powered interpretation of your drawn cards.<br>(Will be active after integration)",
+        aiFallback: "No AI interpretation available for this reading.",
+        aiExpired: "AI interpretation has expired.",
+        homeBtn: "Home",
+        newReadingBtn: "New Reading",
+        resultErrorTitle: "Couldn't load the cards",
+        resultErrorDesc: "Please check your internet connection.",
+        closeBtn: "Close"
+    }
+};
+
+function getLang() {
+    const saved = localStorage.getItem('tarotistan-lang');
+    if (saved) return saved;
+    const systemLang = navigator.language || navigator.userLanguage;
+    return systemLang.startsWith('tr') ? 'tr' : 'en';
+}
+
+function setLang(code) {
+    localStorage.setItem('tarotistan-lang', code);
+}
+
+function t(key) {
+    return LANG[getLang()][key] || key;
+}
