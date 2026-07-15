@@ -16,9 +16,21 @@
         .hidden { display: none !important; }
 
         .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; }
-        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
-        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
+        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.3s ease; }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; transition: all 0.3s ease; transform-origin: center; }
+        .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
+        
+        /* Sidebar Stilleri */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #ffffff; z-index: 151; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.12); }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; color: #000; }
+        .sidebar-menu { display: flex; flex-direction: column; }
+        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         
         .content { padding: 76px 16px 88px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .intent-box { width: 100%; background: #fafafa; border: 1px solid #e8e8ed; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; text-align: center; }
@@ -28,7 +40,6 @@
         .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
         .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
         .cards-area.single { justify-content: center; }
-        .cards-area.single .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
         
         .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
         .card-slot.reversed { transform: rotate(180deg); }
@@ -44,9 +55,7 @@
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 30px; }
         .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .nav-btn.active { background: #f2f2f5; }
-        .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
-
+        
         .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -66,8 +75,19 @@
     </div>
 
     <div class="topbar">
-        <button class="hamburger-btn" onclick="window.location.href='dashboard.html'" id="menuBtn"><span></span><span></span><span></span></button>
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
         <div class="topbar-title" id="topbarTitle"></div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">TAROT'S</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='dashboard.html'">Anasayfa</div>
+            <div class="sidebar-item" onclick="logout()">Çıkış</div>
+        </div>
     </div>
 
     <div class="content" id="contentArea" style="display:none;">
@@ -96,6 +116,24 @@
     <script>
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            if (sidebar.classList.contains('active')) {
+                sidebarOverlay.classList.remove('active');
+                sidebar.classList.remove('active');
+                menuBtn.classList.remove('active');
+            } else {
+                sidebarOverlay.classList.add('active');
+                sidebar.classList.add('active');
+                menuBtn.classList.add('active');
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
 
         function isWithin24h(timestamp) {
             if (!timestamp) return false;
@@ -118,9 +156,7 @@
         });
 
         function withTimeout(promise, ms) {
-            const timeout = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('timeout')), ms)
-            );
+            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
             return Promise.race([promise, timeout]);
         }
 
@@ -131,10 +167,8 @@
         }
 
         function showEmptyState() {
-            document.getElementById('intentDisplay').textContent =
-                (typeof t === 'function' ? t('resultNotSpecified') : 'Henüz okuma yapılmamış');
-            document.getElementById('aiDescText').textContent =
-                (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
+            document.getElementById('intentDisplay').textContent = (typeof t === 'function' ? t('resultNotSpecified') : 'Henüz okuma yapılmamış');
+            document.getElementById('aiDescText').textContent = (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
             document.getElementById('cardsArea').innerHTML = '';
             showContent();
         }
@@ -144,7 +178,6 @@
                 const response = await fetch('tarot_cards.json');
                 if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
                 const tarotData = await response.json();
-
                 let cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
                 let intent = sessionStorage.getItem('tarotIntent') || '';
                 let type = sessionStorage.getItem('tarotReadingType') || 'single';
@@ -155,66 +188,32 @@
                 const readingId = urlParams.get('id');
 
                 if (cards.length === 0) {
-                    let query = null;
-                    if (readingId) {
-                        query = db.collection('users').doc(uid).collection('readings').doc(readingId);
-                    } else {
-                        const last = await withTimeout(
-                            db.collection('users').doc(uid)
-                                .collection('readings')
-                                .orderBy('createdAt', 'desc')
-                                .limit(1)
-                            .get(),
-                            10000
-                        );
+                    let query = readingId ? db.collection('users').doc(uid).collection('readings').doc(readingId) : null;
+                    if (!readingId) {
+                        const last = await withTimeout(db.collection('users').doc(uid).collection('readings').orderBy('createdAt', 'desc').limit(1).get(), 10000);
                         if (!last.empty) query = last.docs[0].ref;
                     }
-
                     if (query) {
                         const snap = await withTimeout(query.get(), 10000);
                         if (snap.exists) {
                             const data = snap.data();
-                            cards = data.cards || [];
-                            intent = data.intent || '';
-                            type = data.type || 'single';
-                            aiText = data.aiInterpretation || '';
-                            readingTimestamp = data.createdAt || null;
+                            cards = data.cards || []; intent = data.intent || ''; type = data.type || 'single'; aiText = data.aiInterpretation || ''; readingTimestamp = data.createdAt || null;
                         }
                     }
                 }
+                if (cards.length === 0) { showEmptyState(); return; }
 
-                if (cards.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-
-                document.getElementById('intentDisplay').textContent =
-                    intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
+                document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
                 renderCards(cards, type, tarotData);
 
-                // AI yorumu 24 saat kontrolü
-                const aiSection = document.getElementById('aiSection');
                 const aiDescText = document.getElementById('aiDescText');
-
                 if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-                    aiDescText.textContent = aiText;
-                    aiDescText.className = 'ai-text';
-                } else if (aiText && aiText.trim() !== '' && readingTimestamp && !isWithin24h(readingTimestamp)) {
-                    aiDescText.textContent = typeof t === 'function' ? t('aiExpired') : 'Yapay zeka yorumunun süresi dolmuş.';
-                    aiDescText.className = 'ai-empty';
+                    aiDescText.textContent = aiText; aiDescText.className = 'ai-text';
                 } else {
-                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
-                    aiDescText.className = 'ai-empty';
+                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.'; aiDescText.className = 'ai-empty';
                 }
-
                 showContent();
-
-            } catch (e) {
-                console.error("HATA:", e);
-                document.getElementById('aiDescText').textContent =
-                    (typeof t === 'function' ? t('aiFallback') : 'Sonuçlar yüklenemedi. Lütfen tekrar deneyin.');
-                showContent();
-            }
+            } catch (e) { console.error("HATA:", e); showContent(); }
         }
 
         function renderCards(cards, type, tarotData) {
@@ -223,17 +222,9 @@
             cards.forEach(drawn => {
                 const info = tarotData.cards.find(c => c.id === drawn.id);
                 if (!info) return;
-                
-                const isReversed = drawn.reversed;
                 const wrapper = document.createElement('div');
                 wrapper.className = 'card-wrapper';
-                wrapper.innerHTML = `
-                    <div class="card-slot ${isReversed ? 'reversed' : ''}">
-                        <div class="card-bg"><img src="onecard.png" alt=""></div>
-                        ${isReversed ? `<div class="card-badge">${(typeof t === 'function' ? t('resultReversedBadge') : 'Ters')}</div>` : ''}
-                        <div class="card-name">${(typeof getLang === 'function' && getLang() === 'tr') ? info.name_tr : info.name_en}</div>
-                    </div>
-                `;
+                wrapper.innerHTML = `<div class="card-slot ${drawn.reversed ? 'reversed' : ''}"><div class="card-bg"><img src="onecard.png" alt=""></div>${drawn.reversed ? `<div class="card-badge">${(typeof t === 'function' ? t('resultReversedBadge') : 'Ters')}</div>` : ''}<div class="card-name">${(typeof getLang === 'function' && getLang() === 'tr') ? info.name_tr : info.name_en}</div></div>`;
                 wrapper.querySelector('.card-slot').onclick = () => showDetail(info, drawn);
                 area.appendChild(wrapper);
             });
@@ -248,11 +239,7 @@
         function closeDetail() { document.getElementById('detailOverlay').classList.remove('active'); }
         document.getElementById('detailCloseBtn').onclick = closeDetail;
         document.getElementById('detailOverlay').onclick = (e) => { if(e.target.id === 'detailOverlay') closeDetail(); };
-
-        function newReading() {
-            sessionStorage.clear();
-            window.location.href = 'dashboard.html';
-        }
+        function logout() { auth.signOut().then(() => window.location.href = 'auth.html'); }
     </script>
 </body>
 </html>
