@@ -87,7 +87,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Alt navigasyon (Örnekteki gibi) */
+        /* Alt navigasyon */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -137,7 +137,7 @@
         .detail-scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 
-        /* Sidebar (Örnekteki gibi güncellendi) */
+        /* Sidebar */
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.active { display: block; opacity: 1; }
         .sidebar {
@@ -152,18 +152,6 @@
         .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 12px; }
         .sidebar-item:active { background: #f5f5f7; }
         .sidebar-item.active-page { font-weight: 700; background: #fafafa; }
-
-        /* ---- Doğum Bilgileri Kartı ---- */
-        .birth-card { border: 1.5px solid #c8c8c8; border-radius: 14px; padding: 16px; background: #fff; margin-top: 16px; }
-        .birth-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-        .birth-card-title { font-size: 1rem; font-weight: 700; color: #111; }
-        .birth-card-row { display: flex; gap: 8px; margin-bottom: 12px; }
-        .birth-input { flex: 1; padding: 10px 6px; border: 1.5px solid #e8e8ed; border-radius: 8px; font-size: 0.9rem; font-family: 'Times New Roman', Times, serif; text-align: center; outline: none; color: #000; -webkit-appearance: none; }
-        .birth-input:focus { border-color: #000; }
-        .birth-save-btn { width: 100%; padding: 11px; background: #000; color: #fff; border: none; border-radius: 8px; font-family: 'Times New Roman', Times, serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-        .birth-msg { font-size: 0.78rem; text-align: center; margin-top: 8px; min-height: 16px; }
-        .birth-msg.success { color: #28a745; }
-        .birth-msg.error { color: #e74c3c; }
 
         /* Auth Spinner */
         .auth-check { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
@@ -187,26 +175,11 @@
 
     <div class="content">
         <div class="cards-grid" id="cardsGrid"></div>
-
-        <!-- Doğum Bilgileri Formu -->
-        <div class="birth-card">
-            <div class="birth-card-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <span class="birth-card-title" id="birthCardTitle"></span>
-            </div>
-            <div class="birth-card-row">
-                <input type="number" class="birth-input" id="birthDay" min="1" max="31">
-                <input type="number" class="birth-input" id="birthMonth" min="1" max="12">
-                <input type="number" class="birth-input" id="birthYear" min="1900" max="2099">
-            </div>
-            <button class="birth-save-btn" id="birthSaveBtn"></button>
-            <div class="birth-msg" id="birthMsg"></div>
-        </div>
     </div>
 
-    <!-- Alt navigasyon güncellendi -->
+    <!-- Alt navigasyon -->
     <div class="bottom-nav">
-        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
+        <a href="dashboard.html" class="nav-btn" id="navHome" style="text-decoration: none; display: flex;">
             <img src="cardsinfo.png" alt="Ana Sayfa">
         </a>
     </div>
@@ -229,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Sidebar güncellendi -->
+    <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
@@ -238,7 +211,6 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
                 <span id="sidebarCardsText">Kartlar</span>
             </div>
-
             <div class="sidebar-item" onclick="logout()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 <span id="sidebarLogoutText">Çıkış</span>
@@ -259,47 +231,6 @@
                 return;
             }
             document.getElementById('authCheck').classList.add('hidden');
-            loadBirthInfo();
-        });
-
-        // Doğum bilgisi yükle
-        async function loadBirthInfo() {
-            const user = auth.currentUser;
-            if (!user) return;
-            try {
-                const doc = await db.collection('users').doc(user.uid).get();
-                if (doc.exists && doc.data().birthInfo) {
-                    const b = doc.data().birthInfo;
-                    if (b.day) document.getElementById('birthDay').value = b.day;
-                    if (b.month) document.getElementById('birthMonth').value = b.month;
-                    if (b.year) document.getElementById('birthYear').value = b.year;
-                }
-            } catch (e) {}
-        }
-
-        document.getElementById('birthSaveBtn').addEventListener('click', async function() {
-            const user = auth.currentUser;
-            if (!user) return;
-            const day = parseInt(document.getElementById('birthDay').value);
-            const month = parseInt(document.getElementById('birthMonth').value);
-            const year = parseInt(document.getElementById('birthYear').value);
-            const msg = document.getElementById('birthMsg');
-            if (!day || !month || !year) {
-                msg.textContent = t('birthRequired');
-                msg.className = 'birth-msg error';
-                return;
-            }
-            try {
-                await db.collection('users').doc(user.uid).set({
-                    birthInfo: { day, month, year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
-                }, { merge: true });
-                msg.textContent = t('birthSaved');
-                msg.className = 'birth-msg success';
-                setTimeout(() => { msg.textContent = ''; }, 2000);
-            } catch (err) {
-                msg.textContent = t('birthRequired');
-                msg.className = 'birth-msg error';
-            }
         });
 
         // Sidebar Mantığı
@@ -323,11 +254,6 @@
         // Metin ve çeviri atamaları
         document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
         document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
-        document.getElementById('birthCardTitle').textContent = t('birthInfoTitle');
-        document.getElementById('birthDay').placeholder = t('birthDay');
-        document.getElementById('birthMonth').placeholder = t('birthMonth');
-        document.getElementById('birthYear').placeholder = t('birthYear');
-        document.getElementById('birthSaveBtn').textContent = t('birthSaveBtn');
         document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
         document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
         document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
