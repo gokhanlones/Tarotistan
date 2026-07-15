@@ -3,138 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAROT'S - Sonuç</title>
+    <title>TAROT'S</title>
     <script src="lang.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100%;
-            background: #ffffff;
-            font-family: 'Times New Roman', Times, serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; }
+        
         .hidden { display: none !important; }
 
-        /* ---- Üst Banner (Dashboard Birebir Aynı) ---- */
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 60px;
-            background: #ffffff;
-            display: flex; align-items: center;
-            padding: 0 16px;
-            z-index: 10;
-        }
-        .hamburger-btn {
-            width: 40px; height: 40px;
-            background: none; border: none;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer;
-            flex-shrink: 0;
-        }
-        .hamburger-btn span {
-            display: block; width: 22px; height: 2px;
-            background: #000;
-        }
-        .topbar-title {
-            flex: 1;
-            text-align: center;
-            font-size: 1.25rem; font-weight: 700;
-            letter-spacing: 3px;
-            color: #000;
-        }
-        .topbar-icon {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        .topbar-icon img {
-            width: 28px; height: 28px;
-            object-fit: contain;
-            border-radius: 50%;
-        }
-        .topbar-icon.hidden { display: none; }
-
-        /* ---- Sidebar (Dashboard Birebir Aynı) ---- */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 150;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: 260px;
-            background: #ffffff;
-            z-index: 151;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid #e8e8ed;
-            font-size: 1.1rem; font-weight: 700;
-            letter-spacing: 2px;
-            color: #000;
-        }
-        .sidebar-menu {
-            display: flex; flex-direction: column;
-        }
-        .sidebar-item {
-            padding: 18px 20px;
-            font-size: 1rem;
-            color: #000;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background 0.15s;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .sidebar-item:active {
-            background: #f5f5f7;
-        }
-
-        /* ---- Alt Navigasyon (Dashboard Birebir Aynı) ---- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 68px;
-            background: #ffffff;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-        }
-        .nav-btn {
-            background: none; border: none; padding: 0;
-            width: 44px; height: 44px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
-        .nav-btn.active { background: #f2f2f5; }
-        .nav-btn img {
-            width: 34px; height: 34px;
-            object-fit: contain; border-radius: 6px;
-        }
-
-        /* ---- İçerik Stilleri (Result Özel) ---- */
+        /* ---- Üst Bar ---- */
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
+        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.3s ease; }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; transition: all 0.3s ease; transform-origin: center; }
+        .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
+        
+        /* ---- Sidebar ---- */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #ffffff; z-index: 151; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.12); }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; color: #000; }
+        .sidebar-menu { display: flex; flex-direction: column; }
+        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 12px; }
+        .sidebar-item:active { background: #f5f5f7; }
+        .sidebar-item.active-page { font-weight: 700; background: #fafafa; }
+        
+        /* ---- İçerik ---- */
         .content { padding: 76px 16px 88px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .intent-box { width: 100%; background: #fafafa; border: 1px solid #e8e8ed; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; text-align: center; }
         .intent-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
@@ -155,8 +56,14 @@
         .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 16px; }
         .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
         .ai-empty { font-size: 0.92rem; color: #888; text-align: center; font-style: italic; }
+
+        /* ---- Alt Nav ---- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 30px; border-top: 1px solid #f0f0f0; }
+        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
         
-        /* ---- Yükleme ve Detay (Result Özel) ---- */
+        /* ---- Yükleme ve Detay ---- */
         .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -166,30 +73,30 @@
         .detail-box { width: 100%; max-width: 360px; background: #ffffff; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; }
         .detail-title { font-size: 1.25rem; font-weight: 700; color: #000; text-align: center; }
         .detail-meaning { font-size: 0.95rem; line-height: 1.55; color: #333; overflow-y: auto; }
-        .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-family: 'Times New Roman', Times, serif; font-weight: 600; font-size: 1rem; }
+        .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- Loading -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
 
-    <!-- Topbar (Dashboard) -->
     <div class="topbar">
         <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
             <span></span><span></span><span></span>
         </button>
         <div class="topbar-title" id="topbarTitle"></div>
-        <div class="topbar-icon hidden" id="topbarIcon"></div> 
     </div>
 
-    <!-- Sidebar (Dashboard) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
         <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='dashboard.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span id="sidebarHomeText">Anasayfa</span>
+            </div>
             <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
                 <span id="sidebarCardsText">Kartlar</span>
@@ -205,7 +112,6 @@
         </div>
     </div>
 
-    <!-- İçerik -->
     <div class="content" id="contentArea" style="display:none;">
         <div class="intent-box">
             <div class="intent-label" id="intentLabel"></div>
@@ -215,14 +121,12 @@
         <div class="ai-section" id="aiSection"><div class="ai-text" id="aiDescText"></div></div>
     </div>
 
-    <!-- Alt navigasyon (Dashboard) -->
     <div class="bottom-nav">
         <a href="dashboard.html" class="nav-btn" id="navHome" style="text-decoration: none; display: flex;">
             <img src="cardsinfo.png" alt="Ana Sayfa">
         </a>
     </div>
 
-    <!-- Detay Modalı -->
     <div class="detail-overlay" id="detailOverlay">
         <div class="detail-box">
             <div class="detail-title" id="detailTitle"></div>
@@ -234,48 +138,47 @@
     <script>
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // ---- 1. Sidebar Yönetimi (Dashboard'dan) ----
-        function openSidebar() {
-            document.getElementById('sidebarOverlay').classList.add('active');
-            document.getElementById('sidebar').classList.add('active');
-        }
-        function closeSidebar() {
-            document.getElementById('sidebarOverlay').classList.remove('active');
-            document.getElementById('sidebar').classList.remove('active');
-        }
-        function logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'auth.html';
-            });
-        }
-        document.getElementById('menuBtn').addEventListener('click', openSidebar);
-        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-        document.getElementById('sidebarBirthItem').addEventListener('click', function() {
-            closeSidebar(); // İleride yönlendirme eklenebilir
-        });
-
-
-        // ---- 2. Dil ve Metin Atamaları ----
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof t === 'function') {
-                document.getElementById('topbarTitle').textContent = t('dashboardTitle') || 'Sonuç';
-                document.getElementById('intentLabel').textContent = t('resultIntentLabel') || 'Niyetiniz';
-                document.getElementById('detailCloseBtn').textContent = t('closeBtn') || 'Kapat';
-                document.getElementById('sidebarCardsText').textContent = t('sidebarCards') || 'Kartlar';
-                document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo') || 'Doğum Bilgileri';
-                document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout') || 'Çıkış';
+        function toggleSidebar() {
+            if (sidebar.classList.contains('active')) {
+                sidebarOverlay.classList.remove('active');
+                sidebar.classList.remove('active');
+                menuBtn.classList.remove('active');
+            } else {
+                sidebarOverlay.classList.add('active');
+                sidebar.classList.add('active');
+                menuBtn.classList.add('active');
             }
+        }
+
+        menuBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        document.getElementById('sidebarBirthItem').addEventListener('click', function() {
+            toggleSidebar();
         });
 
-
-        // ---- 3. Result / Veri İşlemleri ----
         function isWithin24h(timestamp) {
             if (!timestamp) return false;
             const now = Date.now();
             const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
             return (now - recordTime) < (24 * 60 * 60 * 1000);
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof t === 'function') {
+                document.getElementById('topbarTitle').textContent = t('dashboardTitle');
+                document.getElementById('intentLabel').textContent = t('resultIntentLabel');
+                document.getElementById('detailCloseBtn').textContent = t('closeBtn');
+                document.getElementById('sidebarHomeText').textContent = t('sidebarHome') || 'Anasayfa';
+                document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+                document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
+                document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+            }
+        });
 
         auth.onAuthStateChanged(function(user) {
             if (!user) { window.location.href = 'auth.html'; return; }
@@ -366,6 +269,7 @@
         function closeDetail() { document.getElementById('detailOverlay').classList.remove('active'); }
         document.getElementById('detailCloseBtn').onclick = closeDetail;
         document.getElementById('detailOverlay').onclick = (e) => { if(e.target.id === 'detailOverlay') closeDetail(); };
+        function logout() { auth.signOut().then(() => window.location.href = 'auth.html'); }
     </script>
 </body>
 </html>
