@@ -333,6 +333,57 @@
             background: #fafafa;
         }
 
+        /* ---- Doğum Formu (Sidebar içinde) ---- */
+        .birth-form-section {
+            padding: 0 20px 16px;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        .birth-form-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .birth-form-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        .birth-form-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .birth-input {
+            flex: 1;
+            padding: 8px;
+            border: 1.5px solid #e8e8ed;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'Times New Roman', Times, serif;
+            text-align: center;
+            outline: none;
+        }
+        .birth-input:focus { border-color: #000; }
+        .birth-btn {
+            width: 100%;
+            padding: 8px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .birth-msg {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+        .birth-msg.success { color: #28a745; }
+        .birth-msg.error { color: #e74c3c; }
+
         /* ---- Auth kontrol spinner ---- */
         .auth-check {
             position: fixed; inset: 0;
@@ -445,6 +496,16 @@
             <div class="sidebar-item" id="sidebarBirthItem">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                 <span id="sidebarBirthText">Doğum Bilgileri</span>
+            </div>
+            <div class="birth-form-section" id="birthFormSection">
+                <div class="birth-form-title" id="birthFormTitle">Doğum Tarihi</div>
+                <div class="birth-form-row">
+                    <input type="number" class="birth-input" id="birthDay" min="1" max="31" placeholder="Gün">
+                    <input type="number" class="birth-input" id="birthMonth" min="1" max="12" placeholder="Ay">
+                    <input type="number" class="birth-input" id="birthYear" min="1900" max="2026" placeholder="Yıl">
+                </div>
+                <button class="birth-btn" id="birthSaveBtn">Kaydet</button>
+                <div class="birth-msg" id="birthMsg"></div>
             </div>
             <div class="sidebar-item" onclick="logout()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -604,11 +665,56 @@
             openSidebar();
         });
 
-        // Sidebar doğum bilgileri tıklayınca şimdilik sidebar kapat (ileride sayfa yönlendirmesi yapılacak)
+        // Doğum bilgileri formu aç/kapat
         document.getElementById('sidebarBirthItem').addEventListener('click', function() {
-            // Şimdilik sadece kapat, ileride doğum bilgileri sayfasına yönlendirilecek
-            closeSidebar();
+            const form = document.getElementById('birthFormSection');
+            form.classList.toggle('active');
+            loadBirthInfoToForm();
         });
+
+        // Doğum bilgisi kaydet
+        document.getElementById('birthSaveBtn').addEventListener('click', async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const day = parseInt(document.getElementById('birthDay').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const year = parseInt(document.getElementById('birthYear').value);
+            const msg = document.getElementById('birthMsg');
+
+            if (!day || !month || !year) {
+                msg.textContent = 'Lütfen tüm alanları doldurun.';
+                msg.className = 'birth-msg error';
+                return;
+            }
+
+            try {
+                await db.collection('users').doc(user.uid).set({
+                    birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+                }, { merge: true });
+                msg.textContent = 'Kaydedildi!';
+                msg.className = 'birth-msg success';
+                setTimeout(() => { msg.textContent = ''; }, 2000);
+            } catch (err) {
+                msg.textContent = 'Hata: ' + err.message;
+                msg.className = 'birth-msg error';
+            }
+        });
+
+        // Forma mevcut veriyi yükle
+        async function loadBirthInfoToForm() {
+            const user = auth.currentUser;
+            if (!user) return;
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists && doc.data().birthInfo) {
+                    const b = doc.data().birthInfo;
+                    if (b.day) document.getElementById('birthDay').value = b.day;
+                    if (b.month) document.getElementById('birthMonth').value = b.month;
+                    if (b.year) document.getElementById('birthYear').value = b.year;
+                }
+            } catch (e) {}
+        }
 
         let currentReadingType = null;
         const intentOverlay = document.getElementById('intentOverlay');
