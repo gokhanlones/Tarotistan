@@ -333,62 +333,66 @@
             background: #fafafa;
         }
 
-        /* ---- Doğum Bilgileri Kartı (Sayfa içi) ---- */
-        .birth-card {
-            border: 1.5px solid #c8c8c8;
-            border-radius: 14px;
-            padding: 16px;
-            background: #fff;
+        /* ---- Doğum Bilgileri Modalı ---- */
+        .birth-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 24px;
+            z-index: 100;
         }
-        .birth-card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
+        .birth-modal-overlay.active { display: flex; }
+        .birth-modal-box {
+            width: 100%; max-width: 360px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            gap: 14px;
         }
-        .birth-card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #111;
+        .birth-modal-title {
+            font-size: 1.2rem; font-weight: 700;
+            color: #000; text-align: center;
         }
-        .birth-card-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+        .birth-modal-row {
+            display: flex; gap: 10px;
         }
-        .birth-input {
+        .birth-modal-input {
             flex: 1;
-            padding: 10px 6px;
+            padding: 12px 6px;
             border: 1.5px solid #e8e8ed;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            border-radius: 10px;
+            font-size: 1rem;
             font-family: 'Times New Roman', Times, serif;
             text-align: center;
             outline: none;
             color: #000;
             -webkit-appearance: none;
         }
-        .birth-input:focus { border-color: #000; }
-        .birth-save-btn {
+        .birth-modal-input:focus { border-color: #000; }
+        .birth-modal-save {
             width: 100%;
-            padding: 11px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
+            padding: 13px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
             font-family: 'Times New Roman', Times, serif;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 1rem; font-weight: 600;
             cursor: pointer;
         }
-        .birth-msg {
-            font-size: 0.78rem;
+        .birth-modal-msg {
+            font-size: 0.85rem;
             text-align: center;
-            margin-top: 8px;
-            min-height: 16px;
+            min-height: 18px;
         }
-        .birth-msg.success { color: #28a745; }
-        .birth-msg.error { color: #e74c3c; }
+        .birth-modal-msg.success { color: #28a745; }
+        .birth-modal-msg.error { color: #e74c3c; }
+        .birth-modal-close {
+            background: none; border: none;
+            color: #888; font-size: 0.85rem;
+            cursor: pointer; padding: 4px;
+            align-self: center;
+        }
 
         /* ---- Auth kontrol spinner ---- */
         .auth-check {
@@ -457,21 +461,6 @@
                 <div class="horoscope-desc" id="horoscopeDesc"></div>
             </div>
         </div>
-
-        <!-- Doğum Bilgileri Formu -->
-        <div class="birth-card">
-            <div class="birth-card-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <span class="birth-card-title" id="birthCardTitle"></span>
-            </div>
-            <div class="birth-card-row">
-                <input type="number" class="birth-input" id="birthDay" min="1" max="31">
-                <input type="number" class="birth-input" id="birthMonth" min="1" max="12">
-                <input type="number" class="birth-input" id="birthYear" min="1900" max="2099">
-            </div>
-            <button class="birth-save-btn" id="birthSaveBtn"></button>
-            <div class="birth-msg" id="birthMsg"></div>
-        </div>
     </div>
 
     <!-- Alt navigasyon -->
@@ -505,6 +494,21 @@
         </div>
     </div>
 
+    <!-- Doğum Bilgileri Modalı -->
+    <div class="birth-modal-overlay" id="birthModalOverlay">
+        <div class="birth-modal-box">
+            <div class="birth-modal-title" id="birthModalTitle"></div>
+            <div class="birth-modal-row">
+                <input type="number" class="birth-modal-input" id="birthModalDay" min="1" max="31">
+                <input type="number" class="birth-modal-input" id="birthModalMonth" min="1" max="12">
+                <input type="number" class="birth-modal-input" id="birthModalYear" min="1900" max="2099">
+            </div>
+            <button class="birth-modal-save" id="birthModalSaveBtn"></button>
+            <div class="birth-modal-msg" id="birthModalMsg"></div>
+            <button class="birth-modal-close" id="birthModalCloseBtn"></button>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
@@ -514,7 +518,6 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
                 <span id="sidebarCardsText">Kartlar</span>
             </div>
-
             <div class="sidebar-item" onclick="logout()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 <span id="sidebarLogoutText">Çıkış</span>
@@ -583,11 +586,12 @@
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
-            document.getElementById('birthCardTitle').textContent = t('birthInfoTitle');
-            document.getElementById('birthDay').placeholder = t('birthDay');
-            document.getElementById('birthMonth').placeholder = t('birthMonth');
-            document.getElementById('birthYear').placeholder = t('birthYear');
-            document.getElementById('birthSaveBtn').textContent = t('birthSaveBtn');
+            document.getElementById('birthModalTitle').textContent = t('birthInfoTitle');
+            document.getElementById('birthModalDay').placeholder = t('birthDay');
+            document.getElementById('birthModalMonth').placeholder = t('birthMonth');
+            document.getElementById('birthModalYear').placeholder = t('birthYear');
+            document.getElementById('birthModalSaveBtn').textContent = t('birthSaveBtn');
+            document.getElementById('birthModalCloseBtn').textContent = t('closeBtn');
 
             await checkLastReading(user.uid);
             await loadBirthInfo();
@@ -597,7 +601,6 @@
         async function checkLastReading(userId) {
             const topbarIcon = document.getElementById('topbarIcon');
             try {
-                // Her zaman sunucudan taze veri al (cache stale olabilir)
                 let lastQuery;
                 try {
                     lastQuery = await db.collection('users').doc(userId)
@@ -606,7 +609,6 @@
                         .limit(1)
                         .get({ source: 'server' });
                 } catch (_) {
-                    // Offline ise cache'den dene
                     lastQuery = await db.collection('users').doc(userId)
                         .collection('readings')
                         .orderBy('createdAt', 'desc')
@@ -624,7 +626,6 @@
                 const within24h = lastData.createdAt && isWithin24h(lastData.createdAt);
                 const hasAi = !!(lastData.aiInterpretation && lastData.aiInterpretation.trim() !== '');
 
-                // Eye ikonu: 24 saat içinde ve AI yorumu varsa göster
                 if (within24h && hasAi) {
                     topbarIcon.classList.remove('hidden');
                 } else {
@@ -664,12 +665,26 @@
             window.location.href = 'result.html';
         });
 
-        // Günlük burç alanı tıklayınca sidebar aç
+        // ===== DOĞUM BİLGİLERİ MODAL =====
+        const birthModalOverlay = document.getElementById('birthModalOverlay');
+
+        function openBirthModal() {
+            birthModalOverlay.classList.add('active');
+        }
+        function closeBirthModal() {
+            birthModalOverlay.classList.remove('active');
+        }
+
+        // Günlük burç alanına tıklayınca doğum bilgisi modalı aç
         document.getElementById('horoscopeOption').addEventListener('click', function() {
-            openSidebar();
+            openBirthModal();
         });
 
-        // Doğum bilgisi yükle
+        birthModalOverlay.addEventListener('click', function(e) {
+            if (e.target === birthModalOverlay) closeBirthModal();
+        });
+        document.getElementById('birthModalCloseBtn').addEventListener('click', closeBirthModal);
+
         async function loadBirthInfo() {
             const user = auth.currentUser;
             if (!user) return;
@@ -677,24 +692,23 @@
                 const doc = await db.collection('users').doc(user.uid).get();
                 if (doc.exists && doc.data().birthInfo) {
                     const b = doc.data().birthInfo;
-                    if (b.day) document.getElementById('birthDay').value = b.day;
-                    if (b.month) document.getElementById('birthMonth').value = b.month;
-                    if (b.year) document.getElementById('birthYear').value = b.year;
+                    if (b.day) document.getElementById('birthModalDay').value = b.day;
+                    if (b.month) document.getElementById('birthModalMonth').value = b.month;
+                    if (b.year) document.getElementById('birthModalYear').value = b.year;
                 }
             } catch (e) {}
         }
 
-        // Doğum bilgisi kaydet
-        document.getElementById('birthSaveBtn').addEventListener('click', async function() {
+        document.getElementById('birthModalSaveBtn').addEventListener('click', async function() {
             const user = auth.currentUser;
             if (!user) return;
-            const day = parseInt(document.getElementById('birthDay').value);
-            const month = parseInt(document.getElementById('birthMonth').value);
-            const year = parseInt(document.getElementById('birthYear').value);
-            const msg = document.getElementById('birthMsg');
+            const day = parseInt(document.getElementById('birthModalDay').value);
+            const month = parseInt(document.getElementById('birthModalMonth').value);
+            const year = parseInt(document.getElementById('birthModalYear').value);
+            const msg = document.getElementById('birthModalMsg');
             if (!day || !month || !year) {
                 msg.textContent = t('birthRequired');
-                msg.className = 'birth-msg error';
+                msg.className = 'birth-modal-msg error';
                 return;
             }
             try {
@@ -702,13 +716,14 @@
                     birthInfo: { day, month, year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }, { merge: true });
                 msg.textContent = t('birthSaved');
-                msg.className = 'birth-msg success';
-                setTimeout(() => { msg.textContent = ''; }, 2000);
+                msg.className = 'birth-modal-msg success';
+                setTimeout(() => { closeBirthModal(); msg.textContent = ''; }, 1500);
             } catch (err) {
                 msg.textContent = t('birthRequired');
-                msg.className = 'birth-msg error';
+                msg.className = 'birth-modal-msg error';
             }
         });
+        // ===== DOĞUM BİLGİLERİ MODAL SON =====
 
         let currentReadingType = null;
         const intentOverlay = document.getElementById('intentOverlay');
@@ -775,7 +790,6 @@
         });
         document.getElementById('premiumCtaBtn').addEventListener('click', function() {
             closeCooldownModal();
-            document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     </script>
 </body>
