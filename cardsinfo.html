@@ -18,7 +18,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ---- Üst banner ---- */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0;
             height: 60px;
@@ -42,7 +41,6 @@
             transition: all 0.3s ease;
             transform-origin: center;
         }
-        /* Hamburger aktif (X) durumu */
         .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .hamburger-btn.active span:nth-child(2) { opacity: 0; }
         .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -56,7 +54,6 @@
             margin-right: 40px;
         }
 
-        /* ---- İçerik ---- */
         .content {
             padding: 76px 12px 88px;
             max-width: 600px;
@@ -97,7 +94,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ---- Alt navigasyon ---- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -120,7 +116,6 @@
             object-fit: contain; border-radius: 6px;
         }
 
-        /* ---- Kart detay modalı ---- */
         .detail-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
@@ -171,7 +166,7 @@
             flex-shrink: 0;
         }
 
-        /* ---- Sidebar ---- */
+        /* Sidebar Stilleri */
         .sidebar-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.45);
@@ -192,12 +187,11 @@
             box-shadow: 4px 0 20px rgba(0,0,0,0.12);
         }
         .sidebar.active { transform: translateX(0); }
-        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; color: #000; }
+        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; color: #000; }
         .sidebar-menu { display: flex; flex-direction: column; }
-        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 12px; }
         .sidebar-item:active { background: #f5f5f7; }
 
-        /* ---- Auth kontrol spinner ---- */
         .auth-check {
             position: fixed; inset: 0;
             background: #fff;
@@ -256,13 +250,23 @@
         </div>
     </div>
 
-    <!-- Sidebar Eklentisi -->
+    <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TAROT'S</div>
+        <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='dashboard.html'">Anasayfa</div>
-            <div class="sidebar-item" onclick="logout()">Çıkış</div>
+            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
+                <span id="sidebarCardsText">Kartlar</span>
+            </div>
+            <div class="sidebar-item" id="sidebarBirthItem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <span id="sidebarBirthText">Doğum Bilgileri</span>
+            </div>
+            <div class="sidebar-item" onclick="logout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span id="sidebarLogoutText">Çıkış</span>
+            </div>
         </div>
     </div>
 
@@ -307,7 +311,9 @@
         }
 
         // Metin ve çeviri atamaları
-        document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+        document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+        document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
+        document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
         document.getElementById('detailCloseBtn').textContent = t('cardsInfoClose');
         document.getElementById('uprightLabel').textContent = t('cardsInfoUpright');
         document.getElementById('reversedLabel').textContent = t('cardsInfoReversed');
