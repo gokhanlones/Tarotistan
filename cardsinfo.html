@@ -33,27 +33,20 @@
             justify-content: center; align-items: center;
             gap: 5px; cursor: pointer;
             flex-shrink: 0;
-            transition: all 0.3s ease;
         }
         .hamburger-btn span {
             display: block; width: 22px; height: 2px;
             background: #000;
-            transition: all 0.3s ease;
-            transform-origin: center;
         }
-        .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
-        .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
         .topbar-title {
             flex: 1;
             text-align: center;
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px;
             color: #000;
-            margin-right: 40px;
         }
 
+        /* İçerik */
         .content {
             padding: 76px 12px 88px;
             max-width: 600px;
@@ -94,6 +87,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Alt navigasyon (Örnekteki gibi) */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -102,6 +96,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 30px;
         }
         .nav-btn {
             background: none; border: none; padding: 0;
@@ -116,6 +111,7 @@
             object-fit: contain; border-radius: 6px;
         }
 
+        /* Modal */
         .detail-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
@@ -134,78 +130,33 @@
             gap: 10px;
             max-height: 80vh;
         }
-        .detail-meta {
-            font-size: 0.75rem; color: #888;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            text-align: center;
-        }
-        .detail-title {
-            font-size: 1.25rem; font-weight: 700;
-            color: #000; text-align: center;
-        }
-        .detail-section-label {
-            font-size: 0.8rem; font-weight: 700;
-            color: #000; margin-top: 4px;
-        }
-        .detail-meaning {
-            font-size: 0.92rem; line-height: 1.55; color: #333;
-            overflow-y: auto;
-        }
-        .detail-scroll {
-            overflow-y: auto;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .detail-close {
-            margin-top: 6px;
-            padding: 12px;
-            background: #000; color: #fff;
-            border: none; border-radius: 10px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 0.95rem; font-weight: 600;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
+        .detail-meta { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
+        .detail-title { font-size: 1.25rem; font-weight: 700; color: #000; text-align: center; }
+        .detail-section-label { font-size: 0.8rem; font-weight: 700; color: #000; margin-top: 4px; }
+        .detail-meaning { font-size: 0.92rem; line-height: 1.55; color: #333; overflow-y: auto; }
+        .detail-scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .detail-close { margin-top: 6px; padding: 12px; background: #000; color: #fff; border: none; border-radius: 10px; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 
-        /* Sidebar Stilleri */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 150;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+        /* Sidebar (Örnekteki gibi güncellendi) */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.active { display: block; opacity: 1; }
         .sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
-            width: 260px;
-            background: #ffffff;
-            z-index: 151;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+            width: 260px; background: #ffffff; z-index: 151;
+            transform: translateX(-100%); transition: transform 0.3s ease;
+            display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.12);
         }
         .sidebar.active { transform: translateX(0); }
         .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e8e8ed; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; color: #000; }
         .sidebar-menu { display: flex; flex-direction: column; }
-        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 12px; }
+        .sidebar-item { padding: 18px 20px; font-size: 1rem; color: #000; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 12px; }
         .sidebar-item:active { background: #f5f5f7; }
+        .sidebar-item.active-page { font-weight: 700; background: #fafafa; }
 
-        .auth-check {
-            position: fixed; inset: 0;
-            background: #fff;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200;
-        }
+        /* Auth Spinner */
+        .auth-check { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 200; }
         .auth-check.hidden { display: none; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -226,10 +177,11 @@
         <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
+    <!-- Alt navigasyon güncellendi -->
     <div class="bottom-nav">
-        <button class="nav-btn active" id="navHome" onclick="window.location.href='dashboard.html'">
+        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
             <img src="cardsinfo.png" alt="Ana Sayfa">
-        </button>
+        </a>
     </div>
 
     <div class="detail-overlay" id="detailOverlay">
@@ -250,12 +202,12 @@
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar güncellendi -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
+            <div class="sidebar-item active-page" onclick="window.location.href='cardsinfo.html'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
                 <span id="sidebarCardsText">Kartlar</span>
             </div>
@@ -288,20 +240,12 @@
         function openSidebar() {
             sidebarOverlay.classList.add('active');
             sidebar.classList.add('active');
-            menuBtn.classList.add('active');
         }
         function closeSidebar() {
             sidebarOverlay.classList.remove('active');
             sidebar.classList.remove('active');
-            menuBtn.classList.remove('active');
         }
-        menuBtn.addEventListener('click', function() {
-            if (sidebar.classList.contains('active')) {
-                closeSidebar();
-            } else {
-                openSidebar();
-            }
-        });
+        menuBtn.addEventListener('click', openSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
         function logout() {
@@ -320,13 +264,8 @@
 
         let tarotCards = [];
 
-        function cardName(card) {
-            return getLang() === 'tr' ? card.name_tr : card.name_en;
-        }
-
-        function arcanaLabel(card) {
-            return card.arcana === 'major' ? t('cardsInfoMajor') : t('cardsInfoMinor');
-        }
+        function cardName(card) { return getLang() === 'tr' ? card.name_tr : card.name_en; }
+        function arcanaLabel(card) { return card.arcana === 'major' ? t('cardsInfoMajor') : t('cardsInfoMinor'); }
 
         async function loadCards() {
             try {
@@ -334,50 +273,33 @@
                 const data = await response.json();
                 tarotCards = data.cards;
                 renderGrid();
-            } catch (err) {
-                console.error('Kart verisi yüklenemedi:', err);
-            }
+            } catch (err) { console.error('Kart verisi yüklenemedi:', err); }
         }
 
         function renderGrid() {
             const grid = document.getElementById('cardsGrid');
             grid.innerHTML = '';
-
             tarotCards.forEach((card, index) => {
                 const item = document.createElement('div');
                 item.className = 'card-item';
                 item.style.animationDelay = (index * 0.02) + 's';
-
-                item.innerHTML = `
-                    <div class="thumb"><img src="onecard.png" alt=""></div>
-                    <div class="name">${cardName(card)}</div>
-                `;
-
-                item.addEventListener('click', function() {
-                    openDetail(card);
-                });
-
+                item.innerHTML = `<div class="thumb"><img src="onecard.png" alt=""></div><div class="name">${cardName(card)}</div>`;
+                item.addEventListener('click', () => openDetail(card));
                 grid.appendChild(item);
             });
         }
 
         function openDetail(card) {
-            document.getElementById('detailMeta').textContent =
-                arcanaLabel(card) + ' \u00B7 ' + card.element + ' \u00B7 ' + card.planet;
+            document.getElementById('detailMeta').textContent = arcanaLabel(card) + ' \u00B7 ' + card.element + ' \u00B7 ' + card.planet;
             document.getElementById('detailTitle').textContent = cardName(card);
             document.getElementById('uprightText').textContent = card.upright_meaning;
             document.getElementById('reversedText').textContent = card.reversed_meaning;
             document.getElementById('detailOverlay').classList.add('active');
         }
 
-        function closeDetail() {
-            document.getElementById('detailOverlay').classList.remove('active');
-        }
-
+        function closeDetail() { document.getElementById('detailOverlay').classList.remove('active'); }
         document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-        document.getElementById('detailOverlay').addEventListener('click', function(e) {
-            if (e.target === document.getElementById('detailOverlay')) closeDetail();
-        });
+        document.getElementById('detailOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('detailOverlay')) closeDetail(); });
 
         loadCards();
     </script>
