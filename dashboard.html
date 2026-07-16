@@ -148,6 +148,9 @@
             transform: scale(0.98);
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+        .horoscope-area.loading {
+            cursor: wait;
+        }
         .horoscope-icon-box {
             width: 88px;
             height: 88px;
@@ -180,6 +183,11 @@
             font-size: 0.82rem;
             color: #555555;
             line-height: 1.45;
+        }
+        .horoscope-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
         }
 
         /* ---- Alt navigasyon ---- */
@@ -342,69 +350,6 @@
         .birth-msg.success { color: #28a745; }
         .birth-msg.error { color: #e74c3c; }
 
-        /* ---- Burç Yorumu Modalı ---- */
-        .horoscope-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: flex-start; justify-content: center;
-            padding: 76px 16px 24px;
-            z-index: 100;
-        }
-        .horoscope-modal-overlay.active { display: flex; }
-        .horoscope-modal-box {
-            width: 100%; max-width: 380px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex; flex-direction: column;
-            gap: 14px;
-            max-height: 75vh;
-        }
-        .horoscope-modal-header {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .horoscope-modal-icon {
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: #fafafa;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .horoscope-modal-icon svg { width: 28px; height: 28px; }
-        .horoscope-modal-title {
-            font-size: 1.15rem; font-weight: 700; color: #000;
-        }
-        .horoscope-modal-sign {
-            font-size: 0.85rem; color: #888;
-        }
-        .horoscope-modal-content {
-            font-size: 0.92rem; line-height: 1.65;
-            color: #333; overflow-y: auto;
-            white-space: pre-wrap;
-            padding-right: 4px;
-        }
-        .horoscope-modal-content.loading {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 80px;
-        }
-        .horoscope-modal-close {
-            margin-top: 4px; padding: 12px;
-            background: #000; color: #fff;
-            border: none; border-radius: 10px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 0.95rem; font-weight: 600;
-            cursor: pointer; flex-shrink: 0;
-        }
-        .horoscope-spinner {
-            width: 32px; height: 32px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
         /* ---- Sidebar ---- */
         .sidebar-overlay {
             position: fixed; inset: 0;
@@ -474,6 +419,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -523,6 +469,7 @@
             <div class="horoscope-text">
                 <div class="horoscope-title" id="horoscopeTitle"></div>
                 <div class="horoscope-desc" id="horoscopeDesc"></div>
+                <div class="horoscope-date hidden" id="horoscopeDate"></div>
             </div>
         </div>
     </div>
@@ -573,29 +520,6 @@
         </div>
     </div>
 
-    <!-- Burç Yorumu Modalı -->
-    <div class="horoscope-modal-overlay" id="horoscopeModalOverlay">
-        <div class="horoscope-modal-box">
-            <div class="horoscope-modal-header">
-                <div class="horoscope-modal-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-                        <path d="M2 12h20"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="horoscope-modal-title" id="horoscopeModalTitle"></div>
-                    <div class="horoscope-modal-sign" id="horoscopeModalSign"></div>
-                </div>
-            </div>
-            <div class="horoscope-modal-content" id="horoscopeModalContent">
-                <div class="horoscope-spinner"></div>
-            </div>
-            <button class="horoscope-modal-close" id="horoscopeModalCloseBtn">Kapat</button>
-        </div>
-    </div>
-
     <!-- Sidebar - SADECE Kartlar ve Çıkış -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
@@ -626,15 +550,6 @@
             const now = Date.now();
             const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
             return (now - recordTime) < (24 * 60 * 60 * 1000);
-        }
-
-        function isSameDay(timestamp) {
-            if (!timestamp) return false;
-            const recordDate = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const now = new Date();
-            return recordDate.getDate() === now.getDate() &&
-                   recordDate.getMonth() === now.getMonth() &&
-                   recordDate.getFullYear() === now.getFullYear();
         }
 
         function formatRemainingTime(timestamp) {
@@ -754,10 +669,11 @@ Kurallar:
 
         // ===== BURÇ YORUMU KAYDET (GÜNLÜK) =====
         async function saveHoroscope(userId, sign, text) {
+            const todayStr = new Date().toISOString().split('T')[0];
             const data = {
                 sign: sign,
                 text: text,
-                date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+                date: todayStr,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             const docRef = await db.collection('users').doc(userId).collection('horoscopes').add(data);
@@ -766,10 +682,8 @@ Kurallar:
 
         // ===== BUGÜNKÜ BURÇ YORUMUNU YÜKLE =====
         async function loadTodayHoroscope(userId) {
-            const horoscopeRef = db.collection('users').doc(userId).collection('horoscopes');
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            const query = await horoscopeRef
+            const query = await db.collection('users').doc(userId).collection('horoscopes')
                 .where('date', '==', todayStr)
                 .orderBy('createdAt', 'desc')
                 .limit(1)
@@ -782,11 +696,27 @@ Kurallar:
         }
 
         // ===== BURÇ ALANINI GÜNCELLE =====
-        function updateHoroscopeUI(sign, text) {
+        function updateHoroscopeUI(sign, text, dateStr) {
             const titleEl = document.getElementById('horoscopeTitle');
             const descEl = document.getElementById('horoscopeDesc');
-            titleEl.textContent = sign + ' - Günlük Burç';
-            descEl.textContent = text.substring(0, 80) + (text.length > 80 ? '...' : '');
+            const dateEl = document.getElementById('horoscopeDate');
+
+            titleEl.textContent = sign + ' - ' + t('dailyHoroscopeAreaTitle');
+            descEl.textContent = text;
+            dateEl.textContent = dateStr;
+            dateEl.classList.remove('hidden');
+        }
+
+        function showHoroscopeLoading() {
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent = 'Yorum yükleniyor...';
+            document.getElementById('horoscopeDate').classList.add('hidden');
+        }
+
+        function showHoroscopeEmpty() {
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
+            document.getElementById('horoscopeDate').classList.add('hidden');
         }
 
         // ===== DOĞUM TARİHİ MODAL =====
@@ -824,15 +754,18 @@ Kurallar:
                 msg.textContent = 'Kaydedildi! Yorum hazırlanıyor...';
                 msg.className = 'birth-msg success';
 
+                closeBirthModal();
+
                 // Burç hesapla ve yorum al
                 const sign = getZodiacSign(day, month);
                 const signEn = getZodiacSignEn(sign);
+                showHoroscopeLoading();
+
                 const aiText = await fetchHoroscopeFromGemini(sign, signEn);
                 await saveHoroscope(user.uid, sign, aiText);
 
-                // UI güncelle
-                updateHoroscopeUI(sign, aiText);
-                closeBirthModal();
+                const todayStr = new Date().toLocaleDateString('tr-TR');
+                updateHoroscopeUI(sign, aiText, todayStr);
 
             } catch (err) {
                 msg.textContent = 'Hata: ' + err.message;
@@ -840,56 +773,33 @@ Kurallar:
             }
         });
 
-        // ===== BURÇ YORUMU MODAL AÇ =====
-        async function openHoroscopeModal() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const overlay = document.getElementById('horoscopeModalOverlay');
-            const content = document.getElementById('horoscopeModalContent');
-            const signEl = document.getElementById('horoscopeModalSign');
-
-            overlay.classList.add('active');
-            content.innerHTML = '<div class="horoscope-spinner"></div>';
-            content.classList.add('loading');
-
-            try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                const birthInfo = userDoc.exists && userDoc.data().birthInfo;
-
-                if (!birthInfo || !birthInfo.day || !birthInfo.month) {
-                    content.classList.remove('loading');
-                    content.textContent = 'Doğum bilgileriniz eksik.';
-                    signEl.textContent = '';
-                    return;
-                }
-
-                const sign = getZodiacSign(birthInfo.day, birthInfo.month);
-                const signEn = getZodiacSignEn(sign);
-                signEl.textContent = sign + ' (' + signEn + ')';
-
-                // Bugünün yorumunu kontrol et
-                let todayHoroscope = await loadTodayHoroscope(user.uid);
-
-                if (!todayHoroscope) {
-                    // Bugün için yorum yoksa → Gemini'den çek
-                    const aiText = await fetchHoroscopeFromGemini(sign, signEn);
-                    await saveHoroscope(user.uid, sign, aiText);
-                    todayHoroscope = { text: aiText, sign: sign };
-                }
-
-                content.classList.remove('loading');
-                content.textContent = todayHoroscope.text;
-                updateHoroscopeUI(todayHoroscope.sign, todayHoroscope.text);
-
-            } catch (err) {
-                content.classList.remove('loading');
-                content.textContent = 'Yorum alınırken hata: ' + err.message;
+        // ===== BURÇ YORUMUNU YÜKLE (OTOMATİK) =====
+        async function loadAndShowHoroscope(userId, birthInfo) {
+            if (!birthInfo || !birthInfo.day || !birthInfo.month) {
+                showHoroscopeEmpty();
+                return;
             }
-        }
 
-        function closeHoroscopeModal() {
-            document.getElementById('horoscopeModalOverlay').classList.remove('active');
+            const sign = getZodiacSign(birthInfo.day, birthInfo.month);
+            const todayHoroscope = await loadTodayHoroscope(userId);
+
+            if (todayHoroscope) {
+                const todayStr = new Date().toLocaleDateString('tr-TR');
+                updateHoroscopeUI(todayHoroscope.sign, todayHoroscope.text, todayStr);
+            } else {
+                // Bugün için yorum yok → Gemini'den çek
+                showHoroscopeLoading();
+                try {
+                    const signEn = getZodiacSignEn(sign);
+                    const aiText = await fetchHoroscopeFromGemini(sign, signEn);
+                    await saveHoroscope(userId, sign, aiText);
+
+                    const todayStr = new Date().toLocaleDateString('tr-TR');
+                    updateHoroscopeUI(sign, aiText, todayStr);
+                } catch (err) {
+                    document.getElementById('horoscopeDesc').textContent = 'Yorum alınamadı. Tekrar deneyin.';
+                }
+            }
         }
 
         auth.onAuthStateChanged(async function(user) {
@@ -915,27 +825,14 @@ Kurallar:
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
-            // Doğum bilgisi ve burç yorumu kontrolü
+            // Burç yorumunu otomatik yükle
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 const birthInfo = userDoc.exists && userDoc.data().birthInfo;
-
-                if (birthInfo && birthInfo.day && birthInfo.month) {
-                    const sign = getZodiacSign(birthInfo.day, birthInfo.month);
-                    const todayHoroscope = await loadTodayHoroscope(user.uid);
-
-                    if (todayHoroscope) {
-                        updateHoroscopeUI(sign, todayHoroscope.text);
-                    } else {
-                        // Doğum bilgisi var ama bugün yorum yok → otomatik çek
-                        const signEn = getZodiacSignEn(sign);
-                        const aiText = await fetchHoroscopeFromGemini(sign, signEn);
-                        await saveHoroscope(user.uid, sign, aiText);
-                        updateHoroscopeUI(sign, aiText);
-                    }
-                }
+                await loadAndShowHoroscope(user.uid, birthInfo);
             } catch (e) {
                 console.log('Horoscope load error:', e);
+                showHoroscopeEmpty();
             }
 
             await checkLastReading(user.uid);
@@ -1019,30 +916,9 @@ Kurallar:
             window.location.href = 'result.html';
         });
 
-        // Günlük Burç alanı tıklayınca
-        document.getElementById('horoscopeOption').addEventListener('click', async function() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                const birthInfo = userDoc.exists && userDoc.data().birthInfo;
-
-                if (!birthInfo || !birthInfo.day || !birthInfo.month) {
-                    // Doğum bilgisi yok → doğum tarihi modalı aç
-                    openBirthModal();
-                } else {
-                    // Doğum bilgisi var → burç yorumu modalı aç
-                    openHoroscopeModal();
-                }
-            } catch (e) {
-                openBirthModal();
-            }
-        });
-
-        document.getElementById('horoscopeModalCloseBtn').addEventListener('click', closeHoroscopeModal);
-        document.getElementById('horoscopeModalOverlay').addEventListener('click', function(e) {
-            if (e.target === document.getElementById('horoscopeModalOverlay')) closeHoroscopeModal();
+        // Günlük Burç alanına tıklayınca → doğum tarihi modalı aç
+        document.getElementById('horoscopeOption').addEventListener('click', function() {
+            openBirthModal();
         });
 
         let currentReadingType = null;
