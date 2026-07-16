@@ -444,7 +444,7 @@
             </div>
         </div>
 
-        <!-- Günlük Burç Yorumu - İKON KALDIRILDI -->
+        <!-- Günlük Burç Yorumu -->
         <div class="horoscope-area" id="horoscopeOption">
             <div class="horoscope-text">
                 <div class="horoscope-title" id="horoscopeTitle"></div>
@@ -544,6 +544,7 @@
         }
 
         let cooldownRemaining = '';
+        let userHasBirthInfo = false; // EKLENEN SATIR: Kullanıcının doğum bilgisi olup olmadığını tutar.
 
         function lockCards(message) {
             const singleCard = document.getElementById('singleCardOption');
@@ -665,7 +666,7 @@ Kurallar:
             const todayStr = new Date().toISOString().split('T')[0];
             const query = await db.collection('users').doc(userId).collection('horoscopes')
                 .where('date', '==', todayStr)
-                .orderBy('createdAt', 'desc')
+                // .orderBy('createdAt', 'desc') // DÜZELTİLDİ: Firestore index hatasını önlemek için kaldırıldı.
                 .limit(1)
                 .get();
 
@@ -731,6 +732,8 @@ Kurallar:
                     birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }, { merge: true });
 
+                userHasBirthInfo = true; // EKLENEN SATIR: Kaydedildikten sonra kullanıcı verisi var kabul edilir.
+
                 msg.textContent = 'Kaydedildi! Yorum hazırlanıyor...';
                 msg.className = 'birth-msg success';
 
@@ -761,6 +764,9 @@ Kurallar:
             }
 
             const sign = getZodiacSign(birthInfo.day, birthInfo.month);
+            
+            showHoroscopeLoading(); // EKLENEN SATIR: Veri tabanından veya API'den veri çekerken ilk önce animasyon başlasın.
+
             const todayHoroscope = await loadTodayHoroscope(userId);
 
             if (todayHoroscope) {
@@ -768,7 +774,6 @@ Kurallar:
                 updateHoroscopeUI(todayHoroscope.sign, todayHoroscope.text, todayStr);
             } else {
                 // Bugün için yorum yok → Gemini'den çek
-                showHoroscopeLoading();
                 try {
                     const signEn = getZodiacSignEn(sign);
                     const aiText = await fetchHoroscopeFromGemini(sign, signEn);
@@ -808,7 +813,13 @@ Kurallar:
             // Burç yorumunu otomatik yükle
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                const birthInfo = userDoc.exists && userDoc.data().birthInfo;
+                const birthInfo = userDoc.exists ? userDoc.data().birthInfo : null; // DÜZELTİLDİ
+
+                // EKLENEN BLOK: Eğer kullanıcının kayıtlı doğum bilgisi varsa doğrula
+                if (birthInfo && birthInfo.day && birthInfo.month) {
+                    userHasBirthInfo = true;
+                }
+
                 await loadAndShowHoroscope(user.uid, birthInfo);
             } catch (e) {
                 console.log('Horoscope load error:', e);
@@ -896,9 +907,11 @@ Kurallar:
             window.location.href = 'result.html';
         });
 
-        // Günlük Burç alanına tıklayınca → doğum tarihi modalı aç
+        // Günlük Burç alanına tıklayınca → EĞER VERİ YOKSA doğum tarihi modalı aç (DÜZELTİLDİ)
         document.getElementById('horoscopeOption').addEventListener('click', function() {
-            openBirthModal();
+            if (!userHasBirthInfo) {
+                openBirthModal();
+            }
         });
 
         let currentReadingType = null;
