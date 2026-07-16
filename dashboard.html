@@ -87,7 +87,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .card-area.locked {
-            opacity: 0.5;
+            /* opacity tamamen kaldırıldı */
             cursor: not-allowed;
         }
         .area-img-box {
@@ -104,7 +104,6 @@
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            /* opacity: 0.9 kaldırıldı, artık tam renkli ve net */
             filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
         }
         #threeCardOption .area-img {
@@ -164,19 +163,19 @@
             font-weight: 700;
             color: #111111;
             line-height: 1.3;
-            text-align: center; /* Başlık ortalı kalsın */
+            text-align: center;
         }
         .horoscope-desc {
-            font-size: 0.85rem; /* Biraz büyütüldü rahat okunması için */
+            font-size: 0.85rem;
             color: #333333;
             line-height: 1.45;
-            text-align: justify; /* İçerik iki yana yaslandı */
+            text-align: justify;
         }
         .horoscope-date {
             font-size: 0.75rem;
             color: #888;
             margin-top: 2px;
-            text-align: right; /* Tarihi sağa aldık estetik dursun diye */
+            text-align: right;
         }
 
         /* ---- Alt navigasyon ---- */
@@ -546,7 +545,7 @@
         }
 
         let cooldownRemaining = '';
-        let userBirthInfo = null; // Doğum bilgisini global olarak tutuyoruz
+        let userBirthInfo = null;
 
         function lockCards(message) {
             const singleCard = document.getElementById('singleCardOption');
@@ -704,9 +703,8 @@ Kurallar:
         // ===== DOĞUM TARİHİ MODAL =====
         function openBirthModal() {
             const msg = document.getElementById('birthModalMsg');
-            msg.textContent = ''; // Eski mesajı temizle
+            msg.textContent = ''; 
             
-            // Eğer daha önceden kayıtlı veri varsa kutucuklara doldur
             if (userBirthInfo) {
                 document.getElementById('birthModalDay').value = userBirthInfo.day || '';
                 document.getElementById('birthModalMonth').value = userBirthInfo.month || '';
@@ -740,19 +738,17 @@ Kurallar:
             }
 
             try {
-                // Sadece doğum bilgisini güncelle
                 await db.collection('users').doc(user.uid).set({
                     birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }, { merge: true });
 
-                userBirthInfo = { day: day, month: month, year: year }; // Global değişkeni güncelle
+                userBirthInfo = { day: day, month: month, year: year }; 
 
                 msg.textContent = 'Kaydedildi! Yorum hazırlanıyor...';
                 msg.className = 'birth-msg success';
 
                 closeBirthModal();
 
-                // Burç hesapla ve yorum al
                 const sign = getZodiacSign(day, month);
                 const signEn = getZodiacSignEn(sign);
                 showHoroscopeLoading();
@@ -786,7 +782,6 @@ Kurallar:
                 const todayStr = new Date().toLocaleDateString('tr-TR');
                 updateHoroscopeUI(todayHoroscope.sign, todayHoroscope.text, todayStr);
             } else {
-                // Bugün için yorum yok → Gemini'den çek
                 try {
                     const signEn = getZodiacSignEn(sign);
                     const aiText = await fetchHoroscopeFromGemini(sign, signEn);
@@ -823,13 +818,12 @@ Kurallar:
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
 
-            // Burç yorumunu ve kullanıcı bilgilerini yükle
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 const birthInfo = userDoc.exists ? userDoc.data().birthInfo : null;
 
                 if (birthInfo && birthInfo.day && birthInfo.month) {
-                    userBirthInfo = birthInfo; // Global değişkene ata
+                    userBirthInfo = birthInfo; 
                 }
 
                 await loadAndShowHoroscope(user.uid, birthInfo);
@@ -919,7 +913,6 @@ Kurallar:
             window.location.href = 'result.html';
         });
 
-        // Günlük Burç alanına tıklayınca -> Veri olsa da olmasa da modalı aç
         document.getElementById('horoscopeOption').addEventListener('click', function() {
             openBirthModal();
         });
