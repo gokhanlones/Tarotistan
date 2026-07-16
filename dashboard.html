@@ -838,16 +838,18 @@ Kurallar:
 
         async function checkLastReading(userId) {
             try {
+                // 1. Önbellek (Cache) Kontrolü: Hızlı UI tepkisi için anında kilitle
                 const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
                 if (cachedTime) {
                     const cachedTimestamp = parseInt(cachedTime);
                     if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
                         const remaining = formatRemainingTime(new Date(cachedTimestamp));
                         lockCards(remaining);
-                        return;
+                        // Erken return kaldırıldı. 
                     }
                 }
 
+                // 2. Veritabanı Kontrolü: Gerçek durumu ve yapay zeka yorumunu sorgula
                 const lastQuery = await db.collection('users').doc(userId)
                     .collection('readings')
                     .orderBy('createdAt', 'desc')
@@ -859,31 +861,36 @@ Kurallar:
                 if (!lastQuery.empty) {
                     const lastData = lastQuery.docs[0].data();
 
+                    // Yorum var mı ve son 24 saat içinde mi yapılmış?
                     if (lastData.aiInterpretation && lastData.aiInterpretation.trim() !== '' &&
                         lastData.createdAt && isWithin24h(lastData.createdAt)) {
                         hasValidAiComment = true;
                     }
 
+                    // Son 24 saat içindeyse süreyi veritabanındaki kesin saatle güncelle ve kilitle
                     if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
                         const remaining = formatRemainingTime(lastData.createdAt);
-                        lockCards(remaining);
+                        lockCards(remaining); 
                     }
                 }
 
+                // 3. İkon Görünürlüğünü Ayarla
                 const topbarIcon = document.getElementById('topbarIcon');
                 if (hasValidAiComment) {
-                    topbarIcon.classList.remove('hidden');
+                    topbarIcon.classList.remove('hidden'); // Yorum varsa ikonu göster
                 } else {
-                    topbarIcon.classList.add('hidden');
+                    topbarIcon.classList.add('hidden');    // Yorum yoksa ikonu gizle
                 }
 
+                // 4. Eğer 24 saat dolmamışsa işlemi burada bitir
                 if (!lastQuery.empty) {
                     const lastData = lastQuery.docs[0].data();
                     if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
-                        return;
+                        return; 
                     }
                 }
 
+                // 5. Veritabanında kayıt yoksa veya 24 saat dolmuşsa kartların kilidini aç
                 unlockCards();
 
             } catch (e) {
