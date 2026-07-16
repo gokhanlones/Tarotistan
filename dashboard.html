@@ -133,8 +133,9 @@
         /* ---- Günlük Burç Alanı ---- */
         .horoscope-area {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 6px;
             min-height: 100px;
             border: 1.5px solid #c8c8c8;
             border-radius: 14px;
@@ -151,25 +152,11 @@
         .horoscope-area.loading {
             cursor: wait;
         }
-        .horoscope-icon-box {
-            width: 88px;
-            height: 88px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .horoscope-icon {
-            width: 48px;
-            height: 48px;
-            opacity: 0.9;
-        }
         .horoscope-text {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            flex: 1;
+            width: 100%;
             text-align: center;
             justify-content: center;
         }
@@ -457,15 +444,8 @@
             </div>
         </div>
 
-        <!-- Günlük Burç Yorumu -->
+        <!-- Günlük Burç Yorumu - İKON KALDIRILDI -->
         <div class="horoscope-area" id="horoscopeOption">
-            <div class="horoscope-icon-box">
-                <svg class="horoscope-icon" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-                    <path d="M2 12h20"/>
-                </svg>
-            </div>
             <div class="horoscope-text">
                 <div class="horoscope-title" id="horoscopeTitle"></div>
                 <div class="horoscope-desc" id="horoscopeDesc"></div>
