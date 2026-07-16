@@ -71,17 +71,19 @@
 
         /* ---- Kart Alanı ---- */
         .card-area {
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 16px;
-            min-height: 120px;
+            justify-content: center;
+            min-height: 130px;
             border: 1.5px solid #c8c8c8;
             border-radius: 14px;
             padding: 14px 16px;
             background: #ffffff;
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
-        }
+            overflow: hidden;
+            }
         .card-area:active {
             transform: scale(0.98);
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -110,24 +112,27 @@
          height: 96px;   /* 76 → 96 */
          }
         .area-text {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            text-align: center;
-            justify-content: center;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+    width: 100%;
+    padding: 0 12px;
         }
         .area-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #111111;
-            line-height: 1.3;
-        }
-        .area-desc {
-            font-size: 0.82rem;
-            color: #333333;
-            line-height: 1.45;
-        }
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+}
+.area-desc {
+    font-size: 0.82rem;
+    color: #ffffff;
+    line-height: 1.45;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+}
 
         /* ---- Günlük Burç Alanı ---- */
         .horoscope-area {
