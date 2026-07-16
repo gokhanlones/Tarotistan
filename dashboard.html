@@ -573,43 +573,43 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="horoscope-modal-title" id="horoscopeModalTitle">Günlük Burç Yorumu</div>
+                    <div class="horoscope-modal-title" id="horoscopeModalTitle"></div>
                     <div class="horoscope-modal-sign" id="horoscopeModalSign"></div>
                 </div>
             </div>
             <div class="horoscope-modal-content" id="horoscopeModalContent">
                 <div class="horoscope-spinner"></div>
             </div>
-            <button class="horoscope-modal-close" id="horoscopeModalCloseBtn">Kapat</button>
+            <button class="horoscope-modal-close" id="horoscopeModalCloseBtn"></button>
         </div>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
+        <div class="sidebar-header" id="sidebarHeader"></div>
         <div class="sidebar-menu">
             <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
-                <span id="sidebarCardsText">Kartlar</span>
+                <span id="sidebarCardsText"></span>
             </div>
             <div class="sidebar-item" id="sidebarBirthItem">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <span id="sidebarBirthText">Doğum Bilgileri</span>
+                <span id="sidebarBirthText"></span>
             </div>
             <div class="birth-form-section" id="birthFormSection">
-                <div class="birth-form-title" id="birthFormTitle">Doğum Tarihi</div>
+                <div class="birth-form-title" id="birthFormTitle"></div>
                 <div class="birth-form-row">
-                    <input type="number" class="birth-input" id="birthDay" min="1" max="31" placeholder="Gün">
-                    <input type="number" class="birth-input" id="birthMonth" min="1" max="12" placeholder="Ay">
-                    <input type="number" class="birth-input" id="birthYear" min="1900" max="2026" placeholder="Yıl">
+                    <input type="number" class="birth-input" id="birthDay" min="1" max="31" placeholder="">
+                    <input type="number" class="birth-input" id="birthMonth" min="1" max="12" placeholder="">
+                    <input type="number" class="birth-input" id="birthYear" min="1900" max="2026" placeholder="">
                 </div>
-                <button class="birth-btn" id="birthSaveBtn">Kaydet</button>
+                <button class="birth-btn" id="birthSaveBtn"></button>
                 <div class="birth-msg" id="birthMsg"></div>
             </div>
             <div class="sidebar-item" onclick="logout()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span id="sidebarLogoutText">Çıkış</span>
+                <span id="sidebarLogoutText"></span>
             </div>
         </div>
     </div>
@@ -760,7 +760,6 @@ Kurallar:
                 const lastDoc = lastQuery.docs[0];
                 const lastData = lastDoc.data();
                 if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
-                    // 24 saat geçmemiş → güncelle
                     await lastDoc.ref.update({
                         text: text,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -768,7 +767,6 @@ Kurallar:
                     return lastDoc.id;
                 }
             }
-            // Yeni kayıt
             const docRef = await horoscopeRef.add(data);
             return docRef.id;
         }
@@ -793,10 +791,10 @@ Kurallar:
             const descEl = document.getElementById('horoscopeDesc');
             const statusEl = document.getElementById('horoscopeStatus');
 
-            titleEl.textContent = sign + ' - Günlük Burç';
+            titleEl.textContent = sign + ' - ' + t('dailyHoroscopeAreaTitle');
             descEl.textContent = text.substring(0, 80) + (text.length > 80 ? '...' : '');
-            statusEl.textContent = cached ? 'Önbellekten' : '';
-            statusEl.classList.remove('hidden');
+            statusEl.textContent = cached ? t('dailyHoroscopeCached') : '';
+            statusEl.classList.toggle('hidden', !cached);
         }
 
         // ===== BURÇ YORUMU MODAL AÇ =====
@@ -813,13 +811,12 @@ Kurallar:
             content.classList.add('loading');
 
             try {
-                // Önce doğum bilgisini kontrol et
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 const birthInfo = userDoc.exists && userDoc.data().birthInfo;
 
                 if (!birthInfo || !birthInfo.day || !birthInfo.month) {
                     content.classList.remove('loading');
-                    content.textContent = 'Doğum bilgileriniz eksik. Lütfen sidebar\'dan doğum tarihinizi girin.';
+                    content.textContent = t('dailyHoroscopeNoBirthInfo');
                     signEl.textContent = '';
                     return;
                 }
@@ -828,11 +825,9 @@ Kurallar:
                 const signEn = getZodiacSignEn(sign);
                 signEl.textContent = sign + ' (' + signEn + ')';
 
-                // Önce cache kontrolü
                 let horoscopeData = await loadHoroscope(user.uid);
 
                 if (!horoscopeData) {
-                    // Cache yoksa veya 24 saat geçmişse → Gemini'den çek
                     const aiText = await fetchHoroscopeFromGemini(sign, signEn);
                     await saveOrUpdateHoroscope(user.uid, sign, aiText);
                     horoscopeData = { text: aiText, sign: sign, cached: false };
@@ -844,7 +839,7 @@ Kurallar:
 
             } catch (err) {
                 content.classList.remove('loading');
-                content.textContent = 'Yorum alınırken bir hata oluştu: ' + err.message;
+                content.textContent = t('dailyHoroscopeError') + ': ' + err.message;
             }
         }
 
@@ -858,6 +853,7 @@ Kurallar:
                 return;
             }
 
+            // Dil metinlerini uygula
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
             document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
             document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
@@ -872,9 +868,17 @@ Kurallar:
             document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
             document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+            document.getElementById('sidebarHeader').textContent = t('appName');
             document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
             document.getElementById('sidebarBirthText').textContent = t('sidebarBirthInfo');
             document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+            document.getElementById('birthFormTitle').textContent = t('birthInfoTitle');
+            document.getElementById('birthSaveBtn').textContent = t('birthSaveBtn');
+            document.getElementById('birthDay').placeholder = t('birthDay');
+            document.getElementById('birthMonth').placeholder = t('birthMonth');
+            document.getElementById('birthYear').placeholder = t('birthYear');
+            document.getElementById('horoscopeModalTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeModalCloseBtn').textContent = t('closeBtn');
 
             // Doğum bilgisi varsa burç alanını güncelle
             try {
@@ -886,7 +890,7 @@ Kurallar:
                     if (cached) {
                         updateHoroscopeUI(sign, cached.text, true);
                     } else {
-                        document.getElementById('horoscopeDesc').textContent = sign + ' - Yorum için dokunun';
+                        document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeTapToView');
                     }
                 }
             } catch (e) {}
@@ -997,7 +1001,7 @@ Kurallar:
             const msg = document.getElementById('birthMsg');
 
             if (!day || !month || !year) {
-                msg.textContent = 'Lütfen tüm alanları doldurun.';
+                msg.textContent = t('birthRequired');
                 msg.className = 'birth-msg error';
                 return;
             }
@@ -1006,13 +1010,12 @@ Kurallar:
                 await db.collection('users').doc(user.uid).set({
                     birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }, { merge: true });
-                msg.textContent = 'Kaydedildi!';
+                msg.textContent = t('birthSaved');
                 msg.className = 'birth-msg success';
 
-                // Burç alanını güncelle
                 const sign = getZodiacSign(day, month);
-                document.getElementById('horoscopeTitle').textContent = sign + ' - Günlük Burç';
-                document.getElementById('horoscopeDesc').textContent = 'Yorum için dokunun';
+                document.getElementById('horoscopeTitle').textContent = sign + ' - ' + t('dailyHoroscopeAreaTitle');
+                document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeTapToView');
 
                 setTimeout(() => { msg.textContent = ''; }, 2000);
             } catch (err) {
@@ -1021,7 +1024,6 @@ Kurallar:
             }
         });
 
-        // Forma mevcut veriyi yükle
         async function loadBirthInfoToForm() {
             const user = auth.currentUser;
             if (!user) return;
