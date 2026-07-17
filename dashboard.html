@@ -437,7 +437,8 @@
         <div class="card-area" id="singleCardOption">
             <div class="single-card-container">
                 <img src="onecard.png" class="single-card-img" alt="Tek Kart">
-                <div class="single-card-desc" id="singleCardLabel">Aklındaki sorunun cevabı</div>
+                <!-- ID KALDIRILDI Kİ lang.js TARAFINDAN EZİLMESİN -->
+                <div class="single-card-desc">Aklındaki sorunun cevabı</div>
             </div>
         </div>
 
@@ -815,14 +816,8 @@ Kurallar:
                 return;
             }
 
-            // Çeviriler ve statik metin atamaları (Eski başlıklar kaldırıldı)
+            // Çeviriler ve statik metin atamaları
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
-            
-            // Eğer dil dosyanızdan (lang.js) besleniyorsa singleCardLabel'i buradan alacak.
-            if(document.getElementById('singleCardLabel')) {
-                document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-            }
-            
             document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
             document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
             document.getElementById('intentTitle').textContent = t('intentTitle');
