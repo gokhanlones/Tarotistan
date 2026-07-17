@@ -69,67 +69,71 @@
             margin: 0 auto;
         }
 
-        /* ---- Kart Alanı ---- */
+        /* ---- Yeni Kart Alanı Düzeni ---- */
         .card-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 180px;
-    border: 1.5px solid #c8c8c8;
-    border-radius: 14px;
-    padding: 10px 16px;
-    background: #ffffff;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-}
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+            border: 1.5px solid #c8c8c8;
+            border-radius: 14px;
+            padding: 16px 20px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
 
-.area-img-box {
-    flex-shrink: 0;
-    width: 110px;
-    height: 150px;
-}
+        /* Tek Kart İçin */
+        .single-card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .single-card-img {
+            width: 90px;
+            height: 130px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+        }
+        .single-card-desc {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #111111;
+            text-align: center;
+        }
 
-.area-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: left center;
-    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-}
-
-#threeCardOption .area-img-box {
-    width: 121px;
-    height: 158px;
-}
-#singleCardOption .area-img-box {
-    width: 90px;
-    height: 130px;
-}
-
-.area-text {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.area-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #111111;
-    line-height: 1.3;
-}
-
-.area-desc {
-    font-size: 0.82rem;
-    color: #333333;
-    line-height: 1.45;
-}
+        /* Üç Kart İçin */
+        .three-cards-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            gap: 10px;
+        }
+        .card-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .three-card-img {
+            width: 100%;
+            max-width: 80px;
+            aspect-ratio: 90/130;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+        }
+        .card-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #333333;
+            text-align: center;
+            line-height: 1.2;
+        }
 
         /* ---- Günlük Burç Alanı ---- */
         .horoscope-area {
@@ -138,10 +142,10 @@
             align-items: center;
             gap: 6px;
             min-height: 100px;
-            border: 1.5px solid #ffffff; /* Kenarlık rengi beyaz yapıldı */
+            border: 1.5px solid #ffffff;
             border-radius: 14px;
             padding: 14px 16px;
-            background: #cfebff; /* Arka plan rengi güncellendi */
+            background: #cfebff;
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
             margin-top: 8px;
@@ -431,19 +435,27 @@
     <div class="content">
         <!-- Tek Kart -->
         <div class="card-area" id="singleCardOption">
-            <div class="area-img-box"><img src="onecard.png" class="area-img" alt=""></div>
-            <div class="area-text">
-                <div class="area-title" id="singleCardTitle"></div>
-                <div class="area-desc" id="singleCardLabel"></div>
+            <div class="single-card-container">
+                <img src="onecard.png" class="single-card-img" alt="Tek Kart">
+                <div class="single-card-desc" id="singleCardLabel">Aklındaki sorunun cevabı</div>
             </div>
         </div>
 
         <!-- Üç Kart -->
         <div class="card-area" id="threeCardOption">
-            <div class="area-img-box"><img src="threecards.png" class="area-img" alt=""></div>
-            <div class="area-text">
-                <div class="area-title" id="threeCardTitle"></div>
-                <div class="area-desc" id="threeCardLabel"></div>
+            <div class="three-cards-container">
+                <div class="card-col">
+                    <img src="onecard.png" class="three-card-img" alt="Geçmiş">
+                    <div class="card-label">Geçmiş</div>
+                </div>
+                <div class="card-col">
+                    <img src="onecard.png" class="three-card-img" alt="Şimdi">
+                    <div class="card-label">Şimdi</div>
+                </div>
+                <div class="card-col">
+                    <img src="onecard.png" class="three-card-img" alt="Gelecek">
+                    <div class="card-label">Gelecek</div>
+                </div>
             </div>
         </div>
 
@@ -803,11 +815,14 @@ Kurallar:
                 return;
             }
 
+            // Çeviriler ve statik metin atamaları (Eski başlıklar kaldırıldı)
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
-            document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
-            document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-            document.getElementById('threeCardTitle').innerHTML = t('threeCardTitle').replace(/, /g, '<br>');
-            document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
+            
+            // Eğer dil dosyanızdan (lang.js) besleniyorsa singleCardLabel'i buradan alacak.
+            if(document.getElementById('singleCardLabel')) {
+                document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
+            }
+            
             document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
             document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
             document.getElementById('intentTitle').textContent = t('intentTitle');
@@ -847,7 +862,6 @@ Kurallar:
                     if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
                         const remaining = formatRemainingTime(new Date(cachedTimestamp));
                         lockCards(remaining);
-                        // Erken return kaldırıldı. 
                     }
                 }
 
