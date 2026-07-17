@@ -806,7 +806,7 @@ Kurallar:
             document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
             document.getElementById('singleCardTitle').textContent = t('singleCardTitle');
             document.getElementById('singleCardLabel').textContent = t('singleCardLabel');
-            document.getElementById('threeCardTitle').textContent = t('threeCardTitle');
+            document.getElementById('threeCardTitle').innerHTML = t('threeCardTitle').replace(/, /g, '<br>');
             document.getElementById('threeCardLabel').textContent = t('threeCardLabel');
             document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
             document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
