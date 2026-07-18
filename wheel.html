@@ -61,7 +61,7 @@
             left: 0; right: 0;
             display: flex;
             justify-content: center;
-            align-items: center; /* Çerçeveyi dikeyde ortalar */
+            align-items: center;
             background: #ffffff;
             isolation: isolate;
         }
@@ -71,7 +71,7 @@
             position: relative;
             width: 190px;
             height: 310px;
-            overflow: hidden; /* Çerçeve dışındaki kartları gizler */
+            overflow: hidden;
             border-radius: 12px;
         }
 
@@ -79,7 +79,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 190px; height: 310px; /* Büyütüldü */
+            width: 190px; height: 310px;
             border: 3px solid #D4AF37;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
@@ -95,7 +95,7 @@
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
-            height: 15%; /* Slot penceresi içinde hafif gölge */
+            height: 15%;
             pointer-events: none;
             z-index: 140;
         }
@@ -110,9 +110,9 @@
 
         .wheel-card {
             position: absolute;
-            width: 160px; height: 270px; /* Kartlar büyütüldü */
+            width: 160px; height: 270px;
             left: 50%;
-            margin-left: -80px; /* Ortalama (width/2) */
+            margin-left: -80px;
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
             will-change: transform, opacity;
@@ -340,7 +340,6 @@
     <!-- Çark alanı -->
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter"></div>
-        <!-- Kartların dışarı taşmasını engelleyen maske (slot) -->
         <div class="slot-window" id="slotWindow">
             <div class="fade-top"></div>
             <div class="fade-bottom"></div>
@@ -447,9 +446,9 @@
 
         /* ---- Çark mekanizması ---- */
         const touchArea  = document.getElementById('wheelTouchArea');
-        const container  = document.getElementById('slotWindow'); // Kartlar maskenin (slot'un) içine ekleniyor
+        const container  = document.getElementById('slotWindow');
         const numCards   = 78;
-        const cardHeight = 280; // Kartlar arası mesafe büyütüldü
+        const cardHeight = 280; 
         const totalHeight = numCards * cardHeight;
 
         let cards       = [];
@@ -462,7 +461,6 @@
         let hasSpun     = false;
         let isIntentSet = false;
 
-        // Seçilen kart verisi (rastgele atanacak)
         let drawnCard   = null;
 
         for (let i = 0; i < numCards; i++) {
@@ -476,7 +474,7 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (270 / 2); // 270 kartın yeni yüksekliği
+            const centerY    = containerH / 2 - (270 / 2); 
             let minOffset    = Infinity;
             let activeIndex  = -1;
 
@@ -525,10 +523,11 @@
             } else {
                 if (!isSnapping) {
                     offsetY  += velocity;
-                    // Sürtünmeyi (0.92'den 0.97'ye) düşürdüm. Artık çok daha uzun süre dönüyor.
-                    velocity *= 0.97; 
+                    // Sürtünme neredeyse sıfırlandı: Çok daha uzun süre dönecek
+                    velocity *= 0.985; 
 
-                    if (Math.abs(velocity) < 0.5 && hasSpun) {
+                    // Hız 1.5'in altına düşene kadar çark durmuyor
+                    if (Math.abs(velocity) < 1.5 && hasSpun) {
                         velocity   = 0;
                         isSnapping = true;
                     }
@@ -566,8 +565,6 @@
         renderCards();
         requestAnimationFrame(animate);
 
-        /* ---- Dokunma / fare olayları ---- */
-        // Yalnızca ortadaki aktif alan üzerinden işlem yapmak için genişlik toleransı artırıldı (120px)
         function inCardZone(clientX) {
             const rect    = touchArea.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
@@ -598,14 +595,18 @@
             isDragging = false;
             
             if (hasSpun) {
-                // Parmağı çektiğiniz andaki momentumu artırdım.
-                if (Math.abs(velocity) < 5) {
-                    // Yavaşça itilirse bile minimum hız uygulayarak çok dönmesini sağla
-                    velocity = (velocity >= 0 ? 35 : -35); 
+                // Hızı uçurduğumuz bölüm
+                if (Math.abs(velocity) < 10) {
+                    // Çok hafif itilse bile devasa bir güçle fırlat (78 kartı geçmesi için)
+                    velocity = (velocity >= 0 ? 80 : -80); 
                 } else {
-                    // Hızlıca kaydırıldıysa mevcut hızı katla
-                    velocity *= 2.5; 
+                    // Güçlü itildiyse hızı 4'e katla
+                    velocity *= 4; 
                 }
+
+                // Görüntünün bozulmaması ve kartların atlamaması için maksimum hız sınırı
+                if (velocity > 150) velocity = 150;
+                if (velocity < -150) velocity = -150;
             }
         }
 
