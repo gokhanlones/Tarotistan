@@ -66,7 +66,6 @@
             isolation: isolate;
         }
 
-        /* Sadece çerçevenin içini gösteren yeni maske alanı */
         .slot-window {
             position: relative;
             width: 190px;
@@ -193,68 +192,6 @@
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
         .send-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* ---- Seçim overlay ---- */
-        .selection-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.75);
-            display: none;
-            align-items: center; justify-content: center;
-            z-index: 250;
-            backdrop-filter: blur(5px);
-        }
-        .selection-overlay.active { display: flex; }
-        .selected-card-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            animation: cardReveal 0.5s ease-out;
-        }
-        @keyframes cardReveal {
-            from { opacity: 0; transform: scale(0.5) translateY(30px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .selected-card-display img {
-            width: 120px; height: 200px;
-            border-radius: 10px;
-            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
-        }
-        .selected-card-name {
-            font-size: 1.3rem;
-            color: #D4AF37;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-        .selected-card-badge {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: -8px;
-        }
-        .selected-card-meaning {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.75);
-            text-align: center;
-            max-width: 280px;
-            padding: 0 16px;
-            line-height: 1.5;
-        }
-        .continue-btn {
-            margin-top: 8px;
-            padding: 12px 32px;
-            background: #D4AF37;
-            border: none;
-            border-radius: 25px;
-            color: #000;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: transform 0.2s ease;
-        }
-        .continue-btn:active { transform: scale(0.95); }
-
         /* ---- Sidebar ---- */
         .sidebar-overlay {
             position: fixed; inset: 0;
@@ -357,22 +294,11 @@
     <div class="modal-overlay" id="intentOverlay">
         <div class="modal-box">
             <div class="modal-title" id="intentTitle">Niyet</div>
-            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3" id="intentPlaceholder"></textarea>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
             <div class="char-counter" id="charCounter">0/200</div>
             <button class="send-btn" id="sendIntentBtn" disabled>
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
-        </div>
-    </div>
-
-    <!-- Seçim overlay -->
-    <div class="selection-overlay" id="selectionOverlay">
-        <div class="selected-card-display">
-            <img id="selectedCardImg" src="onecard.png" alt="Seçilen Kart">
-            <div class="selected-card-name" id="selectedCardName">···</div>
-            <div class="selected-card-badge" id="selectedCardBadge"></div>
-            <div class="selected-card-meaning" id="selectedCardMeaning"></div>
-            <button class="continue-btn" id="continueBtn"></button>
         </div>
     </div>
 
@@ -406,7 +332,6 @@
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
-        document.getElementById('continueBtn').textContent  = typeof t === 'function' ? t('continueButton') : 'Devam Et';
         document.getElementById('intentInput').placeholder  = lang === 'tr'
             ? 'Sorunuzu veya niyetinizi buraya yazın...'
             : 'Write your question or intention here...';
@@ -437,13 +362,6 @@
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
-        /* ---- tarot_cards.json yükleme ---- */
-        let tarotData = null;
-        fetch('tarot_cards.json')
-            .then(r => r.json())
-            .then(data => { tarotData = data; })
-            .catch(e => console.warn('tarot_cards.json yüklenemedi:', e));
-
         /* ---- Çark mekanizması ---- */
         const touchArea  = document.getElementById('wheelTouchArea');
         const container  = document.getElementById('slotWindow');
@@ -460,8 +378,6 @@
         let snapDone    = false;
         let hasSpun     = false;
         let isIntentSet = false;
-
-        let drawnCard   = null;
 
         for (let i = 0; i < numCards; i++) {
             const img = document.createElement('img');
@@ -523,10 +439,8 @@
             } else {
                 if (!isSnapping) {
                     offsetY  += velocity;
-                    // Sürtünme neredeyse sıfırlandı: Çok daha uzun süre dönecek
                     velocity *= 0.985; 
 
-                    // Hız 1.5'in altına düşene kadar çark durmuyor
                     if (Math.abs(velocity) < 1.5 && hasSpun) {
                         velocity   = 0;
                         isSnapping = true;
@@ -550,7 +464,17 @@
                         }
 
                         if (navigator.vibrate) navigator.vibrate(50);
-                        setTimeout(() => showSelectionOverlay(), 500);
+                        
+                        // Kartı seçip tam 1 saniye (1000ms) sonra yönlendirme yapıyoruz
+                        setTimeout(() => {
+                            const randId = Math.floor(Math.random() * 78);
+                            const randReversed = Math.random() < 0.5;
+                            const drawnCard = { id: randId, reversed: randReversed };
+                            
+                            sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
+                            sessionStorage.setItem('tarotReadingType', 'single');
+                            window.location.href = 'ad.html';
+                        }, 1000);
                     }
                 }
             }
@@ -595,16 +519,11 @@
             isDragging = false;
             
             if (hasSpun) {
-                // Hızı uçurduğumuz bölüm
                 if (Math.abs(velocity) < 10) {
-                    // Çok hafif itilse bile devasa bir güçle fırlat (78 kartı geçmesi için)
                     velocity = (velocity >= 0 ? 80 : -80); 
                 } else {
-                    // Güçlü itildiyse hızı 4'e katla
                     velocity *= 4; 
                 }
-
-                // Görüntünün bozulmaması ve kartların atlamaması için maksimum hız sınırı
                 if (velocity > 150) velocity = 150;
                 if (velocity < -150) velocity = -150;
             }
@@ -661,52 +580,6 @@
             closeIntentModal();
         });
 
-        /* ---- Seçim overlay ---- */
-        const selectionOverlay   = document.getElementById('selectionOverlay');
-        const selectedCardName   = document.getElementById('selectedCardName');
-        const selectedCardBadge  = document.getElementById('selectedCardBadge');
-        const selectedCardMeaning = document.getElementById('selectedCardMeaning');
-
-        function showSelectionOverlay() {
-            const randId       = Math.floor(Math.random() * 78);
-            const randReversed = Math.random() < 0.5;
-            drawnCard = { id: randId, reversed: randReversed };
-
-            if (tarotData) {
-                const cardInfo = tarotData.cards.find(c => c.id === randId);
-                if (cardInfo) {
-                    const name    = lang === 'tr' ? cardInfo.name_tr : cardInfo.name_en;
-                    const meaning = randReversed ? cardInfo.reversed_meaning : cardInfo.upright_meaning;
-                    const excerpt = meaning.length > 100
-                        ? meaning.substring(0, 100).trim() + '...'
-                        : meaning;
-
-                    selectedCardName.textContent  = name;
-                    selectedCardBadge.textContent = randReversed
-                        ? (lang === 'tr' ? '— TERS —' : '— REVERSED —')
-                        : (lang === 'tr' ? '— DÜZ —'  : '— UPRIGHT —');
-                    selectedCardMeaning.textContent = excerpt;
-                } else {
-                    selectedCardName.textContent    = '···';
-                    selectedCardBadge.textContent   = '';
-                    selectedCardMeaning.textContent = '';
-                }
-            } else {
-                selectedCardName.textContent    = '···';
-                selectedCardBadge.textContent   = '';
-                selectedCardMeaning.textContent = '';
-            }
-
-            selectionOverlay.classList.add('active');
-        }
-
-        /* ---- Devam Et → ad.html ---- */
-        document.getElementById('continueBtn').addEventListener('click', function () {
-            if (!drawnCard) return;
-            sessionStorage.setItem('tarotDrawnCards',  JSON.stringify([drawnCard]));
-            sessionStorage.setItem('tarotReadingType', 'single');
-            window.location.href = 'ad.html';
-        });
     </script>
 </body>
 </html>
