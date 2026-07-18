@@ -91,20 +91,21 @@
             50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
         }
 
+        /* Opaklık ve alan arttırıldı */
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
-            height: 15%;
+            height: 25%;
             pointer-events: none;
             z-index: 140;
         }
         .fade-top {
             top: 0;
-            background: linear-gradient(to bottom, #ffffff 0%, transparent 100%);
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
         }
         .fade-bottom {
             bottom: 0;
-            background: linear-gradient(to top, #ffffff 0%, transparent 100%);
+            background: linear-gradient(to top, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
         }
 
         .wheel-card {
@@ -407,7 +408,6 @@
                 if (dist === dist2) renderY = y - totalHeight;
                 if (dist === dist3) renderY = y + totalHeight;
 
-                const scale   = Math.max(0.6, 1 - dist * 0.0025);
                 const opacity = Math.max(0.15, 1 - dist * 0.0035);
                 const zIndex  = 100 - Math.floor(dist / 10);
 
@@ -415,7 +415,8 @@
                     card.style.display = 'none';
                 } else {
                     card.style.display    = 'block';
-                    card.style.transform  = `translateY(${renderY}px) scale(${scale})`;
+                    // Büyüyüp küçülme (scale) kaldırıldı, sadece düz hareket
+                    card.style.transform  = `translateY(${renderY}px)`;
                     card.style.opacity    = opacity;
                     card.style.zIndex     = zIndex;
                 }
@@ -465,7 +466,6 @@
 
                         if (navigator.vibrate) navigator.vibrate(50);
                         
-                        // Kartı seçip tam 1 saniye (1000ms) sonra yönlendirme yapıyoruz
                         setTimeout(() => {
                             const randId = Math.floor(Math.random() * 78);
                             const randReversed = Math.random() < 0.5;
