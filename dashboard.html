@@ -69,7 +69,7 @@
             margin: 0 auto;
         }
 
-        /* ---- Yeni Kart Alanı Düzeni ---- */
+        /* ---- Kart Alanı ---- */
         .card-area {
             display: flex;
             justify-content: flex-start;
@@ -108,35 +108,32 @@
             word-break: break-word;
         }
 
-        /* Üç Kart İçin */
-        .three-cards-container {
+        /* Üç Kart İçin - Tek görsel + yazılar */
+        .three-card-container {
             display: flex;
             flex-direction: row;
+            align-items: center;
             justify-content: flex-start;
-            align-items: center;
+            gap: 16px;
             width: 100%;
-            gap: 12px;
-        }
-        .card-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            flex: 0 0 auto;
         }
         .three-card-img {
-            width: 55px;
+            width: 120px;
             height: 80px;
             object-fit: contain;
             filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+            flex-shrink: 0;
         }
-        .card-label {
-            font-size: 0.75rem;
+        .three-card-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .three-card-labels span {
+            font-size: 0.85rem;
             font-weight: 700;
             color: #333333;
-            text-align: center;
-            line-height: 1.2;
-            white-space: nowrap;
+            line-height: 1.3;
         }
 
         /* ---- Günlük Burç Alanı ---- */
@@ -449,18 +446,10 @@
 
         <!-- Üç Kart -->
         <div class="card-area" id="threeCardOption">
-            <div class="three-cards-container">
-                <div class="card-col">
-                    <img src="threecards.png" class="three-card-img" alt="Geçmiş">
-                    <div class="card-label">Geçmiş</div>
-                </div>
-                <div class="card-col">
-                    <img src="threecards.png" class="three-card-img" alt="Şimdi">
-                    <div class="card-label">Şimdi</div>
-                </div>
-                <div class="card-col">
-                    <img src="threecards.png" class="three-card-img" alt="Gelecek">
-                    <div class="card-label">Gelecek</div>
+            <div class="three-card-container">
+                <img src="threecards.png" class="three-card-img" alt="Üç Kart">
+                <div class="three-card-labels">
+                    <span>Geçmiş - Şimdi - Gelecek</span>
                 </div>
             </div>
         </div>
