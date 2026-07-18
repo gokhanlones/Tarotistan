@@ -59,20 +59,28 @@
             top: 60px;
             bottom: 68px;
             left: 0; right: 0;
-            overflow: hidden;
             display: flex;
             justify-content: center;
+            align-items: center; /* Çerçeveyi dikeyde ortalar */
             background: #ffffff;
-            /* Kart z-index'lerini container içinde hapseder */
             isolation: isolate;
+        }
+
+        /* Sadece çerçevenin içini gösteren yeni maske alanı */
+        .slot-window {
+            position: relative;
+            width: 190px;
+            height: 310px;
+            overflow: hidden; /* Çerçeve dışındaki kartları gizler */
+            border-radius: 12px;
         }
 
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 110px; height: 170px;
-            border: 2px solid #D4AF37;
+            width: 190px; height: 310px; /* Büyütüldü */
+            border: 3px solid #D4AF37;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
             pointer-events: none;
@@ -87,8 +95,7 @@
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
-            height: 38%;
-            min-height: 140px;
+            height: 15%; /* Slot penceresi içinde hafif gölge */
             pointer-events: none;
             z-index: 140;
         }
@@ -103,9 +110,9 @@
 
         .wheel-card {
             position: absolute;
-            width: 90px; height: 150px;
+            width: 160px; height: 270px; /* Kartlar büyütüldü */
             left: 50%;
-            margin-left: -45px;
+            margin-left: -80px; /* Ortalama (width/2) */
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
             will-change: transform, opacity;
@@ -331,10 +338,13 @@
     </div>
 
     <!-- Çark alanı -->
-    <div class="wheel-container" id="wheelContainer">
-        <div class="fade-top"></div>
-        <div class="fade-bottom"></div>
+    <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter"></div>
+        <!-- Kartların dışarı taşmasını engelleyen maske (slot) -->
+        <div class="slot-window" id="slotWindow">
+            <div class="fade-top"></div>
+            <div class="fade-bottom"></div>
+        </div>
     </div>
 
     <!-- Alt nav -->
@@ -436,9 +446,10 @@
             .catch(e => console.warn('tarot_cards.json yüklenemedi:', e));
 
         /* ---- Çark mekanizması ---- */
-        const container  = document.getElementById('wheelContainer');
+        const touchArea  = document.getElementById('wheelTouchArea');
+        const container  = document.getElementById('slotWindow'); // Kartlar maskenin (slot'un) içine ekleniyor
         const numCards   = 78;
-        const cardHeight = 160;
+        const cardHeight = 280; // Kartlar arası mesafe büyütüldü
         const totalHeight = numCards * cardHeight;
 
         let cards       = [];
@@ -465,7 +476,7 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (150 / 2);
+            const centerY    = containerH / 2 - (270 / 2); // 270 kartın yeni yüksekliği
             let minOffset    = Infinity;
             let activeIndex  = -1;
 
@@ -521,7 +532,7 @@
                         isSnapping = true;
                     }
                 } else {
-                    const centerY     = containerH / 2 - (150 / 2);
+                    const centerY     = containerH / 2 - (270 / 2);
                     const floatSlot   = (centerY - offsetY) / cardHeight;
                     const targetSlot  = Math.round(floatSlot);
                     const targetOffY  = centerY - targetSlot * cardHeight;
@@ -555,11 +566,11 @@
         requestAnimationFrame(animate);
 
         /* ---- Dokunma / fare olayları ---- */
-        // Yalnızca kart kolonunun üzerindeki (yatayda merkez ±100px) dokunuşları kabul et
+        // Yalnızca ortadaki aktif alan üzerinden işlem yapmak için genişlik toleransı artırıldı (120px)
         function inCardZone(clientX) {
-            const rect    = container.getBoundingClientRect();
+            const rect    = touchArea.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
-            return Math.abs(clientX - centerX) <= 100;
+            return Math.abs(clientX - centerX) <= 120;
         }
 
         function handleStart(y, x) {
@@ -589,22 +600,22 @@
             }
         }
 
-        container.addEventListener('touchstart', e => {
+        touchArea.addEventListener('touchstart', e => {
             handleStart(e.touches[0].clientY, e.touches[0].clientX);
         }, { passive: false });
 
-        container.addEventListener('touchmove', e => {
+        touchArea.addEventListener('touchmove', e => {
             if (!isDragging) return;
             e.preventDefault();
             handleMove(e.touches[0].clientY);
         }, { passive: false });
 
-        container.addEventListener('touchend', handleEnd);
+        touchArea.addEventListener('touchend', handleEnd);
 
-        container.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
-        container.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
-        container.addEventListener('mouseup',    handleEnd);
-        container.addEventListener('mouseleave', handleEnd);
+        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
+        touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
+        touchArea.addEventListener('mouseup',    handleEnd);
+        touchArea.addEventListener('mouseleave', handleEnd);
 
         /* ---- Niyet modalı ---- */
         const intentOverlay = document.getElementById('intentOverlay');
@@ -647,12 +658,10 @@
         const selectedCardMeaning = document.getElementById('selectedCardMeaning');
 
         function showSelectionOverlay() {
-            // Rastgele kart ve yön belirle
             const randId       = Math.floor(Math.random() * 78);
             const randReversed = Math.random() < 0.5;
             drawnCard = { id: randId, reversed: randReversed };
 
-            // Kart verisini tarot_cards.json'dan al
             if (tarotData) {
                 const cardInfo = tarotData.cards.find(c => c.id === randId);
                 if (cardInfo) {
@@ -673,7 +682,6 @@
                     selectedCardMeaning.textContent = '';
                 }
             } else {
-                // JSON henüz yüklenmediyse minimal göster
                 selectedCardName.textContent    = '···';
                 selectedCardBadge.textContent   = '';
                 selectedCardMeaning.textContent = '';
@@ -685,12 +693,8 @@
         /* ---- Devam Et → ad.html ---- */
         document.getElementById('continueBtn').addEventListener('click', function () {
             if (!drawnCard) return;
-
-            // Kart verisini sessionStorage'a yaz (ad.html + result.html'in beklediği format)
             sessionStorage.setItem('tarotDrawnCards',  JSON.stringify([drawnCard]));
             sessionStorage.setItem('tarotReadingType', 'single');
-            // tarotIntent zaten niyet modalında kaydedildi
-
             window.location.href = 'ad.html';
         });
     </script>
