@@ -27,7 +27,7 @@
             background: #ffffff;
             display: flex; align-items: center;
             padding: 0 16px;
-            z-index: 10;
+            z-index: 110;
         }
         .hamburger-btn {
             width: 40px; height: 40px;
@@ -63,6 +63,8 @@
             display: flex;
             justify-content: center;
             background: #ffffff;
+            /* Kart z-index'lerini container içinde hapseder */
+            isolation: isolate;
         }
 
         .center-highlighter {
@@ -85,7 +87,8 @@
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
-            height: 100px;
+            height: 38%;
+            min-height: 140px;
             pointer-events: none;
             z-index: 140;
         }
@@ -96,23 +99,6 @@
         .fade-bottom {
             bottom: 0;
             background: linear-gradient(to top, #ffffff 0%, transparent 100%);
-        }
-
-        .swipe-instruction {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 1rem;
-            color: #888;
-            letter-spacing: 1px;
-            z-index: 150;
-            pointer-events: none;
-            animation: fadeInOut 3s ease-in-out infinite;
-        }
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0.4; }
-            50%       { opacity: 1; }
         }
 
         .wheel-card {
@@ -135,7 +121,7 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
             background: #ffffff;
-            z-index: 10;
+            z-index: 110;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -161,7 +147,7 @@
             display: none;
             align-items: flex-start; justify-content: center;
             padding: 76px 24px 0;
-            z-index: 100;
+            z-index: 200;
         }
         .modal-overlay.active { display: flex; }
         .modal-box {
@@ -348,7 +334,6 @@
     <div class="wheel-container" id="wheelContainer">
         <div class="fade-top"></div>
         <div class="fade-bottom"></div>
-        <div class="swipe-instruction" id="swipeInstruction"></div>
         <div class="center-highlighter"></div>
     </div>
 
@@ -412,13 +397,10 @@
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
-        document.getElementById('continueBtn').textContent    = typeof t === 'function' ? t('continueButton') : 'Devam Et';
-        document.getElementById('intentInput').placeholder   = lang === 'tr'
+        document.getElementById('continueBtn').textContent  = typeof t === 'function' ? t('continueButton') : 'Devam Et';
+        document.getElementById('intentInput').placeholder  = lang === 'tr'
             ? 'Sorunuzu veya niyetinizi buraya yazın...'
             : 'Write your question or intention here...';
-        document.getElementById('swipeInstruction').textContent = lang === 'tr'
-            ? 'Çevirmek için kaydırın'
-            : 'Swipe to spin';
 
         /* ---- Firebase ---- */
         const auth = firebase.auth();
@@ -573,8 +555,16 @@
         requestAnimationFrame(animate);
 
         /* ---- Dokunma / fare olayları ---- */
-        function handleStart(y) {
+        // Yalnızca kart kolonunun üzerindeki (yatayda merkez ±100px) dokunuşları kabul et
+        function inCardZone(clientX) {
+            const rect    = container.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            return Math.abs(clientX - centerX) <= 100;
+        }
+
+        function handleStart(y, x) {
             if (!isIntentSet) return;
+            if (!inCardZone(x)) return;
             isDragging = true;
             velocity   = 0;
             lastY      = y;
@@ -584,7 +574,6 @@
 
         function handleMove(y) {
             if (!isDragging || !isIntentSet) return;
-            document.getElementById('swipeInstruction').style.display = 'none';
             hasSpun = true;
             const deltaY = y - lastY;
             offsetY += deltaY;
@@ -593,6 +582,7 @@
         }
 
         function handleEnd() {
+            if (!isDragging) return;
             isDragging = false;
             if (hasSpun && Math.abs(velocity) < 3) {
                 velocity = (velocity >= 0 ? 8 : -8);
@@ -600,17 +590,18 @@
         }
 
         container.addEventListener('touchstart', e => {
-            handleStart(e.touches[0].clientY);
+            handleStart(e.touches[0].clientY, e.touches[0].clientX);
         }, { passive: false });
 
         container.addEventListener('touchmove', e => {
+            if (!isDragging) return;
             e.preventDefault();
             handleMove(e.touches[0].clientY);
         }, { passive: false });
 
         container.addEventListener('touchend', handleEnd);
 
-        container.addEventListener('mousedown',  e => handleStart(e.clientY));
+        container.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
         container.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
         container.addEventListener('mouseup',    handleEnd);
         container.addEventListener('mouseleave', handleEnd);
