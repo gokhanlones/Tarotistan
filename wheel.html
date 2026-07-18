@@ -4,48 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAROT'S</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; overflow: hidden; touch-action: none; -webkit-tap-highlight-color: transparent; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 110; }
-        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; }
-        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
-        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
+        /* ---- Üst banner ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 110;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+        }
+        .topbar-spacer {
+            width: 40px;
+            flex-shrink: 0;
+        }
 
-        .wheel-container { position: absolute; top: 60px; bottom: 68px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; background: #ffffff; isolation: isolate; }
-        .slot-window { position: relative; width: 190px; height: 310px; overflow: hidden; border-radius: 12px; }
+        /* ---- Çark Alanı ---- */
+        .wheel-container {
+            position: absolute;
+            top: 60px;
+            bottom: 68px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            isolation: isolate;
+        }
 
-        .center-highlighter { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 190px; height: 310px; border: 2px solid #D4AF37; border-radius: 12px; pointer-events: none; z-index: 150; }
+        .slot-window {
+            position: relative;
+            width: 190px;
+            height: 310px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
 
-        /* Daraltılmış ve güçlendirilmiş fade */
-        .fade-top, .fade-bottom { position: absolute; left: 0; right: 0; height: 15%; pointer-events: none; z-index: 140; }
-        .fade-top { top: 0; background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); }
-        .fade-bottom { bottom: 0; background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); }
+        .center-highlighter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 190px; height: 310px;
+            border: 3px solid #D4AF37;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            pointer-events: none;
+            z-index: 150;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
+            50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
+        }
 
-        .wheel-card { position: absolute; width: 160px; height: 270px; left: 50%; margin-left: -80px; object-fit: contain; will-change: transform; border-radius: 8px; }
-        .wheel-card.selected { border: 2px solid #D4AF37; }
+        /* Opaklık ve alan arttırıldı */
+        .fade-top, .fade-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 25%;
+            pointer-events: none;
+            z-index: 140;
+        }
+        .fade-top {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
+        }
+        .fade-bottom {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
+        }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 110; display: flex; align-items: center; justify-content: center; }
-        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; cursor: pointer; }
-        .nav-btn img { width: 34px; height: 34px; object-fit: contain; }
+        .wheel-card {
+            position: absolute;
+            width: 160px; height: 270px;
+            left: 50%;
+            margin-left: -80px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            will-change: transform, opacity;
+            border-radius: 8px;
+        }
+        .wheel-card.selected {
+            filter: drop-shadow(0 0 15px #D4AF37) drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
+            transition: filter 0.3s ease;
+        }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: flex-start; justify-content: center; padding: 76px 24px 0; z-index: 200; }
+        /* ---- Alt navigasyon ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            z-index: 110;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img {
+            width: 34px; height: 34px;
+            object-fit: contain; border-radius: 6px;
+        }
+
+        /* ---- Niyet modalı ---- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 0;
+            z-index: 200;
+        }
         .modal-overlay.active { display: flex; }
-        .modal-box { width: 100%; max-width: 340px; background: #ffffff; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .intent-input { width: 100%; min-height: 90px; border: 2px solid #e8e8ed; border-radius: 10px; padding: 12px; font-family: sans-serif; font-size: 1rem; resize: none; }
-        .send-btn { width: 52px; height: 52px; border-radius: 50%; background: #000; border: none; cursor: pointer; }
-        .send-btn:disabled { background: #ccc; }
+        .modal-box {
+            width: 100%; max-width: 340px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 12px;
+        }
+        .modal-title {
+            font-size: 1.3rem; font-weight: 700;
+            color: #000;
+        }
+        .intent-input {
+            width: 100%; min-height: 90px;
+            border: 2px solid #e8e8ed; border-radius: 10px;
+            padding: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; color: #000;
+            resize: none;
+        }
+        .intent-input:focus { border-color: #000; outline: none; }
+        .char-counter {
+            align-self: flex-end;
+            font-size: 0.75rem; color: #999;
+            margin-top: -6px;
+        }
+        .send-btn {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: #000; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-top: 4px;
+        }
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
+        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ---- Sidebar ---- */
+        .sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 260px;
+            background: #ffffff;
+            z-index: 151;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e8e8ed;
+            font-size: 1.1rem; font-weight: 700;
+            letter-spacing: 2px;
+            color: #000;
+        }
+        .sidebar-menu {
+            display: flex; flex-direction: column;
+        }
+        .sidebar-item {
+            padding: 18px 20px;
+            font-size: 1rem;
+            color: #000;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center; gap: 12px;
+        }
+        .sidebar-item:active { background: #f5f5f7; }
+
+        /* ---- Auth spinner ---- */
+        .auth-check {
+            position: fixed; inset: 0;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 300;
+        }
+        .auth-check.hidden { display: none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="topbar">
-        <button class="hamburger-btn"><span></span><span></span><span></span></button>
-        <div class="topbar-title">TAROT'S</div>
+    <!-- Auth yükleme -->
+    <div class="auth-check" id="authCheck">
+        <div class="spinner"></div>
     </div>
 
+    <!-- Üst bar -->
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title">TAROT'S</div>
+        <div class="topbar-spacer"></div>
+    </div>
+
+    <!-- Çark alanı -->
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter"></div>
         <div class="slot-window" id="slotWindow">
@@ -54,54 +284,302 @@
         </div>
     </div>
 
+    <!-- Alt nav -->
     <div class="bottom-nav">
-        <div class="nav-btn"><img src="cardsinfo.png" alt="Nav"></div>
+        <a href="dashboard.html" class="nav-btn" id="navHome" style="text-decoration: none; display: flex;" aria-label="">
+            <img src="cardsinfo.png" alt="Ana Sayfa">
+        </a>
     </div>
 
+    <!-- Niyet modalı -->
     <div class="modal-overlay" id="intentOverlay">
         <div class="modal-box">
-            <textarea class="intent-input" id="intentInput" placeholder="Aklındaki sorunun cevabı..." maxlength="200"></textarea>
-            <button class="send-btn" id="sendIntentBtn" disabled><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+            <div class="modal-title" id="intentTitle">Niyet</div>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
+            <div class="char-counter" id="charCounter">0/200</div>
+            <button class="send-btn" id="sendIntentBtn" disabled>
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">TAROT'S</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="M6 8h.01M6 12h.01M6 16h.01"/>
+                </svg>
+                <span id="sidebarCardsText">Kartlar</span>
+            </div>
+            <div class="sidebar-item" onclick="logout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span id="sidebarLogoutText">Çıkış</span>
+            </div>
         </div>
     </div>
 
     <script>
-        const container = document.getElementById('slotWindow');
-        const input = document.getElementById('intentInput');
-        const btn = document.getElementById('sendIntentBtn');
-        const overlay = document.getElementById('intentOverlay');
-        let isIntentSet = false, offsetY = 0, isDragging = false, lastY = 0;
+        /* ---- i18n ---- */
+        const lang = typeof getLang === 'function' ? getLang() : 'tr';
+        document.getElementById('intentTitle').textContent    = typeof t === 'function' ? t('intentTitle')   : 'Niyet';
+        document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
+        document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
+        document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
+        document.getElementById('intentInput').placeholder  = lang === 'tr'
+            ? 'Sorunuzu veya niyetinizi buraya yazın...'
+            : 'Write your question or intention here...';
 
-        // Modal Mantığı
-        const updateBtn = () => { btn.disabled = input.value.trim().length === 0; };
-        input.addEventListener('input', updateBtn);
-        input.addEventListener('keyup', updateBtn);
-        btn.addEventListener('click', () => { overlay.classList.remove('active'); isIntentSet = true; });
-        
-        window.onload = () => overlay.classList.add('active');
+        /* ---- Firebase ---- */
+        const auth = firebase.auth();
 
-        // Kartlar
-        for (let i = 0; i < 78; i++) {
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            document.getElementById('authCheck').classList.add('hidden');
+        });
+
+        /* ---- Sidebar ---- */
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.add('active');
+            document.getElementById('sidebar').classList.add('active');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.getElementById('sidebar').classList.remove('active');
+        }
+        function logout() {
+            auth.signOut().then(() => { window.location.href = 'auth.html'; });
+        }
+        document.getElementById('menuBtn').addEventListener('click', openSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+        /* ---- Çark mekanizması ---- */
+        const touchArea  = document.getElementById('wheelTouchArea');
+        const container  = document.getElementById('slotWindow');
+        const numCards   = 78;
+        const cardHeight = 280; 
+        const totalHeight = numCards * cardHeight;
+
+        let cards       = [];
+        let offsetY     = Math.random() * totalHeight;
+        let velocity    = 0;
+        let isDragging  = false;
+        let lastY       = 0;
+        let isSnapping  = false;
+        let snapDone    = false;
+        let hasSpun     = false;
+        let isIntentSet = false;
+
+        for (let i = 0; i < numCards; i++) {
             const img = document.createElement('img');
-            img.src = 'onecard.png';
-            img.className = 'wheel-card';
+            img.src   = 'onecard.png';
+            img.className  = 'wheel-card';
+            img.dataset.index = i;
             container.appendChild(img);
+            cards.push(img);
         }
 
-        function render() {
-            const cards = document.querySelectorAll('.wheel-card');
-            cards.forEach((c, i) => {
-                let y = (i * 280 + offsetY) % (78 * 280);
-                if (y < 0) y += (78 * 280);
-                c.style.transform = `translateY(${y - 135}px)`; // Tam hizalama
+        function renderCards() {
+            const containerH = container.clientHeight;
+            const centerY    = containerH / 2 - (270 / 2); 
+            let minOffset    = Infinity;
+            let activeIndex  = -1;
+
+            cards.forEach((card, i) => {
+                let y = (i * cardHeight + offsetY) % totalHeight;
+                if (y < 0) y += totalHeight;
+
+                const dist1 = Math.abs(y - centerY);
+                const dist2 = Math.abs(y - totalHeight - centerY);
+                const dist3 = Math.abs(y + totalHeight - centerY);
+                let dist    = Math.min(dist1, dist2, dist3);
+
+                let renderY = y;
+                if (dist === dist2) renderY = y - totalHeight;
+                if (dist === dist3) renderY = y + totalHeight;
+
+                const opacity = Math.max(0.15, 1 - dist * 0.0035);
+                const zIndex  = 100 - Math.floor(dist / 10);
+
+                if (opacity < 0.15) {
+                    card.style.display = 'none';
+                } else {
+                    card.style.display    = 'block';
+                    // Büyüyüp küçülme (scale) kaldırıldı, sadece düz hareket
+                    card.style.transform  = `translateY(${renderY}px)`;
+                    card.style.opacity    = opacity;
+                    card.style.zIndex     = zIndex;
+                }
+                card.classList.remove('selected');
+
+                if (dist < minOffset) {
+                    minOffset   = dist;
+                    activeIndex = i;
+                }
             });
-            requestAnimationFrame(render);
-        }
-        render();
 
-        document.getElementById('wheelTouchArea').addEventListener('touchstart', e => { if(isIntentSet) { isDragging = true; lastY = e.touches[0].clientY; } });
-        document.getElementById('wheelTouchArea').addEventListener('touchmove', e => { if(isDragging) { offsetY += e.touches[0].clientY - lastY; lastY = e.touches[0].clientY; } });
-        document.getElementById('wheelTouchArea').addEventListener('touchend', () => isDragging = false);
+            return activeIndex;
+        }
+
+        function animate() {
+            const containerH = container.clientHeight;
+
+            if (isDragging) {
+                isSnapping = false;
+                snapDone   = false;
+            } else {
+                if (!isSnapping) {
+                    offsetY  += velocity;
+                    velocity *= 0.985; 
+
+                    if (Math.abs(velocity) < 1.5 && hasSpun) {
+                        velocity   = 0;
+                        isSnapping = true;
+                    }
+                } else {
+                    const centerY     = containerH / 2 - (270 / 2);
+                    const floatSlot   = (centerY - offsetY) / cardHeight;
+                    const targetSlot  = Math.round(floatSlot);
+                    const targetOffY  = centerY - targetSlot * cardHeight;
+                    const diff        = targetOffY - offsetY;
+
+                    offsetY += diff * 0.15;
+
+                    if (Math.abs(diff) < 0.5 && !snapDone) {
+                        offsetY  = targetOffY;
+                        snapDone = true;
+
+                        const activeIdx = renderCards();
+                        if (cards[activeIdx]) {
+                            cards[activeIdx].classList.add('selected');
+                        }
+
+                        if (navigator.vibrate) navigator.vibrate(50);
+                        
+                        setTimeout(() => {
+                            const randId = Math.floor(Math.random() * 78);
+                            const randReversed = Math.random() < 0.5;
+                            const drawnCard = { id: randId, reversed: randReversed };
+                            
+                            sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
+                            sessionStorage.setItem('tarotReadingType', 'single');
+                            window.location.href = 'ad.html';
+                        }, 1000);
+                    }
+                }
+            }
+
+            if (!snapDone || isDragging) {
+                renderCards();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        renderCards();
+        requestAnimationFrame(animate);
+
+        function inCardZone(clientX) {
+            const rect    = touchArea.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            return Math.abs(clientX - centerX) <= 120;
+        }
+
+        function handleStart(y, x) {
+            if (!isIntentSet) return;
+            if (!inCardZone(x)) return;
+            isDragging = true;
+            velocity   = 0;
+            lastY      = y;
+            snapDone   = false;
+            cards.forEach(c => c.classList.remove('selected'));
+        }
+
+        function handleMove(y) {
+            if (!isDragging || !isIntentSet) return;
+            hasSpun = true;
+            const deltaY = y - lastY;
+            offsetY += deltaY;
+            velocity = deltaY;
+            lastY    = y;
+        }
+
+        function handleEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            if (hasSpun) {
+                if (Math.abs(velocity) < 10) {
+                    velocity = (velocity >= 0 ? 80 : -80); 
+                } else {
+                    velocity *= 4; 
+                }
+                if (velocity > 150) velocity = 150;
+                if (velocity < -150) velocity = -150;
+            }
+        }
+
+        touchArea.addEventListener('touchstart', e => {
+            handleStart(e.touches[0].clientY, e.touches[0].clientX);
+        }, { passive: false });
+
+        touchArea.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            e.preventDefault();
+            handleMove(e.touches[0].clientY);
+        }, { passive: false });
+
+        touchArea.addEventListener('touchend', handleEnd);
+
+        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
+        touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
+        touchArea.addEventListener('mouseup',    handleEnd);
+        touchArea.addEventListener('mouseleave', handleEnd);
+
+        /* ---- Niyet modalı ---- */
+        const intentOverlay = document.getElementById('intentOverlay');
+        const intentInput   = document.getElementById('intentInput');
+        const charCounter   = document.getElementById('charCounter');
+        const sendBtn       = document.getElementById('sendIntentBtn');
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                intentOverlay.classList.add('active');
+                intentInput.focus();
+            }, 500);
+        });
+
+        function closeIntentModal() {
+            intentOverlay.classList.remove('active');
+            isIntentSet = true;
+        }
+
+        intentInput.addEventListener('input', function () {
+            charCounter.textContent = intentInput.value.length + '/200';
+            sendBtn.disabled = intentInput.value.trim().length === 0;
+        });
+
+        intentOverlay.addEventListener('click', function (e) {
+            if (e.target === intentOverlay) closeIntentModal();
+        });
+
+        sendBtn.addEventListener('click', function () {
+            const intentText = intentInput.value.trim();
+            if (!intentText) return;
+            sessionStorage.setItem('tarotIntent', intentText);
+            closeIntentModal();
+        });
+
     </script>
 </body>
 </html>
