@@ -69,79 +69,66 @@
             margin: 0 auto;
         }
 
-        /* ---- Yeni Kart Alanı Düzeni ---- */
+        /* ---- Kart Alanı (Ortak) ---- */
         .card-area {
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 180px;
-            1.5px solid #ffffff;
+            min-height: 110px;
             border-radius: 14px;
             padding: 16px 20px;
-            /* ARKA PLAN RENGİ GÜNCELLENDİ */
             background: #FF9D9D;
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
         }
+        .card-area:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
 
-        /* Tek Kart İçin */
-        .single-card-container {
+        /* ---- Yatay kart satırı (her iki kart seçeneği için) ---- */
+        .card-row-layout {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
+            gap: 20px;
+            width: 100%;
         }
-        .single-card-img {
-            width: 90px;
-            height: 130px;
+
+        /* Tek kart görseli */
+        .card-thumb-single {
+            width: 58px;
+            height: 84px;
             object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,0.30));
+            flex-shrink: 0;
         }
-        .single-card-desc {
+
+        /* Üç kart görseli */
+        .card-thumb-three {
+            width: 110px;
+            height: 78px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,0.30));
+            flex-shrink: 0;
+        }
+
+        /* Her iki kart için ortak etiket — aynı boyut, renk, karakter */
+        .card-row-label {
             font-size: 0.95rem;
             font-weight: 700;
             color: #000000;
-            text-align: center;
-        }
-
-        /* Üç Kart İçin */
-        .three-cards-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            gap: 10px;
-        }
-        .card-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             flex: 1;
-        }
-        .three-card-img {
-            width: 90px;
-            height: 130px;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-        }
-        .card-label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #333333;
-            text-align: center;
-            line-height: 1.2;
         }
 
         /* ---- Günlük Burç Alanı ---- */
         .horoscope-area {
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 6px;
-            min-height: 100px;
+            min-height: 80px;
             border: 1.5px solid #ffffff;
             border-radius: 14px;
             padding: 14px 16px;
@@ -157,29 +144,53 @@
         .horoscope-area.loading {
             cursor: wait;
         }
-        .horoscope-text {
+
+        /* Burç ikonu + isim satırı */
+        .horoscope-header-row {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 100%;
-            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
-        .horoscope-title {
+        .horoscope-sign-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            flex-shrink: 0;
+            /* Gizli kalır, sign set edilince gösterilir */
+            display: none;
+        }
+        .horoscope-sign-icon.visible {
+            display: block;
+        }
+        .horoscope-sign-name {
             font-size: 1rem;
             font-weight: 700;
             color: #000000;
-            line-height: 1.3;
-            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
         }
+
+        /* "Günlük burç yorumu" başlığı */
+        .horoscope-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #333333;
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        /* Yorum metni */
         .horoscope-desc {
             font-size: 0.85rem;
             color: #000000;
             line-height: 1.45;
             text-align: justify;
+            font-family: 'Times New Roman', Times, serif;
         }
+
         .horoscope-date {
             font-size: 0.75rem;
-            color: #000000;
+            color: #555555;
             margin-top: 2px;
             text-align: right;
         }
@@ -433,40 +444,38 @@
     </div>
 
     <div class="content">
-        <!-- Tek Kart -->
+
+        <!-- Tek Kart — görsel sol, yazı sağ -->
         <div class="card-area" id="singleCardOption">
-            <div class="single-card-container">
-                <img src="onecard.png" class="single-card-img" alt="Tek Kart">
-                <div class="single-card-desc">Aklındaki sorunun cevabı</div>
+            <div class="card-row-layout">
+                <img src="onecard.png" class="card-thumb-single" alt="Tek Kart">
+                <div class="card-row-label">Aklındaki sorunun cevabı</div>
             </div>
         </div>
 
-        <!-- Üç Kart -->
+        <!-- Üç Kart — threecards.png sol, yazı sağ -->
         <div class="card-area" id="threeCardOption">
-            <div class="three-cards-container">
-                <div class="card-col">
-                    <img src="onecard.png" class="three-card-img" alt="Geçmiş">
-                    <div class="card-label">Geçmiş</div>
-                </div>
-                <div class="card-col">
-                    <img src="onecard.png" class="three-card-img" alt="Şimdi">
-                    <div class="card-label">Şimdi</div>
-                </div>
-                <div class="card-col">
-                    <img src="onecard.png" class="three-card-img" alt="Gelecek">
-                    <div class="card-label">Gelecek</div>
-                </div>
+            <div class="card-row-layout">
+                <img src="threecards.png" class="card-thumb-three" alt="Üç Kart">
+                <div class="card-row-label">Geçmiş · Şimdi · Gelecek</div>
             </div>
         </div>
 
         <!-- Günlük Burç Yorumu -->
         <div class="horoscope-area" id="horoscopeOption">
-            <div class="horoscope-text">
-                <div class="horoscope-title" id="horoscopeTitle"></div>
-                <div class="horoscope-desc" id="horoscopeDesc"></div>
-                <div class="horoscope-date hidden" id="horoscopeDate"></div>
+            <!-- İkon + burç ismi satırı -->
+            <div class="horoscope-header-row">
+                <img src="" class="horoscope-sign-icon" id="horoscopeSignIcon" alt="">
+                <div class="horoscope-sign-name" id="horoscopeSignName"></div>
             </div>
+            <!-- Başlık -->
+            <div class="horoscope-title" id="horoscopeTitle"></div>
+            <!-- Yorum metni -->
+            <div class="horoscope-desc" id="horoscopeDesc"></div>
+            <!-- Tarih (gizli, gerekirse gösterilir) -->
+            <div class="horoscope-date hidden" id="horoscopeDate"></div>
         </div>
+
     </div>
 
     <!-- Alt navigasyon -->
@@ -476,6 +485,7 @@
         </a>
     </div>
 
+    <!-- Niyet modalı -->
     <div class="modal-overlay" id="intentOverlay">
         <div class="modal-box">
             <div class="modal-title" id="intentTitle"></div>
@@ -487,6 +497,7 @@
         </div>
     </div>
 
+    <!-- Cooldown modalı -->
     <div class="modal-overlay" id="cooldownOverlay">
         <div class="modal-box">
             <div class="modal-title" id="cooldownTitle"></div>
@@ -576,26 +587,45 @@
             threeCard.classList.remove('locked');
         }
 
+        // ===== BURÇ İKON DOSYA ADI =====
+        function getZodiacIconFilename(signTr) {
+            const map = {
+                'Koç':     'koc.png',
+                'Boğa':    'boga.png',
+                'İkizler': 'ikizler.png',
+                'Yengeç':  'yengec.png',
+                'Aslan':   'aslan.png',
+                'Başak':   'basak.png',
+                'Terazi':  'terazi.png',
+                'Akrep':   'akrep.png',
+                'Yay':     'yay.png',
+                'Oğlak':   'oglak.png',
+                'Kova':    'kova.png',
+                'Balık':   'balik.png'
+            };
+            return map[signTr] || '';
+        }
+
         // ===== BURÇ HESAPLAMA =====
         function getZodiacSign(day, month) {
             const signs = [
-                { name: 'Oğlak', start: [1, 1], end: [1, 19] },
-                { name: 'Kova', start: [1, 20], end: [2, 18] },
-                { name: 'Balık', start: [2, 19], end: [3, 20] },
-                { name: 'Koç', start: [3, 21], end: [4, 19] },
-                { name: 'Boğa', start: [4, 20], end: [5, 20] },
-                { name: 'İkizler', start: [5, 21], end: [6, 20] },
-                { name: 'Yengeç', start: [6, 21], end: [7, 22] },
-                { name: 'Aslan', start: [7, 23], end: [8, 22] },
-                { name: 'Başak', start: [8, 23], end: [9, 22] },
-                { name: 'Terazi', start: [9, 23], end: [10, 22] },
-                { name: 'Akrep', start: [10, 23], end: [11, 21] },
-                { name: 'Yay', start: [11, 22], end: [12, 21] },
+                { name: 'Oğlak', start: [1, 1],   end: [1, 19]  },
+                { name: 'Kova',   start: [1, 20],  end: [2, 18]  },
+                { name: 'Balık',  start: [2, 19],  end: [3, 20]  },
+                { name: 'Koç',    start: [3, 21],  end: [4, 19]  },
+                { name: 'Boğa',   start: [4, 20],  end: [5, 20]  },
+                { name: 'İkizler',start: [5, 21],  end: [6, 20]  },
+                { name: 'Yengeç', start: [6, 21],  end: [7, 22]  },
+                { name: 'Aslan',  start: [7, 23],  end: [8, 22]  },
+                { name: 'Başak',  start: [8, 23],  end: [9, 22]  },
+                { name: 'Terazi', start: [9, 23],  end: [10, 22] },
+                { name: 'Akrep',  start: [10, 23], end: [11, 21] },
+                { name: 'Yay',    start: [11, 22], end: [12, 21] },
                 { name: 'Oğlak', start: [12, 22], end: [12, 31] }
             ];
             for (const sign of signs) {
                 const sMonth = sign.start[0], sDay = sign.start[1];
-                const eMonth = sign.end[0], eDay = sign.end[1];
+                const eMonth = sign.end[0],   eDay = sign.end[1];
                 if ((month === sMonth && day >= sDay) || (month === eMonth && day <= eDay)) {
                     return sign.name;
                 }
@@ -692,37 +722,73 @@ Kurallar:
 
         // ===== BURÇ ALANINI GÜNCELLE =====
         function updateHoroscopeUI(sign, text, dateStr) {
-            const titleEl = document.getElementById('horoscopeTitle');
-            const descEl = document.getElementById('horoscopeDesc');
-            const dateEl = document.getElementById('horoscopeDate');
+            const signIconEl  = document.getElementById('horoscopeSignIcon');
+            const signNameEl  = document.getElementById('horoscopeSignName');
+            const titleEl     = document.getElementById('horoscopeTitle');
+            const descEl      = document.getElementById('horoscopeDesc');
+            const dateEl      = document.getElementById('horoscopeDate');
 
-            titleEl.textContent = sign + ' - ' + t('dailyHoroscopeAreaTitle');
-            descEl.textContent = text;
-            dateEl.textContent = dateStr;
-            dateEl.classList.remove('hidden');
+            // Burç ikonu
+            const iconFile = getZodiacIconFilename(sign);
+            if (iconFile) {
+                signIconEl.src = iconFile;
+                signIconEl.alt = sign;
+                signIconEl.classList.add('visible');
+            } else {
+                signIconEl.classList.remove('visible');
+            }
+
+            // Burç ismi
+            signNameEl.textContent = sign;
+
+            // Başlık ve yorum
+            titleEl.textContent = t('dailyHoroscopeAreaTitle');
+            descEl.textContent  = text;
+
+            // Tarih
+            if (dateEl) {
+                dateEl.textContent = dateStr;
+                dateEl.classList.remove('hidden');
+            }
         }
 
         function showHoroscopeLoading() {
-            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
-            document.getElementById('horoscopeDesc').textContent = 'Yorum yükleniyor...';
-            document.getElementById('horoscopeDate').classList.add('hidden');
+            const signIconEl = document.getElementById('horoscopeSignIcon');
+            const signNameEl = document.getElementById('horoscopeSignName');
+            const titleEl    = document.getElementById('horoscopeTitle');
+            const descEl     = document.getElementById('horoscopeDesc');
+            const dateEl     = document.getElementById('horoscopeDate');
+
+            signIconEl.classList.remove('visible');
+            signNameEl.textContent = '';
+            titleEl.textContent    = t('dailyHoroscopeAreaTitle');
+            descEl.textContent     = 'Yorum yükleniyor...';
+            if (dateEl) dateEl.classList.add('hidden');
         }
 
         function showHoroscopeEmpty() {
-            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
-            document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
-            document.getElementById('horoscopeDate').classList.add('hidden');
+            const signIconEl = document.getElementById('horoscopeSignIcon');
+            const signNameEl = document.getElementById('horoscopeSignName');
+            const titleEl    = document.getElementById('horoscopeTitle');
+            const descEl     = document.getElementById('horoscopeDesc');
+            const dateEl     = document.getElementById('horoscopeDate');
+
+            signIconEl.classList.remove('visible');
+            signNameEl.textContent = '';
+            titleEl.textContent    = t('dailyHoroscopeAreaTitle');
+            descEl.textContent     = t('dailyHoroscopeAreaDesc');
+            if (dateEl) dateEl.classList.add('hidden');
         }
 
         // ===== DOĞUM TARİHİ MODAL =====
         function openBirthModal() {
             const msg = document.getElementById('birthModalMsg');
-            msg.textContent = ''; 
-            
+            msg.textContent = '';
+
             if (userBirthInfo) {
-                document.getElementById('birthModalDay').value = userBirthInfo.day || '';
+                document.getElementById('birthModalDay').value   = userBirthInfo.day   || '';
                 document.getElementById('birthModalMonth').value = userBirthInfo.month || '';
-                document.getElementById('birthModalYear').value = userBirthInfo.year || '';
+                document.getElementById('birthModalYear').value  = userBirthInfo.year  || '';
             }
 
             document.getElementById('birthModalOverlay').classList.add('active');
@@ -740,30 +806,30 @@ Kurallar:
             const user = auth.currentUser;
             if (!user) return;
 
-            const day = parseInt(document.getElementById('birthModalDay').value);
+            const day   = parseInt(document.getElementById('birthModalDay').value);
             const month = parseInt(document.getElementById('birthModalMonth').value);
-            const year = parseInt(document.getElementById('birthModalYear').value);
-            const msg = document.getElementById('birthModalMsg');
+            const year  = parseInt(document.getElementById('birthModalYear').value);
+            const msg   = document.getElementById('birthModalMsg');
 
             if (!day || !month || !year) {
                 msg.textContent = 'Lütfen tüm alanları doldurun.';
-                msg.className = 'birth-msg error';
+                msg.className   = 'birth-msg error';
                 return;
             }
 
             try {
                 await db.collection('users').doc(user.uid).set({
-                    birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+                    birthInfo: { day, month, year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }, { merge: true });
 
-                userBirthInfo = { day: day, month: month, year: year }; 
+                userBirthInfo = { day, month, year };
 
                 msg.textContent = 'Kaydedildi! Yorum hazırlanıyor...';
-                msg.className = 'birth-msg success';
+                msg.className   = 'birth-msg success';
 
                 closeBirthModal();
 
-                const sign = getZodiacSign(day, month);
+                const sign   = getZodiacSign(day, month);
                 const signEn = getZodiacSignEn(sign);
                 showHoroscopeLoading();
 
@@ -775,7 +841,7 @@ Kurallar:
 
             } catch (err) {
                 msg.textContent = 'Hata: ' + err.message;
-                msg.className = 'birth-msg error';
+                msg.className   = 'birth-msg error';
             }
         });
 
@@ -787,8 +853,7 @@ Kurallar:
             }
 
             const sign = getZodiacSign(birthInfo.day, birthInfo.month);
-            
-            showHoroscopeLoading(); 
+            showHoroscopeLoading();
 
             const todayHoroscope = await loadTodayHoroscope(userId);
 
@@ -815,26 +880,27 @@ Kurallar:
                 return;
             }
 
-            // Çeviriler ve statik metin atamaları
-            document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
-            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
-            document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
-            document.getElementById('intentTitle').textContent = t('intentTitle');
-            document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
-            document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
-            document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
-            document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
-            document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
+            document.getElementById('dashboardTitle').textContent     = t('dashboardTitle');
+            document.getElementById('intentTitle').textContent        = t('intentTitle');
+            document.getElementById('cooldownTitle').textContent      = t('cooldownTitle');
+            document.getElementById('premiumFeature1').textContent    = t('premiumFeature1');
+            document.getElementById('premiumFeature2').textContent    = t('premiumFeature2');
+            document.getElementById('premiumCtaBtn').textContent      = t('premiumCtaBtn');
+            document.getElementById('cooldownCloseBtn').textContent   = t('cooldownCloseBtn');
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
-            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
-            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+            document.getElementById('sidebarCardsText').textContent   = t('sidebarCards');
+            document.getElementById('sidebarLogoutText').textContent  = t('sidebarLogout');
+
+            // Boş başlangıç durumu (yükleme bitene kadar)
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent  = t('dailyHoroscopeAreaDesc');
 
             try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userDoc  = await db.collection('users').doc(user.uid).get();
                 const birthInfo = userDoc.exists ? userDoc.data().birthInfo : null;
 
                 if (birthInfo && birthInfo.day && birthInfo.month) {
-                    userBirthInfo = birthInfo; 
+                    userBirthInfo = birthInfo;
                 }
 
                 await loadAndShowHoroscope(user.uid, birthInfo);
@@ -849,7 +915,6 @@ Kurallar:
 
         async function checkLastReading(userId) {
             try {
-                // 1. Önbellek (Cache) Kontrolü: Hızlı UI tepkisi için anında kilitle
                 const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
                 if (cachedTime) {
                     const cachedTimestamp = parseInt(cachedTime);
@@ -859,7 +924,6 @@ Kurallar:
                     }
                 }
 
-                // 2. Veritabanı Kontrolü: Gerçek durumu ve yapay zeka yorumunu sorgula
                 const lastQuery = await db.collection('users').doc(userId)
                     .collection('readings')
                     .orderBy('createdAt', 'desc')
@@ -871,36 +935,31 @@ Kurallar:
                 if (!lastQuery.empty) {
                     const lastData = lastQuery.docs[0].data();
 
-                    // Yorum var mı ve son 24 saat içinde mi yapılmış?
                     if (lastData.aiInterpretation && lastData.aiInterpretation.trim() !== '' &&
                         lastData.createdAt && isWithin24h(lastData.createdAt)) {
                         hasValidAiComment = true;
                     }
 
-                    // Son 24 saat içindeyse süreyi veritabanındaki kesin saatle güncelle ve kilitle
                     if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
                         const remaining = formatRemainingTime(lastData.createdAt);
-                        lockCards(remaining); 
+                        lockCards(remaining);
                     }
                 }
 
-                // 3. İkon Görünürlüğünü Ayarla
                 const topbarIcon = document.getElementById('topbarIcon');
                 if (hasValidAiComment) {
-                    topbarIcon.classList.remove('hidden'); // Yorum varsa ikonu göster
+                    topbarIcon.classList.remove('hidden');
                 } else {
-                    topbarIcon.classList.add('hidden');    // Yorum yoksa ikonu gizle
+                    topbarIcon.classList.add('hidden');
                 }
 
-                // 4. Eğer 24 saat dolmamışsa işlemi burada bitir
                 if (!lastQuery.empty) {
                     const lastData = lastQuery.docs[0].data();
                     if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
-                        return; 
+                        return;
                     }
                 }
 
-                // 5. Veritabanında kayıt yoksa veya 24 saat dolmuşsa kartların kilidini aç
                 unlockCards();
 
             } catch (e) {
@@ -936,12 +995,12 @@ Kurallar:
 
         let currentReadingType = null;
         const intentOverlay = document.getElementById('intentOverlay');
-        const intentInput = document.getElementById('intentInput');
-        const charCounter = document.getElementById('charCounter');
+        const intentInput   = document.getElementById('intentInput');
+        const charCounter   = document.getElementById('charCounter');
 
         function openIntentModal(type) {
             currentReadingType = type;
-            intentInput.value = '';
+            intentInput.value  = '';
             charCounter.textContent = '0/200';
             sendBtn.disabled = true;
             intentOverlay.classList.add('active');
