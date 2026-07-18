@@ -4,209 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAROT'S</title>
-    <script src="lang.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100%;
-            background: #ffffff;
-            font-family: 'Times New Roman', Times, serif;
-            overflow: hidden;
-            touch-action: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        html, body { width: 100%; height: 100%; background: #ffffff; font-family: 'Times New Roman', Times, serif; overflow: hidden; touch-action: none; -webkit-tap-highlight-color: transparent; }
 
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 60px;
-            background: #ffffff;
-            display: flex; align-items: center;
-            padding: 0 16px;
-            z-index: 110;
-        }
-        .hamburger-btn {
-            width: 40px; height: 40px;
-            background: none; border: none;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer;
-            flex-shrink: 0;
-        }
-        .hamburger-btn span {
-            display: block; width: 22px; height: 2px;
-            background: #000;
-        }
-        .topbar-title {
-            flex: 1;
-            text-align: center;
-            font-size: 1.25rem; font-weight: 700;
-            letter-spacing: 3px;
-            color: #000;
-        }
-        .topbar-spacer {
-            width: 40px;
-            flex-shrink: 0;
-        }
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #ffffff; display: flex; align-items: center; padding: 0 16px; z-index: 110; }
+        .hamburger-btn { width: 40px; height: 40px; background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
+        .topbar-title { flex: 1; text-align: center; font-size: 1.25rem; font-weight: 700; letter-spacing: 3px; color: #000; }
 
-        .wheel-container {
-            position: absolute;
-            top: 60px;
-            bottom: 68px;
-            left: 0; right: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #ffffff;
-            isolation: isolate;
-        }
+        .wheel-container { position: absolute; top: 60px; bottom: 68px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; background: #ffffff; isolation: isolate; }
+        .slot-window { position: relative; width: 190px; height: 310px; overflow: hidden; border-radius: 12px; }
 
-        .slot-window {
-            position: relative;
-            width: 190px;
-            height: 310px;
-            overflow: hidden;
-            border-radius: 12px;
-        }
+        .center-highlighter { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 190px; height: 310px; border: 2px solid #D4AF37; border-radius: 12px; pointer-events: none; z-index: 150; }
 
-        .center-highlighter {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 190px; height: 310px;
-            border: 3px solid #D4AF37;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-            pointer-events: none;
-            z-index: 150;
-            animation: glowPulse 2s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
-            50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
-        }
+        /* Daraltılmış ve güçlendirilmiş fade */
+        .fade-top, .fade-bottom { position: absolute; left: 0; right: 0; height: 15%; pointer-events: none; z-index: 140; }
+        .fade-top { top: 0; background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); }
+        .fade-bottom { bottom: 0; background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); }
 
-        /* Fade daraltıldı ve opaklık artırıldı */
-        .fade-top, .fade-bottom {
-            position: absolute;
-            left: 0; right: 0;
-            height: 15%; 
-            pointer-events: none;
-            z-index: 140;
-        }
-        .fade-top {
-            top: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
-        }
-        .fade-bottom {
-            bottom: 0;
-            background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
-        }
+        .wheel-card { position: absolute; width: 160px; height: 270px; left: 50%; margin-left: -80px; object-fit: contain; will-change: transform; border-radius: 8px; }
+        .wheel-card.selected { border: 2px solid #D4AF37; }
 
-        .wheel-card {
-            position: absolute;
-            width: 160px; height: 270px;
-            left: 50%;
-            margin-left: -80px;
-            object-fit: contain;
-            /* Gölge kaldırıldı */
-            will-change: transform, opacity;
-            border-radius: 8px;
-        }
-        .wheel-card.selected {
-            border: 2px solid #D4AF37;
-            border-radius: 8px;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; z-index: 110; display: flex; align-items: center; justify-content: center; }
+        .nav-btn { background: none; border: none; padding: 0; width: 44px; height: 44px; cursor: pointer; }
+        .nav-btn img { width: 34px; height: 34px; object-fit: contain; }
 
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 68px;
-            background: #ffffff;
-            z-index: 110;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-        }
-        .nav-btn {
-            background: none; border: none; padding: 0;
-            width: 44px; height: 44px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
-        .nav-btn img {
-            width: 34px; height: 34px;
-            object-fit: contain; border-radius: 6px;
-        }
-
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: flex-start; justify-content: center;
-            padding: 76px 24px 0;
-            z-index: 200;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: flex-start; justify-content: center; padding: 76px 24px 0; z-index: 200; }
         .modal-overlay.active { display: flex; }
-        .modal-box {
-            width: 100%; max-width: 340px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex; flex-direction: column;
-            align-items: center; gap: 12px;
-        }
-        .modal-title { font-size: 1.3rem; font-weight: 700; color: #000; }
-        .intent-input {
-            width: 100%; min-height: 90px;
-            border: 2px solid #e8e8ed; border-radius: 10px;
-            padding: 12px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1rem; color: #000; resize: none;
-        }
-        .intent-input:focus { border-color: #000; outline: none; }
-        .char-counter { align-self: flex-end; font-size: 0.75rem; color: #999; margin-top: -6px; }
-        .send-btn {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: #000; border: none;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin-top: 4px;
-        }
+        .modal-box { width: 100%; max-width: 340px; background: #ffffff; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .intent-input { width: 100%; min-height: 90px; border: 2px solid #e8e8ed; border-radius: 10px; padding: 12px; font-family: sans-serif; font-size: 1rem; resize: none; }
+        .send-btn { width: 52px; height: 52px; border-radius: 50%; background: #000; border: none; cursor: pointer; }
+        .send-btn:disabled { background: #ccc; }
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
-        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        .auth-check {
-            position: fixed; inset: 0;
-            background: #fff;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 300;
-        }
-        .auth-check.hidden { display: none; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="auth-check" id="authCheck">
-        <div class="spinner"></div>
-    </div>
-
     <div class="topbar">
-        <button class="hamburger-btn" id="menuBtn"><span></span><span></span><span></span></button>
+        <button class="hamburger-btn"><span></span><span></span><span></span></button>
         <div class="topbar-title">TAROT'S</div>
-        <div class="topbar-spacer"></div>
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
@@ -218,79 +55,53 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="dashboard.html" class="nav-btn" id="navHome"><img src="cardsinfo.png" alt="Ana Sayfa"></a>
+        <div class="nav-btn"><img src="cardsinfo.png" alt="Nav"></div>
     </div>
 
     <div class="modal-overlay" id="intentOverlay">
         <div class="modal-box">
-            <div class="modal-title" id="intentTitle">Niyet</div>
-            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
-            <div class="char-counter" id="charCounter">0/200</div>
+            <textarea class="intent-input" id="intentInput" placeholder="Aklındaki sorunun cevabı..." maxlength="200"></textarea>
             <button class="send-btn" id="sendIntentBtn" disabled><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
         </div>
     </div>
 
     <script>
-        const auth = firebase.auth();
-        auth.onAuthStateChanged(user => { if (!user) window.location.href = 'auth.html'; else document.getElementById('authCheck').classList.add('hidden'); });
+        const container = document.getElementById('slotWindow');
+        const input = document.getElementById('intentInput');
+        const btn = document.getElementById('sendIntentBtn');
+        const overlay = document.getElementById('intentOverlay');
+        let isIntentSet = false, offsetY = 0, isDragging = false, lastY = 0;
 
-        const container  = document.getElementById('slotWindow');
-        const numCards   = 78;
-        const cardHeight = 280; 
-        const totalHeight = numCards * cardHeight;
-        let cards = [];
-        let offsetY = Math.random() * totalHeight;
-        let velocity = 0, isDragging = false, lastY = 0, isSnapping = false, snapDone = false, hasSpun = false, isIntentSet = false;
+        // Modal Mantığı
+        const updateBtn = () => { btn.disabled = input.value.trim().length === 0; };
+        input.addEventListener('input', updateBtn);
+        input.addEventListener('keyup', updateBtn);
+        btn.addEventListener('click', () => { overlay.classList.remove('active'); isIntentSet = true; });
+        
+        window.onload = () => overlay.classList.add('active');
 
-        for (let i = 0; i < numCards; i++) {
+        // Kartlar
+        for (let i = 0; i < 78; i++) {
             const img = document.createElement('img');
             img.src = 'onecard.png';
             img.className = 'wheel-card';
             container.appendChild(img);
-            cards.push(img);
         }
 
-        function renderCards() {
-            const centerY = container.clientHeight / 2 - 135;
-            cards.forEach((card, i) => {
-                let y = (i * cardHeight + offsetY) % totalHeight;
-                if (y < 0) y += totalHeight;
-                card.style.transform = `translateY(${y}px)`;
+        function render() {
+            const cards = document.querySelectorAll('.wheel-card');
+            cards.forEach((c, i) => {
+                let y = (i * 280 + offsetY) % (78 * 280);
+                if (y < 0) y += (78 * 280);
+                c.style.transform = `translateY(${y - 135}px)`; // Tam hizalama
             });
+            requestAnimationFrame(render);
         }
+        render();
 
-        function animate() {
-            if (!isDragging) {
-                if (!isSnapping) {
-                    offsetY += velocity;
-                    velocity *= 0.985;
-                    if (Math.abs(velocity) < 1.5 && hasSpun) { isSnapping = true; }
-                } else {
-                    const target = Math.round(((container.clientHeight/2 - 135) - offsetY) / cardHeight) * cardHeight + (container.clientHeight/2 - 135);
-                    offsetY += (target - offsetY) * 0.15;
-                    if (Math.abs(target - offsetY) < 0.5 && !snapDone) {
-                        snapDone = true;
-                        setTimeout(() => {
-                            sessionStorage.setItem('tarotDrawnCards', JSON.stringify([{ id: Math.floor(Math.random()*78), reversed: Math.random()<0.5 }]));
-                            sessionStorage.setItem('tarotReadingType', 'single');
-                            window.location.href = 'ad.html';
-                        }, 1000);
-                    }
-                }
-            }
-            renderCards();
-            requestAnimationFrame(animate);
-        }
-        
-        requestAnimationFrame(animate);
-
-        // Touch/Mouse eventleri aynı mantıkla devam...
-        document.getElementById('wheelTouchArea').addEventListener('touchstart', e => { isDragging = true; lastY = e.touches[0].clientY; velocity = 0; });
-        document.getElementById('wheelTouchArea').addEventListener('touchmove', e => { if(isDragging) { offsetY += e.touches[0].clientY - lastY; lastY = e.touches[0].clientY; hasSpun = true; } });
+        document.getElementById('wheelTouchArea').addEventListener('touchstart', e => { if(isIntentSet) { isDragging = true; lastY = e.touches[0].clientY; } });
+        document.getElementById('wheelTouchArea').addEventListener('touchmove', e => { if(isDragging) { offsetY += e.touches[0].clientY - lastY; lastY = e.touches[0].clientY; } });
         document.getElementById('wheelTouchArea').addEventListener('touchend', () => isDragging = false);
-
-        window.addEventListener('load', () => document.getElementById('intentOverlay').classList.add('active'));
-        document.getElementById('sendIntentBtn').addEventListener('click', () => { document.getElementById('intentOverlay').classList.remove('active'); isIntentSet = true; });
     </script>
 </body>
 </html>
