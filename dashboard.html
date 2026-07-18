@@ -455,6 +455,14 @@
             </div>
         </div>
 
+        <!-- Çarka Sor -->
+        <div class="card-area" id="wheelOption">
+            <div class="single-card-container">
+                <img src="onecard.png" class="single-card-img" alt="Çarka Sor">
+                <div class="card-text">Çarka Sor</div>
+            </div>
+        </div>
+
         <!-- Günlük Burç Yorumu -->
         <div class="horoscope-area" id="horoscopeOption">
             <div class="horoscope-header">
@@ -562,16 +570,23 @@
         function lockCards(message) {
             const singleCard = document.getElementById('singleCardOption');
             const threeCard = document.getElementById('threeCardOption');
+            const wheelCard = document.getElementById('wheelOption');
+            
             cooldownRemaining = message || t('cooldownMessage');
+            
             singleCard.classList.add('locked');
             threeCard.classList.add('locked');
+            wheelCard.classList.add('locked');
         }
 
         function unlockCards() {
             const singleCard = document.getElementById('singleCardOption');
             const threeCard = document.getElementById('threeCardOption');
+            const wheelCard = document.getElementById('wheelOption');
+            
             singleCard.classList.remove('locked');
             threeCard.classList.remove('locked');
+            wheelCard.classList.remove('locked');
         }
 
         // ===== BURÇ HESAPLAMA =====
@@ -990,12 +1005,22 @@ Kurallar:
             }
             openIntentModal('single');
         });
+        
         document.getElementById('threeCardOption').addEventListener('click', function() {
             if (this.classList.contains('locked')) {
                 openCooldownModal();
                 return;
             }
             openIntentModal('three');
+        });
+
+        // Çarka Sor Tıklama Olayı (Yeni Sayfaya Yönlendirme)
+        document.getElementById('wheelOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
+            window.location.href = 'wheel.html';
         });
 
         const cooldownOverlay = document.getElementById('cooldownOverlay');
