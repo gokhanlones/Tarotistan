@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROT'S - Çarka Sor</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            /* Ekranın kazara kaymasını engeller */
+            overflow: hidden; 
+            touch-action: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---- Üst banner ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 200;
+        }
+        .back-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .topbar-title {
+            flex: 1; text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px; color: #000;
+        }
+
+        /* ---- Çark Alanı (Wheel) ---- */
+        .wheel-container {
+            position: absolute;
+            top: 60px; /* Topbar altı */
+            bottom: 68px; /* Bottom nav üstü */
+            left: 0; right: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            background: radial-gradient(circle at center, #ffffff 0%, #f4f4f7 100%);
+        }
+
+        /* Çarkın seçili alanını (Ortayı) belli eden çerçeve/rehber */
+        .center-highlighter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 110px; height: 170px;
+            border: 2px solid #D4AF37; /* Altın sarısı seçim alanı */
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            pointer-events: none; /* Dokunmayı engellememesi için */
+            z-index: 150;
+        }
+
+        .swipe-instruction {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 1px;
+            z-index: 150;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Kart elementleri JS ile buraya eklenecek */
+        .wheel-card {
+            position: absolute;
+            width: 90px; height: 150px; /* Kart boyutları */
+            left: 50%;
+            margin-left: -45px; /* Ortalama */
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            /* Animasyon sırasında sadece transform ve opacity değişecek */
+            will-change: transform, opacity; 
+        }
+
+        /* Seçim sonrası parlama efekti */
+        .wheel-card.selected {
+            filter: drop-shadow(0 0 15px #D4AF37);
+            transition: filter 0.3s ease;
+        }
+
+        /* ---- Alt navigasyon ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img {
+            width: 34px; height: 34px; object-fit: contain; border-radius: 6px;
+        }
+
+        /* ---- Niyet modalı ---- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none; align-items: flex-start; justify-content: center;
+            padding: 76px 24px 0; z-index: 300;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            width: 100%; max-width: 340px; background: #ffffff;
+            border-radius: 16px; padding: 24px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .modal-title { font-size: 1.3rem; font-weight: 700; color: #000; }
+        .intent-input {
+            width: 100%; min-height: 90px;
+            border: 2px solid #e8e8ed; border-radius: 10px; padding: 12px;
+            font-family: 'Times New Roman', Times, serif; font-size: 1rem; color: #000;
+            resize: none;
+        }
+        .intent-input:focus { border-color: #000; outline: none; }
+        .char-counter {
+            align-self: flex-end; font-size: 0.75rem; color: #999; margin-top: -6px;
+        }
+        .send-btn {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: #000; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-top: 4px;
+        }
+        .send-btn svg { width: 22px; height: 22px; fill: #fff; }
+        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Bar -->
+    <div class="topbar">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="topbar-title">ÇARKA SOR</div>
+        <div style="width: 40px;"></div> <!-- Ortalama için boşluk -->
+    </div>
+
+    <!-- Çark Alanı -->
+    <div class="wheel-container" id="wheelContainer">
+        <div class="swipe-instruction" id="swipeInstruction">Çevirmek için kaydırın</div>
+        <div class="center-highlighter"></div>
+        <!-- Kartlar JS ile buraya basılacak -->
+    </div>
+
+    <!-- Alt Navigasyon -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-btn active" style="text-decoration: none; display: flex;">
+            <img src="cardsinfo.png" alt="Ana Sayfa">
+        </a>
+    </div>
+
+    <!-- Niyet Modalı -->
+    <div class="modal-overlay" id="intentOverlay">
+        <div class="modal-box">
+            <div class="modal-title" id="intentTitle">Niyetinizi Belirtin</div>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3" placeholder="Sorunuzu veya niyetinizi buraya yazın..."></textarea>
+            <div class="char-counter" id="charCounter">0/200</div>
+            <button class="send-btn" id="sendIntentBtn" disabled>
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Kullanıcı giriş kontrolü (Opsiyonel ama güvenli)
+        const auth = firebase.auth();
+        auth.onAuthStateChanged(user => {
+            if (!user) window.location.href = 'auth.html';
+        });
+
+        // --- ÇARK FİZİĞİ VE ANİMASYONU ---
+        
+        const container = document.getElementById('wheelContainer');
+        const numCards = 78; // Toplam Tarot kartı sayısı
+        const cardHeight = 160; // Kartın ekrandaki dikey kapladığı alan (boşluklar dahil)
+        const totalHeight = numCards * cardHeight;
+        
+        let cards = [];
+        let offsetY = 0;
+        let velocity = 0;
+        let isDragging = false;
+        let lastY = 0;
+        let isSnapping = false;
+        let snapDone = false;
+        let hasSpun = false; // İlk çevirmede yazıyı gizlemek için
+
+        // Kartları DOM'a ekle
+        for (let i = 0; i < numCards; i++) {
+            let img = document.createElement('img');
+            img.src = 'onecard.png';
+            img.className = 'wheel-card';
+            container.appendChild(img);
+            cards.push(img);
+        }
+
+        // Çarkı ekranda çizen ve 3D derinlik etkisini veren fonksiyon
+        function renderCards() {
+            const containerH = container.clientHeight;
+            const centerY = containerH / 2 - (150 / 2); // 150 kartın gerçek yüksekliği
+            let minOffset = Infinity;
+            let activeIndex = -1;
+
+            cards.forEach((card, i) => {
+                // Modulo ile kartların pozisyonunu döngüsel hesapla
+                let y = (i * cardHeight + offsetY) % totalHeight;
+                if (y < 0) y += totalHeight; 
+
+                // Kartın ekran merkezine olan uzaklığını bul
+                // (Döngüsel olduğu için 3 farklı ihtimali kontrol edip en yakınını alıyoruz)
+                let dist1 = Math.abs(y - centerY);
+                let dist2 = Math.abs(y - totalHeight - centerY);
+                let dist3 = Math.abs(y + totalHeight - centerY);
+                let dist = Math.min(dist1, dist2, dist3);
+
+                // Ekranda çizeceğimiz Y koordinatı
+                let renderY = y;
+                if (dist === dist2) renderY = y - totalHeight;
+                if (dist === dist3) renderY = y + totalHeight;
+
+                // Merkezden uzaklaştıkça küçülme ve silikleşme (Odaklanma efekti)
+                let scale = Math.max(0.6, 1 - dist * 0.0025);
+                let opacity = Math.max(0.15, 1 - dist * 0.0035);
+                let zIndex = 100 - Math.floor(dist);
+
+                card.style.transform = `translateY(${renderY}px) scale(${scale})`;
+                card.style.opacity = opacity;
+                card.style.zIndex = zIndex;
+                card.classList.remove('selected'); // Temizle
+
+                if (dist < minOffset) {
+                    minOffset = dist;
+                    activeIndex = i;
+                }
+            });
+
+            return activeIndex;
+        }
+
+        // Animasyon Döngüsü
+        function animate() {
+            const containerH = container.clientHeight;
+            let activeIndex = -1;
+
+            if (isDragging) {
+                isSnapping = false;
+                snapDone = false;
+            } else {
+                if (!isSnapping) {
+                    // Kaydırma ivmesi (Momentum)
+                    offsetY += velocity;
+                    velocity *= 0.95; // Sürtünme katsayısı (ne kadar yavaşlayacağı)
+                    
+                    // İvme iyice düşünce durdur ve kilitleme (snap) moduna geç
+                    if (Math.abs(velocity) < 0.5 && hasSpun) {
+                        velocity = 0;
+                        isSnapping = true;
+                    }
+                } else {
+                    // Ortadaki karta kilitleme (Snap) matematiği
+                    const centerY = containerH / 2 - (150 / 2);
+                    let floatSlot = (centerY - offsetY) / cardHeight;
+                    let targetSlot = Math.round(floatSlot);
+                    let targetOffsetY = centerY - targetSlot * cardHeight;
+                    
+                    let diff = targetOffsetY - offsetY;
+                    offsetY += diff * 0.15; // Yumuşak bir şekilde merkeze kaydır
+                    
+                    // Tam oturduğunda işlemi bitir
+                    if (Math.abs(diff) < 0.5 && !snapDone) {
+                        offsetY = targetOffsetY;
+                        snapDone = true;
+                        
+                        // Kilitlenen karta parlama efekti ver
+                        activeIndex = renderCards();
+                        if(cards[activeIndex]) {
+                            cards[activeIndex].classList.add('selected');
+                        }
+                        
+                        // Yarım saniye sonra Niyet penceresini aç
+                        setTimeout(() => openIntentModal(), 500);
+                    }
+                }
+            }
+            
+            // Eğer snap bittiyse render'ı tekrar tekrar çağırmaya gerek yok
+            if (!snapDone || isDragging) {
+                renderCards();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Sayfa yüklendiğinde çarkı ilk kez çiz ve animasyonu başlat
+        renderCards();
+        requestAnimationFrame(animate);
+
+        // --- DOKUNMATİK EKRAN KONTROLLERİ ---
+        container.addEventListener('touchstart', e => {
+            isDragging = true;
+            velocity = 0;
+            lastY = e.touches[0].clientY;
+            snapDone = false;
+            if(cards.length > 0) cards.forEach(c => c.classList.remove('selected'));
+        }, {passive: false});
+
+        container.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            e.preventDefault(); // Sayfanın kendi scroll'unu iptal et
+            
+            // "Çevirmek için kaydırın" yazısını gizle
+            document.getElementById('swipeInstruction').style.display = 'none';
+            hasSpun = true;
+
+            let currentY = e.touches[0].clientY;
+            let deltaY = currentY - lastY;
+            offsetY += deltaY;
+            velocity = deltaY; // Son hareketi hıza dönüştür
+            lastY = currentY;
+        }, {passive: false});
+
+        container.addEventListener('touchend', e => {
+            isDragging = false;
+            // Eğer kullanıcı sadece tıkladıysa (kaydırmadıysa) hafif bir dönüş ver
+            if (hasSpun && Math.abs(velocity) < 3) {
+                velocity = (velocity >= 0 ? 8 : -8);
+            }
+        });
+
+
+        // --- NİYET MODALI İŞLEMLERİ ---
+        const intentOverlay = document.getElementById('intentOverlay');
+        const intentInput = document.getElementById('intentInput');
+        const charCounter = document.getElementById('charCounter');
+        const sendBtn = document.getElementById('sendIntentBtn');
+
+        function openIntentModal() {
+            intentInput.value = '';
+            charCounter.textContent = '0/200';
+            sendBtn.disabled = true;
+            intentOverlay.classList.add('active');
+            intentInput.focus();
+        }
+
+        function closeIntentModal() {
+            intentOverlay.classList.remove('active');
+            // Kullanıcı modalı kapatırsa çarkı sıfırla ki tekrar çevirebilsin
+            snapDone = false;
+            hasSpun = false;
+            document.getElementById('swipeInstruction').style.display = 'block';
+            cards.forEach(c => c.classList.remove('selected'));
+        }
+
+        intentInput.addEventListener('input', function() {
+            charCounter.textContent = intentInput.value.length + '/200';
+            sendBtn.disabled = intentInput.value.trim().length === 0;
+        });
+
+        // Modala dışarı tıklanınca kapat
+        intentOverlay.addEventListener('click', function(e) {
+            if (e.target === intentOverlay) closeIntentModal();
+        });
+
+        // Seçimi onayla ve yönlendir
+        sendBtn.addEventListener('click', function() {
+            const intentText = intentInput.value.trim();
+            if (!intentText) return;
+            
+            // Verileri kaydet
+            sessionStorage.setItem('tarotIntent', intentText);
+            sessionStorage.setItem('tarotReadingType', 'wheel'); // Tip çark olarak gidiyor
+            
+            // cards.html sayfasına yönlendir (Kart animasyonu veya sonuç sayfası hangisiyse)
+            window.location.href = 'cards.html'; 
+        });
+
+        // Çeviriler için opsiyonel entegrasyon
+        if (typeof t === 'function') {
+            document.getElementById('intentTitle').textContent = t('intentTitle');
+        }
+
+    </script>
+</body>
+</html>
