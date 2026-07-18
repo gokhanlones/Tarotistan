@@ -525,7 +525,8 @@
             } else {
                 if (!isSnapping) {
                     offsetY  += velocity;
-                    velocity *= 0.92;
+                    // Sürtünmeyi (0.92'den 0.97'ye) düşürdüm. Artık çok daha uzun süre dönüyor.
+                    velocity *= 0.97; 
 
                     if (Math.abs(velocity) < 0.5 && hasSpun) {
                         velocity   = 0;
@@ -595,8 +596,16 @@
         function handleEnd() {
             if (!isDragging) return;
             isDragging = false;
-            if (hasSpun && Math.abs(velocity) < 3) {
-                velocity = (velocity >= 0 ? 8 : -8);
+            
+            if (hasSpun) {
+                // Parmağı çektiğiniz andaki momentumu artırdım.
+                if (Math.abs(velocity) < 5) {
+                    // Yavaşça itilirse bile minimum hız uygulayarak çok dönmesini sağla
+                    velocity = (velocity >= 0 ? 35 : -35); 
+                } else {
+                    // Hızlıca kaydırıldıysa mevcut hızı katla
+                    velocity *= 2.5; 
+                }
             }
         }
 
