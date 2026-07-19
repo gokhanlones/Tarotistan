@@ -191,46 +191,76 @@
         }
 
         async function initResult(uid) {
-            try {
-                const response = await fetch('tarot_cards.json');
-                if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
-                const tarotData = await response.json();
-                let cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-                let intent = sessionStorage.getItem('tarotIntent') || '';
-                let type = sessionStorage.getItem('tarotReadingType') || 'single';
-                let aiText = '';
-                let readingTimestamp = null;
+        async function initResult(uid) {
+    try {
+        const response = await fetch('tarot_cards.json');
+        if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
+        const tarotData = await response.json();
 
-                const urlParams = new URLSearchParams(window.location.search);
-                const readingId = urlParams.get('id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const readingId = urlParams.get('id');
 
-                if (cards.length === 0) {
-                    let query = readingId ? db.collection('users').doc(uid).collection('readings').doc(readingId) : null;
-                    if (!readingId) {
-                        const last = await withTimeout(db.collection('users').doc(uid).collection('readings').orderBy('createdAt', 'desc').limit(1).get(), 10000);
-                        if (!last.empty) query = last.docs[0].ref;
-                    }
-                    if (query) {
-                        const snap = await withTimeout(query.get(), 10000);
-                        if (snap.exists) {
-                            const data = snap.data();
-                            cards = data.cards || []; intent = data.intent || ''; type = data.type || 'single'; aiText = data.aiInterpretation || ''; readingTimestamp = data.createdAt || null;
-                        }
-                    }
+        let cards = [];
+        let intent = '';
+        let type = 'single';
+        let aiText = '';
+        let readingTimestamp = null;
+
+        // readingId varsa HER ZAMAN Firestore'dan oku
+        if (readingId) {
+            const snap = await withTimeout(
+                db.collection('users').doc(uid).collection('readings').doc(readingId).get(),
+                10000
+            );
+            if (snap.exists) {
+                const data = snap.data();
+                cards = data.cards || [];
+                intent = data.intent || '';
+                type = data.type || 'single';
+                aiText = data.aiInterpretation || '';
+                readingTimestamp = data.createdAt || null;
+            }
+        }
+
+        // Firestore'dan kart gelmediyse sessionStorage'a bak
+        if (cards.length === 0) {
+            cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
+            intent = sessionStorage.getItem('tarotIntent') || '';
+            type = sessionStorage.getItem('tarotReadingType') || 'single';
+
+            // readingId de yoksa son kaydı çek
+            if (!readingId) {
+                const last = await withTimeout(
+                    db.collection('users').doc(uid).collection('readings')
+                        .orderBy('createdAt', 'desc').limit(1).get(),
+                    10000
+                );
+                if (!last.empty) {
+                    const data = last.docs[0].data();
+                    cards = data.cards || [];
+                    intent = data.intent || '';
+                    type = data.type || 'single';
+                    aiText = data.aiInterpretation || '';
+                    readingTimestamp = data.createdAt || null;
                 }
-                if (cards.length === 0) { showEmptyState(); return; }
+            }
+        }
 
-                document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
-                renderCards(cards, type, tarotData);
+        if (cards.length === 0) { showEmptyState(); return; }
 
-                const aiDescText = document.getElementById('aiDescText');
-                if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-                    aiDescText.textContent = aiText; aiDescText.className = 'ai-text';
-                } else {
-                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.'; aiDescText.className = 'ai-empty';
-                }
-                showContent();
-            } catch (e) { console.error("HATA:", e); showContent(); }
+        document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
+        renderCards(cards, type, tarotData);
+
+        const aiDescText = document.getElementById('aiDescText');
+        if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
+            aiDescText.textContent = aiText;
+            aiDescText.className = 'ai-text';
+        } else {
+            aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
+            aiDescText.className = 'ai-empty';
+        }
+        showContent();
+    } catch (e) { console.error("HATA:", e); showContent(); }
         }
 
         function renderCards(cards, type, tarotData) {
