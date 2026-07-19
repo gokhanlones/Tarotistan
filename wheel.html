@@ -60,11 +60,19 @@
             isolation: isolate;
         }
 
+        /* Çerçeve içindeki SABİT arka plan: üst gri → beyaz → alt gri */
         .slot-window {
             position: relative;
             width: 190px; height: 310px;
             overflow: hidden;
             border-radius: 12px;
+            background: linear-gradient(
+                to bottom,
+                #a0a0a0 0%,
+                #ffffff 38%,
+                #ffffff 62%,
+                #a0a0a0 100%
+            );
         }
 
         .center-highlighter {
@@ -84,6 +92,7 @@
             50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
         }
 
+        /* Fade rengi slot-window arka planının gri tonuyla eşleşiyor */
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
@@ -93,14 +102,14 @@
         }
         .fade-top {
             top: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to bottom, #a0a0a0 0%, rgba(160,160,160,0) 100%);
         }
         .fade-bottom {
             bottom: 0;
-            background: linear-gradient(to top, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to top, #a0a0a0 0%, rgba(160,160,160,0) 100%);
         }
 
-        /* ---- Kart wrapper ---- */
+        /* Kart wrapper — gölge yok, ::after yok */
         .wheel-card-wrap {
             position: absolute;
             width: 160px; height: 270px;
@@ -110,33 +119,15 @@
             border-radius: 8px;
         }
 
-        /* Üst ve alttan griye geçiş, ortası beyaz */
-        .wheel-card-wrap::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-                to bottom,
-                rgba(90, 90, 90, 0.38) 0%,
-                rgba(255, 255, 255, 0) 38%,
-                rgba(255, 255, 255, 0) 62%,
-                rgba(90, 90, 90, 0.38) 100%
-            );
-            pointer-events: none;
-            border-radius: 8px;
-            z-index: 1;
-        }
-
         .wheel-card {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
             border-radius: 8px;
-            /* Gölge yok */
         }
 
-        /* Seçilen karta altın parlaması — wrapper üzerinden */
+        /* Seçilen karta altın parlaması */
         .wheel-card-wrap.selected .wheel-card {
             filter: drop-shadow(0 0 15px #D4AF37) drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
         }
@@ -223,19 +214,16 @@
             padding: 24px 20px;
             border-bottom: 1px solid #e8e8ed;
             font-size: 1.1rem; font-weight: 700;
-            letter-spacing: 2px;
-            color: #000;
+            letter-spacing: 2px; color: #000;
         }
         .sidebar-menu { display: flex; flex-direction: column; }
         .sidebar-item {
             padding: 18px 20px;
-            font-size: 1rem;
-            color: #000;
+            font-size: 1rem; color: #000;
             border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
             transition: background 0.15s;
-            display: flex;
-            align-items: center; gap: 12px;
+            display: flex; align-items: center; gap: 12px;
         }
         .sidebar-item:active { background: #f5f5f7; }
 
@@ -319,7 +307,7 @@
 
     <script>
         const lang = typeof getLang === 'function' ? getLang() : 'tr';
-        document.getElementById('intentTitle').textContent      = typeof t === 'function' ? t('intentTitle')   : 'Niyet';
+        document.getElementById('intentTitle').textContent       = typeof t === 'function' ? t('intentTitle')   : 'Niyet';
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
@@ -341,168 +329,105 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
             document.getElementById('sidebar').classList.remove('active');
         }
-        function logout() {
-            auth.signOut().then(() => { window.location.href = 'auth.html'; });
-        }
+        function logout() { auth.signOut().then(() => { window.location.href = 'auth.html'; }); }
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
-        /* ========== SES SİSTEMİ ========== */
-        let audioCtx    = null;
-        let noiseNode   = null;
-        let noiseGain   = null;
-        let lastCardIndex = -1;
-        let spinActive  = false;
+        /* ========== SES ========== */
+        let audioCtx = null, noiseNode = null, noiseGain = null;
+        let lastCardIndex = -1, spinActive = false;
 
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
-
         function createSoftNoiseBuffer() {
-            const bufferSize = audioCtx.sampleRate * 1;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data   = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.3;
-            }
+            const buf = audioCtx.sampleRate * 1;
+            const buffer = audioCtx.createBuffer(1, buf, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < buf; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
             return buffer;
         }
-
         function startSpinSound() {
             if (!audioCtx || spinActive) return;
             spinActive = true;
-
-            const noiseBuffer = createSoftNoiseBuffer();
             noiseNode = audioCtx.createBufferSource();
-            noiseNode.buffer = noiseBuffer;
-            noiseNode.loop   = true;
-
-            const lowFilter  = audioCtx.createBiquadFilter();
-            lowFilter.type   = 'lowpass';
-            lowFilter.frequency.value = 300;
-            lowFilter.Q.value = 0.5;
-
-            const bandFilter = audioCtx.createBiquadFilter();
-            bandFilter.type  = 'bandpass';
-            bandFilter.frequency.value = 200;
-            bandFilter.Q.value = 1;
-
-            noiseGain = audioCtx.createGain();
-            noiseGain.gain.value = 0.04;
-
-            noiseNode.connect(lowFilter);
-            lowFilter.connect(bandFilter);
-            bandFilter.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
+            noiseNode.buffer = createSoftNoiseBuffer();
+            noiseNode.loop = true;
+            const lf = audioCtx.createBiquadFilter(); lf.type = 'lowpass'; lf.frequency.value = 300; lf.Q.value = 0.5;
+            const bf = audioCtx.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = 200; bf.Q.value = 1;
+            noiseGain = audioCtx.createGain(); noiseGain.gain.value = 0.04;
+            noiseNode.connect(lf); lf.connect(bf); bf.connect(noiseGain); noiseGain.connect(audioCtx.destination);
             noiseNode.start();
         }
-
         function stopSpinSound() {
             spinActive = false;
-            if (noiseNode) {
-                try { noiseNode.disconnect(); noiseNode.stop(audioCtx.currentTime + 0.1); } catch(e) {}
-                noiseNode = null;
-            }
-            if (noiseGain) { try { noiseGain.disconnect(); } catch(e) {} noiseGain = null; }
+            if (noiseNode) { try { noiseNode.disconnect(); noiseNode.stop(audioCtx.currentTime + 0.1); } catch(e){} noiseNode = null; }
+            if (noiseGain) { try { noiseGain.disconnect(); } catch(e){} noiseGain = null; }
         }
-
         function playTickSound(intensity) {
             if (!audioCtx) return;
-            const osc    = audioCtx.createOscillator();
-            const gain   = audioCtx.createGain();
-            const filter = audioCtx.createBiquadFilter();
-
-            osc.type = 'sine';
-            osc.frequency.value = 600 + Math.random() * 200;
-            filter.type = 'lowpass';
-            filter.frequency.value = 1200;
-
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), filter = audioCtx.createBiquadFilter();
+            osc.type = 'sine'; osc.frequency.value = 600 + Math.random() * 200;
+            filter.type = 'lowpass'; filter.frequency.value = 1200;
             const vol = 0.015 * Math.min(intensity, 1);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.04);
+            osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
-
         function playStopSound() {
             if (!audioCtx) return;
-            const osc  = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(350, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.25);
-
             gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.25);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== ÇARK MEKANİZMASI ========== */
+        /* ========== ÇARK ========== */
         const touchArea   = document.getElementById('wheelTouchArea');
         const container   = document.getElementById('slotWindow');
         const numCards    = 78;
         const cardHeight  = 280;
         const totalHeight = numCards * cardHeight;
 
-        let cards       = [];
-        let offsetY     = Math.random() * totalHeight;
-        let velocity    = 0;
-        let isDragging  = false;
-        let lastY       = 0;
-        let isSnapping  = false;
-        let snapDone    = false;
-        let hasSpun     = false;
-        let isIntentSet = false;
+        let cards = [], offsetY = Math.random() * totalHeight, velocity = 0;
+        let isDragging = false, lastY = 0, isSnapping = false;
+        let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        /* Her kart için wrapper div + img oluştur */
         for (let i = 0; i < numCards; i++) {
             const wrap = document.createElement('div');
-            wrap.className    = 'wheel-card-wrap';
+            wrap.className = 'wheel-card-wrap';
             wrap.dataset.index = i;
-
             const img = document.createElement('img');
-            img.src       = 'onecard.png';
+            img.src = 'onecard.png';
             img.className = 'wheel-card';
-
             wrap.appendChild(img);
             container.appendChild(wrap);
-            cards.push(wrap); // wrapper'ı takip ediyoruz
+            cards.push(wrap);
         }
 
         function renderCards() {
             const containerH = container.clientHeight;
             const centerY    = containerH / 2 - (270 / 2);
-            let minOffset    = Infinity;
-            let activeIndex  = -1;
+            let minOffset = Infinity, activeIndex = -1;
 
             cards.forEach((wrap, i) => {
                 let y = (i * cardHeight + offsetY) % totalHeight;
                 if (y < 0) y += totalHeight;
-
-                const dist1 = Math.abs(y - centerY);
-                const dist2 = Math.abs(y - totalHeight - centerY);
-                const dist3 = Math.abs(y + totalHeight - centerY);
-                let dist    = Math.min(dist1, dist2, dist3);
-
+                const d1 = Math.abs(y - centerY);
+                const d2 = Math.abs(y - totalHeight - centerY);
+                const d3 = Math.abs(y + totalHeight - centerY);
+                let dist = Math.min(d1, d2, d3);
                 let renderY = y;
-                if (dist === dist2) renderY = y - totalHeight;
-                if (dist === dist3) renderY = y + totalHeight;
-
+                if (dist === d2) renderY = y - totalHeight;
+                if (dist === d3) renderY = y + totalHeight;
                 const opacity = Math.max(0.15, 1 - dist * 0.0035);
                 const zIndex  = 100 - Math.floor(dist / 10);
-
                 if (opacity < 0.15) {
                     wrap.style.display = 'none';
                 } else {
@@ -512,64 +437,37 @@
                     wrap.style.zIndex    = zIndex;
                 }
                 wrap.classList.remove('selected');
-
-                if (dist < minOffset) {
-                    minOffset   = dist;
-                    activeIndex = i;
-                }
+                if (dist < minOffset) { minOffset = dist; activeIndex = i; }
             });
 
             if (activeIndex !== lastCardIndex && hasSpun && !snapDone && Math.abs(velocity) > 8) {
-                const intensity = Math.min(Math.abs(velocity) / 60, 1);
-                playTickSound(intensity);
+                playTickSound(Math.min(Math.abs(velocity) / 60, 1));
                 lastCardIndex = activeIndex;
             }
-
             return activeIndex;
         }
 
         function animate() {
             const containerH = container.clientHeight;
-
             if (isDragging) {
-                isSnapping = false;
-                snapDone   = false;
+                isSnapping = false; snapDone = false;
             } else {
                 if (!isSnapping) {
-                    offsetY  += velocity;
-                    velocity *= 0.985;
-
-                    if (Math.abs(velocity) < 1.5 && hasSpun) {
-                        velocity   = 0;
-                        isSnapping = true;
-                    }
+                    offsetY += velocity; velocity *= 0.985;
+                    if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
                 } else {
                     const centerY    = containerH / 2 - (270 / 2);
-                    const floatSlot  = (centerY - offsetY) / cardHeight;
-                    const targetSlot = Math.round(floatSlot);
-                    const targetOffY = centerY - targetSlot * cardHeight;
+                    const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
                     const diff       = targetOffY - offsetY;
-
                     offsetY += diff * 0.15;
-
                     if (Math.abs(diff) < 0.5 && !snapDone) {
-                        offsetY  = targetOffY;
-                        snapDone = true;
-
+                        offsetY = targetOffY; snapDone = true;
                         const activeIdx = renderCards();
-                        if (cards[activeIdx]) {
-                            cards[activeIdx].classList.add('selected');
-                        }
-
-                        stopSpinSound();
-                        playStopSound();
+                        if (cards[activeIdx]) cards[activeIdx].classList.add('selected');
+                        stopSpinSound(); playStopSound();
                         if (navigator.vibrate) navigator.vibrate(50);
-
                         setTimeout(() => {
-                            const randId       = Math.floor(Math.random() * 78);
-                            const randReversed = Math.random() < 0.5;
-                            const drawnCard    = { id: randId, reversed: randReversed };
-
+                            const drawnCard = { id: Math.floor(Math.random() * 78), reversed: Math.random() < 0.5 };
                             sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
                             sessionStorage.setItem('tarotReadingType', 'single');
                             window.location.href = 'ad.html';
@@ -577,11 +475,7 @@
                     }
                 }
             }
-
-            if (!snapDone || isDragging) {
-                renderCards();
-            }
-
+            if (!snapDone || isDragging) renderCards();
             requestAnimationFrame(animate);
         }
 
@@ -589,59 +483,34 @@
         requestAnimationFrame(animate);
 
         function inCardZone(clientX) {
-            const rect    = touchArea.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            return Math.abs(clientX - centerX) <= 120;
+            const rect = touchArea.getBoundingClientRect();
+            return Math.abs(clientX - (rect.left + rect.width / 2)) <= 120;
         }
-
         function handleStart(y, x) {
-            if (!isIntentSet) return;
-            if (!inCardZone(x)) return;
-            initAudio();
-            isDragging    = true;
-            velocity      = 0;
-            lastY         = y;
-            snapDone      = false;
-            lastCardIndex = -1;
+            if (!isIntentSet || !inCardZone(x)) return;
+            initAudio(); isDragging = true; velocity = 0; lastY = y;
+            snapDone = false; lastCardIndex = -1;
             cards.forEach(w => w.classList.remove('selected'));
         }
-
         function handleMove(y) {
             if (!isDragging || !isIntentSet) return;
             hasSpun = true;
-            const deltaY = y - lastY;
-            offsetY  += deltaY;
-            velocity  = deltaY;
-            lastY     = y;
+            const dy = y - lastY; offsetY += dy; velocity = dy; lastY = y;
             if (Math.abs(velocity) > 5) startSpinSound();
         }
-
         function handleEnd() {
             if (!isDragging) return;
             isDragging = false;
             if (hasSpun) {
-                if (Math.abs(velocity) < 10) {
-                    velocity = (velocity >= 0 ? 80 : -80);
-                } else {
-                    velocity *= 4;
-                }
+                velocity = Math.abs(velocity) < 10 ? (velocity >= 0 ? 80 : -80) : velocity * 4;
                 if (velocity >  150) velocity =  150;
                 if (velocity < -150) velocity = -150;
             }
         }
 
-        touchArea.addEventListener('touchstart', e => {
-            handleStart(e.touches[0].clientY, e.touches[0].clientX);
-        }, { passive: false });
-
-        touchArea.addEventListener('touchmove', e => {
-            if (!isDragging) return;
-            e.preventDefault();
-            handleMove(e.touches[0].clientY);
-        }, { passive: false });
-
-        touchArea.addEventListener('touchend', handleEnd);
-
+        touchArea.addEventListener('touchstart', e => handleStart(e.touches[0].clientY, e.touches[0].clientX), { passive: false });
+        touchArea.addEventListener('touchmove',  e => { if (!isDragging) return; e.preventDefault(); handleMove(e.touches[0].clientY); }, { passive: false });
+        touchArea.addEventListener('touchend',   handleEnd);
         touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
         touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
         touchArea.addEventListener('mouseup',    handleEnd);
@@ -654,27 +523,15 @@
         const sendBtn       = document.getElementById('sendIntentBtn');
 
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                intentOverlay.classList.add('active');
-                intentInput.focus();
-            }, 500);
+            setTimeout(() => { intentOverlay.classList.add('active'); intentInput.focus(); }, 500);
         });
-
-        function closeIntentModal() {
-            intentOverlay.classList.remove('active');
-            isIntentSet = true;
-        }
-
-        intentInput.addEventListener('input', function () {
+        function closeIntentModal() { intentOverlay.classList.remove('active'); isIntentSet = true; }
+        intentInput.addEventListener('input', () => {
             charCounter.textContent = intentInput.value.length + '/200';
             sendBtn.disabled = intentInput.value.trim().length === 0;
         });
-
-        intentOverlay.addEventListener('click', function (e) {
-            if (e.target === intentOverlay) closeIntentModal();
-        });
-
-        sendBtn.addEventListener('click', function () {
+        intentOverlay.addEventListener('click', e => { if (e.target === intentOverlay) closeIntentModal(); });
+        sendBtn.addEventListener('click', () => {
             const intentText = intentInput.value.trim();
             if (!intentText) return;
             sessionStorage.setItem('tarotIntent', intentText);
