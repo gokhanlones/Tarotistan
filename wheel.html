@@ -60,7 +60,6 @@
             isolation: isolate;
         }
 
-        /* Çerçeve içindeki SABİT arka plan: üst gri → beyaz → alt gri */
         .slot-window {
             position: relative;
             width: 190px; height: 310px;
@@ -75,24 +74,67 @@
             );
         }
 
+        /* ===== GOLD ÇERÇEVE - GRADIENT EFEKT ===== */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 190px; height: 310px;
-            border: 3px solid #D4AF37;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
             pointer-events: none;
             z-index: 150;
+            overflow: hidden;
             animation: glowPulse 2s ease-in-out infinite;
         }
+        
+        /* Gradient border katmanı */
+        .center-highlighter::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 3px;
+            background: linear-gradient(
+                to bottom,
+                #D4AF37 0%,
+                #8B6914 20%,
+                #000000 45%,
+                #000000 55%,
+                #8B6914 80%,
+                #D4AF37 100%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        /* İç glow efekti */
+        .center-highlighter::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 9px;
+            box-shadow: 
+                inset 0 0 20px rgba(212, 175, 55, 0.3),
+                inset 0 0 40px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+        
         @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
-            50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
+            0%, 100% { 
+                filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3)) 
+                        drop-shadow(0 0 20px rgba(212, 175, 55, 0.2)); 
+            }
+            50% { 
+                filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5)) 
+                        drop-shadow(0 0 30px rgba(212, 175, 55, 0.3)); 
+            }
         }
 
-        /* Fade'ler ARKA PLANDA - z-index düşürüldü */
+        /* Fade'ler ARKA PLANDA */
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
@@ -109,7 +151,6 @@
             background: linear-gradient(to top, #a0a0a0 0%, rgba(160,160,160,0) 100%);
         }
 
-        /* Kart wrapper - z-index artırıldı, fade'lerin önünde */
         .wheel-card-wrap {
             position: absolute;
             width: 160px; height: 270px;
@@ -128,7 +169,6 @@
             border-radius: 8px;
         }
 
-        /* Seçilen karta altın parlaması */
         .wheel-card-wrap.selected .wheel-card {
             filter: drop-shadow(0 0 15px #D4AF37) drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
         }
