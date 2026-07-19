@@ -69,54 +69,55 @@
             margin: 0 auto;
         }
 
-        /* ---- Kart Alanı ---- */
-        .card-area {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 140px;
-            border: 1.5px solid #ffffff;
-            border-radius: 14px;
-            padding: 14px 18px;
-            background: url('cardsplan.png') center/cover no-repeat;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
+        /* ---- Kart Alanı (Her 3 alanın dış kutusu) ---- */
+.card-area {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 110px; /* 140px'ten 110px'e düşürüldü */
+    border: 1.5px solid #ffffff;
+    border-radius: 14px;
+    padding: 10px 14px; /* Boşluklar daraltıldı */
+    background: url('cardsplan.png') center/cover no-repeat;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
 
-        /* Tek Kart İçin */
-        .single-card-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 14px;
-            width: 100%;
-        }
-        .single-card-img {
-            width: 70px;
-            height: 100px;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-            flex-shrink: 0;
-        }
+/* Tek Kart ve Çarka Sor İçin (1. ve 3. Alan) */
+.single-card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px; /* Görsel ile yazı arası boşluk hafif kısıldı */
+    width: 100%;
+}
+.single-card-img {
+    width: 56px; /* 70px'ten 56px'e düşürüldü */
+    height: 80px; /* 100px'ten 80px'e düşürüldü */
+    object-fit: contain;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+    flex-shrink: 0;
+}
 
-        /* Üç Kart İçin - Tek görsel + yazılar */
-        .three-card-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 14px;
-            width: 100%;
-        }
-        .three-card-img {
-            height: 100px;
-            width: auto;
-            max-width: 160px;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-            flex-shrink: 0;
-        }
+/* Üç Kart İçin (2. Alan) */
+.three-card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px; /* Görsel ile yazı arası boşluk hafif kısıldı */
+    width: 100%;
+}
+.three-card-img {
+    height: 80px; /* 100px'ten 80px'e düşürüldü */
+    width: auto;
+    max-width: 120px; /* 160px'ten 120px'e düşürüldü */
+    object-fit: contain;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+    flex-shrink: 0;
+}
+
 
         /* ORTAK YAZI STİLİ - Tek ve Üç Kart */
 .card-text {
