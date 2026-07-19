@@ -59,20 +59,27 @@
             top: 60px;
             bottom: 68px;
             left: 0; right: 0;
-            overflow: hidden;
             display: flex;
             justify-content: center;
+            align-items: center;
             background: #ffffff;
-            /* Kart z-index'lerini container içinde hapseder */
             isolation: isolate;
+        }
+
+        .slot-window {
+            position: relative;
+            width: 190px;
+            height: 310px;
+            overflow: hidden;
+            border-radius: 12px;
         }
 
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 110px; height: 170px;
-            border: 2px solid #D4AF37;
+            width: 190px; height: 310px;
+            border: 3px solid #D4AF37;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
             pointer-events: none;
@@ -84,28 +91,28 @@
             50%       { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
         }
 
+        /* Opaklık ve alan arttırıldı */
         .fade-top, .fade-bottom {
             position: absolute;
             left: 0; right: 0;
-            height: 38%;
-            min-height: 140px;
+            height: 25%;
             pointer-events: none;
             z-index: 140;
         }
         .fade-top {
             top: 0;
-            background: linear-gradient(to bottom, #ffffff 0%, transparent 100%);
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
         }
         .fade-bottom {
             bottom: 0;
-            background: linear-gradient(to top, #ffffff 0%, transparent 100%);
+            background: linear-gradient(to top, rgba(255,255,255,1) 15%, rgba(255,255,255,0) 100%);
         }
 
         .wheel-card {
             position: absolute;
-            width: 90px; height: 150px;
+            width: 160px; height: 270px;
             left: 50%;
-            margin-left: -45px;
+            margin-left: -80px;
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
             will-change: transform, opacity;
@@ -185,68 +192,6 @@
         }
         .send-btn svg { width: 22px; height: 22px; fill: #fff; }
         .send-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* ---- Seçim overlay ---- */
-        .selection-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.75);
-            display: none;
-            align-items: center; justify-content: center;
-            z-index: 250;
-            backdrop-filter: blur(5px);
-        }
-        .selection-overlay.active { display: flex; }
-        .selected-card-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            animation: cardReveal 0.5s ease-out;
-        }
-        @keyframes cardReveal {
-            from { opacity: 0; transform: scale(0.5) translateY(30px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .selected-card-display img {
-            width: 120px; height: 200px;
-            border-radius: 10px;
-            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
-        }
-        .selected-card-name {
-            font-size: 1.3rem;
-            color: #D4AF37;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-        .selected-card-badge {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: -8px;
-        }
-        .selected-card-meaning {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.75);
-            text-align: center;
-            max-width: 280px;
-            padding: 0 16px;
-            line-height: 1.5;
-        }
-        .continue-btn {
-            margin-top: 8px;
-            padding: 12px 32px;
-            background: #D4AF37;
-            border: none;
-            border-radius: 25px;
-            color: #000;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: transform 0.2s ease;
-        }
-        .continue-btn:active { transform: scale(0.95); }
 
         /* ---- Sidebar ---- */
         .sidebar-overlay {
@@ -331,10 +276,12 @@
     </div>
 
     <!-- Çark alanı -->
-    <div class="wheel-container" id="wheelContainer">
-        <div class="fade-top"></div>
-        <div class="fade-bottom"></div>
+    <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter"></div>
+        <div class="slot-window" id="slotWindow">
+            <div class="fade-top"></div>
+            <div class="fade-bottom"></div>
+        </div>
     </div>
 
     <!-- Alt nav -->
@@ -348,22 +295,11 @@
     <div class="modal-overlay" id="intentOverlay">
         <div class="modal-box">
             <div class="modal-title" id="intentTitle">Niyet</div>
-            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3" id="intentPlaceholder"></textarea>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
             <div class="char-counter" id="charCounter">0/200</div>
             <button class="send-btn" id="sendIntentBtn" disabled>
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
-        </div>
-    </div>
-
-    <!-- Seçim overlay -->
-    <div class="selection-overlay" id="selectionOverlay">
-        <div class="selected-card-display">
-            <img id="selectedCardImg" src="onecard.png" alt="Seçilen Kart">
-            <div class="selected-card-name" id="selectedCardName">···</div>
-            <div class="selected-card-badge" id="selectedCardBadge"></div>
-            <div class="selected-card-meaning" id="selectedCardMeaning"></div>
-            <button class="continue-btn" id="continueBtn"></button>
         </div>
     </div>
 
@@ -397,7 +333,6 @@
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
-        document.getElementById('continueBtn').textContent  = typeof t === 'function' ? t('continueButton') : 'Devam Et';
         document.getElementById('intentInput').placeholder  = lang === 'tr'
             ? 'Sorunuzu veya niyetinizi buraya yazın...'
             : 'Write your question or intention here...';
@@ -428,17 +363,11 @@
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
-        /* ---- tarot_cards.json yükleme ---- */
-        let tarotData = null;
-        fetch('tarot_cards.json')
-            .then(r => r.json())
-            .then(data => { tarotData = data; })
-            .catch(e => console.warn('tarot_cards.json yüklenemedi:', e));
-
         /* ---- Çark mekanizması ---- */
-        const container  = document.getElementById('wheelContainer');
+        const touchArea  = document.getElementById('wheelTouchArea');
+        const container  = document.getElementById('slotWindow');
         const numCards   = 78;
-        const cardHeight = 160;
+        const cardHeight = 280; 
         const totalHeight = numCards * cardHeight;
 
         let cards       = [];
@@ -451,81 +380,6 @@
         let hasSpun     = false;
         let isIntentSet = false;
 
-        // Seçilen kart verisi (rastgele atanacak)
-        let drawnCard   = null;
-
-        /* ---- Web Audio API ---- */
-        let audioCtx      = null;
-        let lastTickIndex = -1;   // kart değişimini izler
-
-        function ensureAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            return audioCtx;
-        }
-
-        // Kart geçiş tiki — hız arttıkça daha sert/yüksek
-        function playTick(spd) {
-            try {
-                const ctx = ensureAudio();
-                const now = ctx.currentTime;
-                const vol = Math.min(0.45, Math.abs(spd) * 0.012 + 0.06);
-                const dur = 0.045;
-
-                // Kısa beyaz gürültü darbesi
-                const samples = Math.floor(ctx.sampleRate * dur);
-                const buf     = ctx.createBuffer(1, samples, ctx.sampleRate);
-                const data    = buf.getChannelData(0);
-                for (let i = 0; i < samples; i++) {
-                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / samples, 2.5);
-                }
-
-                const src    = ctx.createBufferSource();
-                src.buffer   = buf;
-
-                // Bant geçiren filtre: mekanik/odun klik hissi
-                const filter      = ctx.createBiquadFilter();
-                filter.type       = 'bandpass';
-                filter.frequency.value = 500 + Math.abs(spd) * 15;
-                filter.Q.value    = 1.8;
-
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(vol, now);
-
-                src.connect(filter);
-                filter.connect(gain);
-                gain.connect(ctx.destination);
-                src.start(now);
-            } catch (_) {}
-        }
-
-        // Yerine oturma sesi — iki aşamalı ton
-        function playSnap() {
-            try {
-                const ctx = ensureAudio();
-                const now = ctx.currentTime;
-
-                [
-                    { freq: 320, endFreq: 140, vol: 0.35, dur: 0.18, delay: 0    },
-                    { freq: 280, endFreq: 110, vol: 0.20, dur: 0.14, delay: 0.07 }
-                ].forEach(({ freq, endFreq, vol, dur, delay }) => {
-                    const osc  = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type   = 'sine';
-                    osc.frequency.setValueAtTime(freq, now + delay);
-                    osc.frequency.exponentialRampToValueAtTime(endFreq, now + delay + dur);
-                    gain.gain.setValueAtTime(vol, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now + delay);
-                    osc.stop(now + delay + dur);
-                });
-            } catch (_) {}
-        }
-
         for (let i = 0; i < numCards; i++) {
             const img = document.createElement('img');
             img.src   = 'onecard.png';
@@ -537,7 +391,7 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (150 / 2);
+            const centerY    = containerH / 2 - (270 / 2); 
             let minOffset    = Infinity;
             let activeIndex  = -1;
 
@@ -554,7 +408,6 @@
                 if (dist === dist2) renderY = y - totalHeight;
                 if (dist === dist3) renderY = y + totalHeight;
 
-                const scale   = Math.max(0.6, 1 - dist * 0.0025);
                 const opacity = Math.max(0.15, 1 - dist * 0.0035);
                 const zIndex  = 100 - Math.floor(dist / 10);
 
@@ -562,7 +415,8 @@
                     card.style.display = 'none';
                 } else {
                     card.style.display    = 'block';
-                    card.style.transform  = `translateY(${renderY}px) scale(${scale})`;
+                    // Büyüyüp küçülme (scale) kaldırıldı, sadece düz hareket
+                    card.style.transform  = `translateY(${renderY}px)`;
                     card.style.opacity    = opacity;
                     card.style.zIndex     = zIndex;
                 }
@@ -573,14 +427,6 @@
                     activeIndex = i;
                 }
             });
-
-            // Kart değiştiğinde tik sesi çal (sadece dönüş sırasında)
-            if (activeIndex !== lastTickIndex) {
-                if (lastTickIndex !== -1 && hasSpun && !snapDone) {
-                    playTick(velocity);
-                }
-                lastTickIndex = activeIndex;
-            }
 
             return activeIndex;
         }
@@ -594,14 +440,14 @@
             } else {
                 if (!isSnapping) {
                     offsetY  += velocity;
-                    velocity *= 0.92;
+                    velocity *= 0.985; 
 
-                    if (Math.abs(velocity) < 0.5 && hasSpun) {
+                    if (Math.abs(velocity) < 1.5 && hasSpun) {
                         velocity   = 0;
                         isSnapping = true;
                     }
                 } else {
-                    const centerY     = containerH / 2 - (150 / 2);
+                    const centerY     = containerH / 2 - (270 / 2);
                     const floatSlot   = (centerY - offsetY) / cardHeight;
                     const targetSlot  = Math.round(floatSlot);
                     const targetOffY  = centerY - targetSlot * cardHeight;
@@ -618,9 +464,17 @@
                             cards[activeIdx].classList.add('selected');
                         }
 
-                        playSnap();
                         if (navigator.vibrate) navigator.vibrate(50);
-                        setTimeout(() => showSelectionOverlay(), 500);
+                        
+                        setTimeout(() => {
+                            const randId = Math.floor(Math.random() * 78);
+                            const randReversed = Math.random() < 0.5;
+                            const drawnCard = { id: randId, reversed: randReversed };
+                            
+                            sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
+                            sessionStorage.setItem('tarotReadingType', 'single');
+                            window.location.href = 'ad.html';
+                        }, 1000);
                     }
                 }
             }
@@ -635,18 +489,15 @@
         renderCards();
         requestAnimationFrame(animate);
 
-        /* ---- Dokunma / fare olayları ---- */
-        // Yalnızca kart kolonunun üzerindeki (yatayda merkez ±100px) dokunuşları kabul et
         function inCardZone(clientX) {
-            const rect    = container.getBoundingClientRect();
+            const rect    = touchArea.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
-            return Math.abs(clientX - centerX) <= 100;
+            return Math.abs(clientX - centerX) <= 120;
         }
 
         function handleStart(y, x) {
             if (!isIntentSet) return;
             if (!inCardZone(x)) return;
-            ensureAudio();   // iOS: ilk dokunuşta AudioContext'i aç
             isDragging = true;
             velocity   = 0;
             lastY      = y;
@@ -666,27 +517,34 @@
         function handleEnd() {
             if (!isDragging) return;
             isDragging = false;
-            if (hasSpun && Math.abs(velocity) < 3) {
-                velocity = (velocity >= 0 ? 8 : -8);
+            
+            if (hasSpun) {
+                if (Math.abs(velocity) < 10) {
+                    velocity = (velocity >= 0 ? 80 : -80); 
+                } else {
+                    velocity *= 4; 
+                }
+                if (velocity > 150) velocity = 150;
+                if (velocity < -150) velocity = -150;
             }
         }
 
-        container.addEventListener('touchstart', e => {
+        touchArea.addEventListener('touchstart', e => {
             handleStart(e.touches[0].clientY, e.touches[0].clientX);
         }, { passive: false });
 
-        container.addEventListener('touchmove', e => {
+        touchArea.addEventListener('touchmove', e => {
             if (!isDragging) return;
             e.preventDefault();
             handleMove(e.touches[0].clientY);
         }, { passive: false });
 
-        container.addEventListener('touchend', handleEnd);
+        touchArea.addEventListener('touchend', handleEnd);
 
-        container.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
-        container.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
-        container.addEventListener('mouseup',    handleEnd);
-        container.addEventListener('mouseleave', handleEnd);
+        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
+        touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
+        touchArea.addEventListener('mouseup',    handleEnd);
+        touchArea.addEventListener('mouseleave', handleEnd);
 
         /* ---- Niyet modalı ---- */
         const intentOverlay = document.getElementById('intentOverlay');
@@ -722,59 +580,6 @@
             closeIntentModal();
         });
 
-        /* ---- Seçim overlay ---- */
-        const selectionOverlay   = document.getElementById('selectionOverlay');
-        const selectedCardName   = document.getElementById('selectedCardName');
-        const selectedCardBadge  = document.getElementById('selectedCardBadge');
-        const selectedCardMeaning = document.getElementById('selectedCardMeaning');
-
-        function showSelectionOverlay() {
-            // Rastgele kart ve yön belirle
-            const randId       = Math.floor(Math.random() * 78);
-            const randReversed = Math.random() < 0.5;
-            drawnCard = { id: randId, reversed: randReversed };
-
-            // Kart verisini tarot_cards.json'dan al
-            if (tarotData) {
-                const cardInfo = tarotData.cards.find(c => c.id === randId);
-                if (cardInfo) {
-                    const name    = lang === 'tr' ? cardInfo.name_tr : cardInfo.name_en;
-                    const meaning = randReversed ? cardInfo.reversed_meaning : cardInfo.upright_meaning;
-                    const excerpt = meaning.length > 100
-                        ? meaning.substring(0, 100).trim() + '...'
-                        : meaning;
-
-                    selectedCardName.textContent  = name;
-                    selectedCardBadge.textContent = randReversed
-                        ? (lang === 'tr' ? '— TERS —' : '— REVERSED —')
-                        : (lang === 'tr' ? '— DÜZ —'  : '— UPRIGHT —');
-                    selectedCardMeaning.textContent = excerpt;
-                } else {
-                    selectedCardName.textContent    = '···';
-                    selectedCardBadge.textContent   = '';
-                    selectedCardMeaning.textContent = '';
-                }
-            } else {
-                // JSON henüz yüklenmediyse minimal göster
-                selectedCardName.textContent    = '···';
-                selectedCardBadge.textContent   = '';
-                selectedCardMeaning.textContent = '';
-            }
-
-            selectionOverlay.classList.add('active');
-        }
-
-        /* ---- Devam Et → ad.html ---- */
-        document.getElementById('continueBtn').addEventListener('click', function () {
-            if (!drawnCard) return;
-
-            // Kart verisini sessionStorage'a yaz (ad.html + result.html'in beklediği format)
-            sessionStorage.setItem('tarotDrawnCards',  JSON.stringify([drawnCard]));
-            sessionStorage.setItem('tarotReadingType', 'single');
-            // tarotIntent zaten niyet modalında kaydedildi
-
-            window.location.href = 'ad.html';
-        });
     </script>
 </body>
 </html>
