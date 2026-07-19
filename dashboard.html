@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROT'S</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---- Üst banner ---- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+        }
+        .topbar-icon {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .topbar-icon img {
+            width: 28px; height: 28px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+        .topbar-icon.hidden { display: none; }
+
+        /* ---- İçerik ---- */
+        .content {
+            padding: 76px 16px 88px;
+            display: flex; flex-direction: column;
+            gap: 16px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* ---- Kart Alanı ---- */
+        .card-area {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 140px;
+            border: 1.5px solid #ffffff;
+            border-radius: 14px;
+            padding: 14px 18px;
+            background: url('cardsplan.png') center/cover no-repeat;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        /* Tek Kart İçin */
+        .single-card-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 14px;
+            width: 100%;
+        }
+        .single-card-img {
+            width: 70px;
+            height: 100px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+            flex-shrink: 0;
+        }
+
+        /* Üç Kart İçin - Tek görsel + yazılar */
+        .three-card-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 14px;
+            width: 100%;
+        }
+        .three-card-img {
+            height: 100px;
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+            flex-shrink: 0;
+        }
+
+        /* ORTAK YAZI STİLİ - Tek ve Üç Kart */
+        .card-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #000000;
+            text-align: center;
+            line-height: 1.3;
+            word-break: break-word;
+            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+        }
+
+        /* ---- Günlük Burç Alanı ---- */
+        .horoscope-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-height: 100px;
+            border: 1.5px solid #ffffff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            background: #cfebff;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 8px;
+        }
+        .horoscope-area:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .horoscope-area.loading {
+            cursor: wait;
+        }
+        .horoscope-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            width: 100%;
+        }
+        .horoscope-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .horoscope-sign-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #000000;
+        }
+        .horoscope-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555555;
+            text-align: center;
+            width: 100%;
+        }
+        .horoscope-desc {
+            font-size: 0.85rem;
+            color: #000000;
+            line-height: 1.45;
+            text-align: justify;
+        }
+        .horoscope-date {
+            font-size: 0.75rem;
+            color: #000000;
+            margin-top: 2px;
+            text-align: right;
+        }
+
+        /* ---- Alt navigasyon ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img {
+            width: 34px; height: 34px;
+            object-fit: contain; border-radius: 6px;
+        }
+
+        /* ---- Niyet modalı ---- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 0;
+            z-index: 100;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            width: 100%; max-width: 340px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 12px;
+        }
+        .modal-title {
+            font-size: 1.3rem; font-weight: 700;
+            color: #000;
+        }
+        .intent-input {
+            width: 100%; min-height: 90px;
+            border: 2px solid #e8e8ed; border-radius: 10px;
+            padding: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; color: #000;
+            resize: none;
+        }
+        .intent-input:focus { border-color: #000; outline: none; }
+        .cooldown-remaining {
+            font-size: 0.95rem; color: #555;
+            text-align: center;
+        }
+        .premium-features {
+            width: 100%;
+            display: flex; flex-direction: column; gap: 8px;
+            margin: 2px 0 4px;
+        }
+        .premium-feature-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; color: #333;
+        }
+        .premium-feature-item::before {
+            content: '\2726';
+            color: #D4AF37;
+            flex-shrink: 0;
+        }
+        .premium-cta-btn {
+            width: 100%;
+            padding: 14px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .modal-close-text {
+            background: none; border: none;
+            color: #888; font-size: 0.85rem;
+            cursor: pointer; padding: 4px;
+        }
+        .char-counter {
+            align-self: flex-end;
+            font-size: 0.75rem; color: #999;
+            margin-top: -6px;
+        }
+        .send-btn {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: #000; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .send-btn svg { width: 22px; height: 22px; fill: #fff; }
+        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ---- Doğum Tarihi Modalı ---- */
+        .birth-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 76px 24px 0;
+            z-index: 100;
+        }
+        .birth-modal-overlay.active { display: flex; }
+        .birth-modal-box {
+            width: 100%; max-width: 340px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            gap: 16px;
+        }
+        .birth-modal-title {
+            font-size: 1.2rem; font-weight: 700;
+            color: #000; text-align: center;
+        }
+        .birth-modal-desc {
+            font-size: 0.9rem; color: #555;
+            text-align: center; line-height: 1.4;
+        }
+        .birth-form-row {
+            display: flex; gap: 8px;
+        }
+        .birth-form-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e8e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Times New Roman', Times, serif;
+            text-align: center;
+            outline: none;
+        }
+        .birth-form-input:focus { border-color: #000; }
+        .birth-form-input::placeholder { color: #aaa; }
+        .birth-save-btn {
+            width: 100%; padding: 14px;
+            background: #000; color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .birth-save-btn:disabled { background: #ccc; }
+        .birth-msg {
+            font-size: 0.85rem; text-align: center;
+            min-height: 20px;
+        }
+        .birth-msg.success { color: #28a745; }
+        .birth-msg.error { color: #e74c3c; }
+
+        /* ---- Sidebar ---- */
+        .sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 260px;
+            background: #ffffff;
+            z-index: 151;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e8e8ed;
+            font-size: 1.1rem; font-weight: 700;
+            letter-spacing: 2px;
+            color: #000;
+        }
+        .sidebar-menu {
+            display: flex; flex-direction: column;
+        }
+        .sidebar-item {
+            padding: 18px 20px;
+            font-size: 1rem;
+            color: #000;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center; gap: 12px;
+        }
+        .sidebar-item:active {
+            background: #f5f5f7;
+        }
+        .sidebar-item.active-page {
+            font-weight: 700;
+            background: #fafafa;
+        }
+
+        /* ---- Auth kontrol spinner ---- */
+        .auth-check {
+            position: fixed; inset: 0;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+        }
+        .auth-check.hidden { display: none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e8e8ed;
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="auth-check" id="authCheck">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="dashboardTitle"></div>
+        <div class="topbar-icon hidden" id="topbarIcon">
+            <img src="eye_icon_circle.png" alt="Sonuçlar">
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Tek Kart -->
+        <div class="card-area" id="singleCardOption">
+            <div class="single-card-container">
+                <img src="onecard.png" class="single-card-img" alt="Tek Kart">
+                <div class="card-text">Aklındaki sorunun cevabı</div>
+            </div>
+        </div>
+
+        <!-- Üç Kart -->
+        <div class="card-area" id="threeCardOption">
+            <div class="three-card-container">
+                <img src="threecards.png" class="three-card-img" alt="Üç Kart">
+                <div class="card-text">Geçmiş - Şimdi - Gelecek</div>
+            </div>
+        </div>
+
+        <!-- Çarka Sor -->
+        <div class="card-area" id="wheelOption">
+            <div class="single-card-container">
+                <img src="onecard.png" class="single-card-img" alt="Çarka Sor">
+                <div class="card-text">Çarka Sor</div>
+            </div>
+        </div>
+
+        <!-- Günlük Burç Yorumu -->
+        <div class="horoscope-area" id="horoscopeOption">
+            <div class="horoscope-header">
+                <img src="ikizler.png" class="horoscope-icon" id="horoscopeIcon" alt="Burç">
+                <div class="horoscope-sign-name" id="horoscopeSignName">İkizler</div>
+            </div>
+            <div class="horoscope-title" id="horoscopeTitle">Günlük Burç Yorumu</div>
+            <div class="horoscope-desc" id="horoscopeDesc"></div>
+            <div class="horoscope-date hidden" id="horoscopeDate"></div>
+        </div>
+    </div>
+
+    <!-- Alt navigasyon -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-btn active" id="navHome" style="text-decoration: none; display: flex;">
+            <img src="cardsinfo.png" alt="Ana Sayfa">
+        </a>
+    </div>
+
+    <div class="modal-overlay" id="intentOverlay">
+        <div class="modal-box">
+            <div class="modal-title" id="intentTitle"></div>
+            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
+            <div class="char-counter" id="charCounter">0/200</div>
+            <button class="send-btn" id="sendIntentBtn" aria-label="Gönder" disabled>
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cooldownOverlay">
+        <div class="modal-box">
+            <div class="modal-title" id="cooldownTitle"></div>
+            <div class="cooldown-remaining" id="cooldownRemainingText"></div>
+            <div class="premium-features">
+                <div class="premium-feature-item" id="premiumFeature1"></div>
+                <div class="premium-feature-item" id="premiumFeature2"></div>
+            </div>
+            <button class="premium-cta-btn" id="premiumCtaBtn"></button>
+            <button class="modal-close-text" id="cooldownCloseBtn"></button>
+        </div>
+    </div>
+
+    <!-- Doğum Tarihi Modalı -->
+    <div class="birth-modal-overlay" id="birthModalOverlay">
+        <div class="birth-modal-box">
+            <div class="birth-modal-title" id="birthModalTitle">Doğum Tarihiniz</div>
+            <div class="birth-modal-desc" id="birthModalDesc">Burç yorumu için doğum tarihinizi girin veya güncelleyin.</div>
+            <div class="birth-form-row">
+                <input type="number" class="birth-form-input" id="birthModalDay" min="1" max="31" placeholder="Gün">
+                <input type="number" class="birth-form-input" id="birthModalMonth" min="1" max="12" placeholder="Ay">
+                <input type="number" class="birth-form-input" id="birthModalYear" min="1900" max="2026" placeholder="Yıl">
+            </div>
+            <button class="birth-save-btn" id="birthModalSaveBtn">Kaydet</button>
+            <div class="birth-msg" id="birthModalMsg"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
+                <span id="sidebarCardsText">Kartlar</span>
+            </div>
+            <div class="sidebar-item" onclick="logout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span id="sidebarLogoutText">Çıkış</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const remoteConfig = firebase.remoteConfig();
+
+        remoteConfig.settings = {
+            minimumFetchIntervalMillis: 0
+        };
+
+        function isWithin24h(timestamp) {
+            if (!timestamp) return false;
+            const now = Date.now();
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            return (now - recordTime) < (24 * 60 * 60 * 1000);
+        }
+
+        function formatRemainingTime(timestamp) {
+            if (!timestamp) return '';
+            const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
+            const elapsed = Date.now() - recordTime;
+            const remaining = (24 * 60 * 60 * 1000) - elapsed;
+            if (remaining <= 0) return '';
+            const hours = Math.floor(remaining / (60 * 60 * 1000));
+            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+            return hours + 's ' + minutes + 'dk';
+        }
+
+        let cooldownRemaining = '';
+        let userBirthInfo = null;
+
+        function lockCards(message) {
+            const singleCard = document.getElementById('singleCardOption');
+            const threeCard = document.getElementById('threeCardOption');
+            const wheelCard = document.getElementById('wheelOption');
+            
+            cooldownRemaining = message || t('cooldownMessage');
+            
+            singleCard.classList.add('locked');
+            threeCard.classList.add('locked');
+            wheelCard.classList.add('locked');
+        }
+
+        function unlockCards() {
+            const singleCard = document.getElementById('singleCardOption');
+            const threeCard = document.getElementById('threeCardOption');
+            const wheelCard = document.getElementById('wheelOption');
+            
+            singleCard.classList.remove('locked');
+            threeCard.classList.remove('locked');
+            wheelCard.classList.remove('locked');
+        }
+
+        // ===== BURÇ HESAPLAMA =====
+        function getZodiacSign(day, month) {
+            const signs = [
+                { name: 'Oğlak', start: [1, 1], end: [1, 19] },
+                { name: 'Kova', start: [1, 20], end: [2, 18] },
+                { name: 'Balık', start: [2, 19], end: [3, 20] },
+                { name: 'Koç', start: [3, 21], end: [4, 19] },
+                { name: 'Boğa', start: [4, 20], end: [5, 20] },
+                { name: 'İkizler', start: [5, 21], end: [6, 20] },
+                { name: 'Yengeç', start: [6, 21], end: [7, 22] },
+                { name: 'Aslan', start: [7, 23], end: [8, 22] },
+                { name: 'Başak', start: [8, 23], end: [9, 22] },
+                { name: 'Terazi', start: [9, 23], end: [10, 22] },
+                { name: 'Akrep', start: [10, 23], end: [11, 21] },
+                { name: 'Yay', start: [11, 22], end: [12, 21] },
+                { name: 'Oğlak', start: [12, 22], end: [12, 31] }
+            ];
+            for (const sign of signs) {
+                const sMonth = sign.start[0], sDay = sign.start[1];
+                const eMonth = sign.end[0], eDay = sign.end[1];
+                if ((month === sMonth && day >= sDay) || (month === eMonth && day <= eDay)) {
+                    return sign.name;
+                }
+            }
+            return 'Bilinmiyor';
+        }
+
+        function getZodiacSignEn(signTr) {
+            const map = {
+                'Koç': 'Aries', 'Boğa': 'Taurus', 'İkizler': 'Gemini',
+                'Yengeç': 'Cancer', 'Aslan': 'Leo', 'Başak': 'Virgo',
+                'Terazi': 'Libra', 'Akrep': 'Scorpio', 'Yay': 'Sagittarius',
+                'Oğlak': 'Capricorn', 'Kova': 'Aquarius', 'Balık': 'Pisces'
+            };
+            return map[signTr] || signTr;
+        }
+
+        // ===== BURÇ İKONU DOSYA ADI =====
+        function getZodiacIconFile(signTr) {
+            const map = {
+                'Koç': 'koc.png', 'Boğa': 'boga.png', 'İkizler': 'ikizler.png',
+                'Yengeç': 'yengec.png', 'Aslan': 'aslan.png', 'Başak': 'basak.png',
+                'Terazi': 'terazi.png', 'Akrep': 'akrep.png', 'Yay': 'yay.png',
+                'Oğlak': 'oglak.png', 'Kova': 'kova.png', 'Balık': 'balik.png'
+            };
+            return map[signTr] || 'ikizler.png';
+        }
+
+        // ===== GEMINI API İLE BURÇ YORUMU =====
+        async function fetchHoroscopeFromGemini(signTr, signEn) {
+            await remoteConfig.fetchAndActivate();
+            const geminiApiKey = remoteConfig.getString('gemini_api_key');
+            if (!geminiApiKey) throw new Error('API Key bulunamadı');
+
+            const prompt = `Sen deneyimli bir astrologsun. ${signTr} burcu için günlük burç yorumu yaz.
+
+Kurallar:
+- Türkçe yaz.
+- Yorumun başında VEYA sonunda tarih, gün adı vb. BELİRTME. Sadece doğrudan yoruma başla.
+- Samimi ama profesyonel bir dil kullan.
+- Aşk, kariyer ve genel durum hakkında kısa ipuçları ver.
+- 4-5 cümle olacak şekilde kısa ve öz tut.
+- Markdown, yıldız, numara kullanma. Düz metin yaz.
+- Günün enerjisini pozitif ama gerçekçi aktar.`;
+
+            const modelUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+            const requestBody = {
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 512,
+                    thinkingConfig: { thinkingBudget: 0 }
+                }
+            };
+
+            const response = await fetch(modelUrl, {
+                method: 'POST',
+                headers: {
+                    'x-goog-api-key': geminiApiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            const candidate = data.candidates && data.candidates[0];
+            const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
+
+            if (part && part.text) {
+                return part.text.trim();
+            } else if (data.error) {
+                throw new Error('Gemini API: ' + JSON.stringify(data.error));
+            } else {
+                throw new Error('Beklenmeyen yanıt');
+            }
+        }
+
+        // ===== BURÇ YORUMU KAYDET (GÜNLÜK) =====
+        async function saveHoroscope(userId, sign, text) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const data = {
+                sign: sign,
+                text: text,
+                date: todayStr,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            const docRef = await db.collection('users').doc(userId).collection('horoscopes').add(data);
+            return docRef.id;
+        }
+
+        // ===== BUGÜNKÜ BURÇ YORUMUNU YÜKLE =====
+        async function loadTodayHoroscope(userId) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const query = await db.collection('users').doc(userId).collection('horoscopes')
+                .where('date', '==', todayStr)
+                .limit(1)
+                .get();
+
+            if (!query.empty) {
+                return { text: query.docs[0].data().text, sign: query.docs[0].data().sign };
+            }
+            return null;
+        }
+
+        // ===== BURÇ ALANINI GÜNCELLE =====
+        function updateHoroscopeUI(sign, text, dateStr) {
+            const iconEl = document.getElementById('horoscopeIcon');
+            const signNameEl = document.getElementById('horoscopeSignName');
+            const titleEl = document.getElementById('horoscopeTitle');
+            const descEl = document.getElementById('horoscopeDesc');
+            const dateEl = document.getElementById('horoscopeDate');
+
+            iconEl.src = getZodiacIconFile(sign);
+            iconEl.alt = sign;
+            signNameEl.textContent = sign;
+            titleEl.textContent = t('dailyHoroscopeAreaTitle');
+            descEl.textContent = text;
+            dateEl.textContent = dateStr;
+            dateEl.classList.remove('hidden');
+        }
+
+        function showHoroscopeLoading() {
+            document.getElementById('horoscopeSignName').textContent = '...';
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent = 'Yorum yükleniyor...';
+            document.getElementById('horoscopeDate').classList.add('hidden');
+        }
+
+        function showHoroscopeEmpty() {
+            document.getElementById('horoscopeIcon').src = 'ikizler.png';
+            document.getElementById('horoscopeSignName').textContent = 'Burç';
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
+            document.getElementById('horoscopeDate').classList.add('hidden');
+        }
+
+        // ===== DOĞUM TARİHİ MODAL =====
+        function openBirthModal() {
+            const msg = document.getElementById('birthModalMsg');
+            msg.textContent = ''; 
+            
+            if (userBirthInfo) {
+                document.getElementById('birthModalDay').value = userBirthInfo.day || '';
+                document.getElementById('birthModalMonth').value = userBirthInfo.month || '';
+                document.getElementById('birthModalYear').value = userBirthInfo.year || '';
+            }
+
+            document.getElementById('birthModalOverlay').classList.add('active');
+        }
+
+        function closeBirthModal() {
+            document.getElementById('birthModalOverlay').classList.remove('active');
+        }
+
+        document.getElementById('birthModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeBirthModal();
+        });
+
+        document.getElementById('birthModalSaveBtn').addEventListener('click', async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const day = parseInt(document.getElementById('birthModalDay').value);
+            const month = parseInt(document.getElementById('birthModalMonth').value);
+            const year = parseInt(document.getElementById('birthModalYear').value);
+            const msg = document.getElementById('birthModalMsg');
+
+            if (!day || !month || !year) {
+                msg.textContent = 'Lütfen tüm alanları doldurun.';
+                msg.className = 'birth-msg error';
+                return;
+            }
+
+            try {
+                await db.collection('users').doc(user.uid).set({
+                    birthInfo: { day: day, month: month, year: year, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+                }, { merge: true });
+
+                userBirthInfo = { day: day, month: month, year: year }; 
+
+                msg.textContent = 'Kaydedildi! Yorum hazırlanıyor...';
+                msg.className = 'birth-msg success';
+
+                closeBirthModal();
+
+                const sign = getZodiacSign(day, month);
+                const signEn = getZodiacSignEn(sign);
+                showHoroscopeLoading();
+
+                const aiText = await fetchHoroscopeFromGemini(sign, signEn);
+                await saveHoroscope(user.uid, sign, aiText);
+
+                const todayStr = new Date().toLocaleDateString('tr-TR');
+                updateHoroscopeUI(sign, aiText, todayStr);
+
+            } catch (err) {
+                msg.textContent = 'Hata: ' + err.message;
+                msg.className = 'birth-msg error';
+            }
+        });
+
+        // ===== BURÇ YORUMUNU YÜKLE (OTOMATİK) =====
+        async function loadAndShowHoroscope(userId, birthInfo) {
+            if (!birthInfo || !birthInfo.day || !birthInfo.month) {
+                showHoroscopeEmpty();
+                return;
+            }
+
+            const sign = getZodiacSign(birthInfo.day, birthInfo.month);
+            
+            showHoroscopeLoading(); 
+
+            const todayHoroscope = await loadTodayHoroscope(userId);
+
+            if (todayHoroscope) {
+                const todayStr = new Date().toLocaleDateString('tr-TR');
+                updateHoroscopeUI(todayHoroscope.sign, todayHoroscope.text, todayStr);
+            } else {
+                try {
+                    const signEn = getZodiacSignEn(sign);
+                    const aiText = await fetchHoroscopeFromGemini(sign, signEn);
+                    await saveHoroscope(userId, sign, aiText);
+
+                    const todayStr = new Date().toLocaleDateString('tr-TR');
+                    updateHoroscopeUI(sign, aiText, todayStr);
+                } catch (err) {
+                    document.getElementById('horoscopeDesc').textContent = 'Yorum alınamadı. Tekrar deneyin.';
+                }
+            }
+        }
+
+        auth.onAuthStateChanged(async function(user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Çeviriler ve statik metin atamaları
+            document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
+            document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
+            document.getElementById('horoscopeDesc').textContent = t('dailyHoroscopeAreaDesc');
+            document.getElementById('intentTitle').textContent = t('intentTitle');
+            document.getElementById('cooldownTitle').textContent = t('cooldownTitle');
+            document.getElementById('premiumFeature1').textContent = t('premiumFeature1');
+            document.getElementById('premiumFeature2').textContent = t('premiumFeature2');
+            document.getElementById('premiumCtaBtn').textContent = t('premiumCtaBtn');
+            document.getElementById('cooldownCloseBtn').textContent = t('cooldownCloseBtn');
+            document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+            document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+            document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
+
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const birthInfo = userDoc.exists ? userDoc.data().birthInfo : null;
+
+                if (birthInfo && birthInfo.day && birthInfo.month) {
+                    userBirthInfo = birthInfo; 
+                }
+
+                await loadAndShowHoroscope(user.uid, birthInfo);
+            } catch (e) {
+                console.log('Horoscope load error:', e);
+                showHoroscopeEmpty();
+            }
+
+            await checkLastReading(user.uid);
+            document.getElementById('authCheck').classList.add('hidden');
+        });
+
+        async function checkLastReading(userId) {
+            try {
+                // 1. Önbellek (Cache) Kontrolü: Hızlı UI tepkisi için anında kilitle
+                const cachedTime = sessionStorage.getItem('tarotLastReadingTime');
+                if (cachedTime) {
+                    const cachedTimestamp = parseInt(cachedTime);
+                    if (Date.now() - cachedTimestamp < 24 * 60 * 60 * 1000) {
+                        const remaining = formatRemainingTime(new Date(cachedTimestamp));
+                        lockCards(remaining);
+                    }
+                }
+
+                // 2. Veritabanı Kontrolü: Gerçek durumu ve yapay zeka yorumunu sorgula
+                const lastQuery = await db.collection('users').doc(userId)
+                    .collection('readings')
+                    .orderBy('createdAt', 'desc')
+                    .limit(1)
+                    .get();
+
+                let hasValidAiComment = false;
+
+                if (!lastQuery.empty) {
+                    const lastData = lastQuery.docs[0].data();
+
+                    // Yorum var mı ve son 24 saat içinde mi yapılmış?
+                    if (lastData.aiInterpretation && lastData.aiInterpretation.trim() !== '' &&
+                        lastData.createdAt && isWithin24h(lastData.createdAt)) {
+                        hasValidAiComment = true;
+                    }
+
+                    // Son 24 saat içindeyse süreyi veritabanındaki kesin saatle güncelle ve kilitle
+                    if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
+                        const remaining = formatRemainingTime(lastData.createdAt);
+                        lockCards(remaining); 
+                    }
+                }
+
+                // 3. İkon Görünürlüğünü Ayarla
+                const topbarIcon = document.getElementById('topbarIcon');
+                if (hasValidAiComment) {
+                    topbarIcon.classList.remove('hidden'); // Yorum varsa ikonu göster
+                } else {
+                    topbarIcon.classList.add('hidden');    // Yorum yoksa ikonu gizle
+                }
+
+                // 4. Eğer 24 saat dolmamışsa işlemi burada bitir
+                if (!lastQuery.empty) {
+                    const lastData = lastQuery.docs[0].data();
+                    if (lastData.createdAt && isWithin24h(lastData.createdAt)) {
+                        return; 
+                    }
+                }
+
+                // 5. Veritabanında kayıt yoksa veya 24 saat dolmuşsa kartların kilidini aç
+                unlockCards();
+
+            } catch (e) {
+                console.log('Last reading check error:', e);
+                document.getElementById('topbarIcon').classList.add('hidden');
+                lockCards(t('cooldownMessage'));
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.add('active');
+            document.getElementById('sidebar').classList.add('active');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.getElementById('sidebar').classList.remove('active');
+        }
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'auth.html';
+            });
+        }
+        document.getElementById('menuBtn').addEventListener('click', openSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+        document.getElementById('topbarIcon').addEventListener('click', function() {
+            window.location.href = 'result.html';
+        });
+
+        document.getElementById('horoscopeOption').addEventListener('click', function() {
+            openBirthModal();
+        });
+
+        let currentReadingType = null;
+        const intentOverlay = document.getElementById('intentOverlay');
+        const intentInput = document.getElementById('intentInput');
+        const charCounter = document.getElementById('charCounter');
+
+        function openIntentModal(type) {
+            currentReadingType = type;
+            intentInput.value = '';
+            charCounter.textContent = '0/200';
+            sendBtn.disabled = true;
+            intentOverlay.classList.add('active');
+            intentInput.focus();
+        }
+        function closeIntentModal() {
+            intentOverlay.classList.remove('active');
+        }
+        const sendBtn = document.getElementById('sendIntentBtn');
+        intentInput.addEventListener('input', function() {
+            charCounter.textContent = intentInput.value.length + '/200';
+            sendBtn.disabled = intentInput.value.trim().length === 0;
+        });
+        intentOverlay.addEventListener('click', function(e) {
+            if (e.target === intentOverlay) closeIntentModal();
+        });
+        sendBtn.addEventListener('click', function() {
+            const intentText = intentInput.value.trim();
+            if (!intentText) return;
+            sessionStorage.setItem('tarotIntent', intentText);
+            sessionStorage.setItem('tarotReadingType', currentReadingType);
+            window.location.href = 'cards.html';
+        });
+
+        document.getElementById('singleCardOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
+            openIntentModal('single');
+        });
+        
+        document.getElementById('threeCardOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
+            openIntentModal('three');
+        });
+
+        // Çarka Sor Tıklama Olayı (Yeni Sayfaya Yönlendirme)
+        document.getElementById('wheelOption').addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                openCooldownModal();
+                return;
+            }
+            window.location.href = 'wheel.html';
+        });
+
+        const cooldownOverlay = document.getElementById('cooldownOverlay');
+
+        function openCooldownModal() {
+            document.getElementById('cooldownRemainingText').textContent =
+                t('cooldownRemainingPrefix') + ' ' + cooldownRemaining;
+            cooldownOverlay.classList.add('active');
+        }
+
+        function closeCooldownModal() {
+            cooldownOverlay.classList.remove('active');
+        }
+
+        document.getElementById('cooldownCloseBtn').addEventListener('click', closeCooldownModal);
+        cooldownOverlay.addEventListener('click', function(e) {
+            if (e.target === cooldownOverlay) closeCooldownModal();
+        });
+        document.getElementById('premiumCtaBtn').addEventListener('click', function() {
+            closeCooldownModal();
+            document.getElementById('premiumSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    </script>
+</body>
+</html>
