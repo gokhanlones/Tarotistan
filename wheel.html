@@ -56,7 +56,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #ffffff;
+            /* Arka plan görseli - banner ve nav arası */
+            background-image: url('wheelbackplan.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             isolation: isolate;
         }
 
@@ -86,7 +90,6 @@
             overflow: hidden;
         }
         
-        /* Gradient border - sadece çerçeve, glow yok */
         .center-highlighter::before {
             content: '';
             position: absolute;
@@ -110,7 +113,6 @@
             pointer-events: none;
         }
         
-        /* İç kısım şeffaf */
         .center-highlighter::after {
             content: '';
             position: absolute;
