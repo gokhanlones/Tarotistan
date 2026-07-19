@@ -50,16 +50,18 @@
         .topbar-spacer { width: 40px; flex-shrink: 0; }
 
         .wheel-container {
-    position: absolute;
-    top: 60px; bottom: 68px;
-    left: 0; right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #ffffff;
-    isolation: isolate;
-}
-
+            position: absolute;
+            top: 60px; bottom: 68px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('wheelbackplan.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            isolation: isolate;
+        }
 
         .slot-window {
             position: relative;
@@ -542,7 +544,7 @@
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
 
-        /* ========== NİYET MODALI ========== */
+        /* ========== NİYET MODALI - KİTLİ ========== */
         const intentOverlay = document.getElementById('intentOverlay');
         const intentInput   = document.getElementById('intentInput');
         const charCounter   = document.getElementById('charCounter');
@@ -556,7 +558,7 @@
             charCounter.textContent = intentInput.value.length + '/200';
             sendBtn.disabled = intentInput.value.trim().length === 0;
         });
-        intentOverlay.addEventListener('click', e => { if (e.target === intentOverlay) closeIntentModal(); });
+        // Dışarıya tıklayınca kapanma KALDIRILDI - sadece gönder butonuna tıklayınca kapanır
         sendBtn.addEventListener('click', () => {
             const intentText = intentInput.value.trim();
             if (!intentText) return;
