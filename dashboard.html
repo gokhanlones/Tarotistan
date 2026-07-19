@@ -70,64 +70,52 @@
         }
 
         /* ---- Kart Alanı ---- */
-        .card-area {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 140px;
-            border: 1.5px solid #ffffff;
-            border-radius: 14px;
-            padding: 14px 18px;
-            background: url('cardsplan.png') center/cover no-repeat;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
+        /* ---- Kart Alanı ---- */
+.card-area {
+    display: flex;
+    justify-content: center;          /* DEĞİŞTİ: flex-start → center */
+    align-items: center;
+    min-height: 140px;
+    border: 1.5px solid #ffffff;
+    border-radius: 14px;
+    padding: 14px 18px;
+    background: url('cardsplan.png') center/cover no-repeat;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
 
-        /* Tek Kart İçin */
-        .single-card-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 14px;
-            width: 100%;
-        }
-        .single-card-img {
-            width: 70px;
-            height: 100px;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-            flex-shrink: 0;
-        }
+/* Tek Kart İçin */
+.single-card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;          /* DEĞİŞTİ: flex-start → center */
+    gap: 14px;
+    width: 100%;
+}
 
-        /* Üç Kart İçin - Tek görsel + yazılar */
-        .three-card-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 14px;
-            width: 100%;
-        }
-        .three-card-img {
-            height: 100px;
-            width: auto;
-            max-width: 160px;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
-            flex-shrink: 0;
-        }
+/* Üç Kart İçin */
+.three-card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;          /* DEĞİŞTİ: flex-start → center */
+    gap: 14px;
+    width: 100%;
+}
 
-        /* ORTAK YAZI STİLİ - Tek ve Üç Kart */
-        .card-text {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #000000;
-            text-align: center;
-            line-height: 1.3;
-            word-break: break-word;
-            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
-        }
+/* ORTAK YAZI STİLİ */
+.card-text {
+    flex: 1;                          /* YENİ EKLENDİ */
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #000000;
+    text-align: center;
+    line-height: 1.3;
+    word-break: break-word;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+}
+
 
         /* ---- Günlük Burç Alanı ---- */
         .horoscope-area {
