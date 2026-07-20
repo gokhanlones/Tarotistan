@@ -79,47 +79,49 @@
 
         /* ===== GOLD ÇERÇEVE - GRADIENT BORDER ===== */
         .center-highlighter {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 190px; height: 310px;
-            border-radius: 12px;
-            pointer-events: none;
-            z-index: 150;
-            overflow: hidden;
-        }
-        
-        .center-highlighter::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            padding: 3px;
-            background: linear-gradient(
-                to bottom,
-                #D4AF37 0%,
-                #8B6914 20%,
-                #000000 45%,
-                #000000 55%,
-                #8B6914 80%,
-                #D4AF37 100%
-            );
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) content-box, 
-                linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-        }
-        
-        .center-highlighter::after {
-            content: '';
-            position: absolute;
-            inset: 3px;
-            border-radius: 9px;
-            background: transparent;
-            pointer-events: none;
-        }
+         position: absolute;
+         top: 50%; left: 50%;
+         transform: translate(-50%, -50%);
+         width: 190px; height: 310px;
+         border-radius: 12px;
+         pointer-events: none;
+         z-index: 150;
+         overflow: hidden;
+       }
+
+.center-highlighter::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 6px;                    /* 3px → 6px (iki kat kalın) */
+    background: linear-gradient(
+        to bottom,
+        #cc0000 0%,                 /* Koyu kırmızı */
+        #990000 15%,                 /* Kırmızı */
+        #330000 35%,                 /* Koyu kırmızı-siyah geçiş */
+        #000000 50%,                 /* Ortası tam siyah */
+        #330000 65%,                 /* Siyah-kırmızı geçiş */
+        #990000 85%,                 /* Kırmızı */
+        #cc0000 100%                 /* Koyu kırmızı */
+    );
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.center-highlighter::after {
+    content: '';
+    position: absolute;
+    inset: 6px;                      /* 3px → 6px (iç boşluk ayarı) */
+    border-radius: 9px;
+    background: transparent;
+    pointer-events: none;
+}
+
 
         /* Fade'ler ARKA PLANDA */
         .fade-top, .fade-bottom {
