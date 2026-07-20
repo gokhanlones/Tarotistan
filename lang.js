@@ -1,249 +1,139 @@
 const LANG = {
     tr: {
+        aiFallback: "Bu çekim için yapay zeka yorumu bulunmuyor.",
         appName: "TAROT'S",
-        login: "Giriş Yap",
-        register: "Kayıt Ol",
-        email: "E-posta",
-        password: "Şifre",
-        passwordConfirm: "Şifre Tekrar",
-        googleContinue: "Google ile devam et",
-        showPassword: "Göster",
-        hidePassword: "Gizle",
-        passwordsNotMatch: "Şifreler eşleşmiyor",
-        
-        verifyTitle: "Email Doğrulama",
-        verifySent: "6 haneli kod gönderildi",
-        verifyPlaceholder: "Kodu girin",
-        verifyButton: "Doğrula",
-        resendCode: "Tekrar gönder",
-        resendWait: "sn sonra tekrar gönder",
-        invalidCode: "Geçersiz veya süresi dolmuş kod",
-        
-        termsTitle: "Gizlilik Politikası ve Kullanım Şartları",
-        termsText: `Tarot's uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
-
-1. KİŞİSEL VERİLER: E-posta adresiniz ve çekim geçmişiniz güvenli bir şekilde saklanır. Bilgileriniz üçüncü taraflarla paylaşılmaz.
-
-2. KULLANIM: Uygulama eğlence ve kişisel gelişim amaçlıdır. Tıbbi, hukuki veya finansal kararlar için kullanılmamalıdır.
-
-3. REKLAMLAR: Ücretsiz kullanımda ödüllü reklamlar gösterilir. Premium üyelikle reklamsız deneyim sunulur.
-
-4. ÜYELİK: Premium üyelik aylık veya yıllık olarak satın alınabilir. İptal istediğiniz an yapılabilir.
-
-5. SORUMLULUK REDDİ: Tarot çekimleri yorum niteliğindedir, bağlayıcı değildir.`,
-        termsAccept: "Okudum, kabul ediyorum",
-        termsRequired: "Devam etmek için onaylamanız gerekir",
-        continueButton: "Devam Et",
-
-        sidebarCards: "Kartlar",
-        sidebarBirthInfo: "Doğum Bilgileri",
-        sidebarLogout: "Çıkış",
-
-        birthInfoTitle: "Doğum Bilgileri",
-        birthInfoDesc: "Burç yorumları için doğum bilgilerinizi girin.",
-        birthDay: "Gün",
-        birthMonth: "Ay",
-        birthYear: "Yıl",
-        birthHour: "Saat",
-        birthMinute: "Dakika",
         birthCity: "Doğum Yeri (Şehir)",
         birthCountry: "Ülke",
+        birthDay: "Gün",
+        birthHour: "Saat",
+        birthInfoDesc: "Burç yorumları için doğum bilgilerinizi girin.",
+        birthInfoTitle: "Doğum Bilgileri",
         birthLatitude: "Enlem",
         birthLongitude: "Boylam",
+        birthMinute: "Dakika",
+        birthMonth: "Ay",
+        birthRequired: "Lütfen tüm alanları doldurun.",
         birthSaveBtn: "Kaydet",
         birthSaved: "Doğum bilgileriniz kaydedildi.",
-        birthRequired: "Lütfen tüm alanları doldurun.",
-        birthBackBtn: "Geri Dön",
-
-        cardsInfoTitle: "KART BİLGİLERİ",
+        birthYear: "Yıl",
+        cardAlt: "Tarot Kartı",
+        cardsContinueBtn: "Gönder",
+        cardsInfoClose: "Kapat",
         cardsInfoMajor: "Büyük Arkana",
         cardsInfoMinor: "Küçük Arkana",
-        cardsInfoUpright: "Düz Anlamı",
         cardsInfoReversed: "Ters Anlamı",
-        cardsInfoClose: "Kapat",
-        navHomeLabel: "Anasayfa",
-        navCardsInfoLabel: "Kart Bilgileri",
-        navHistoryLabel: "Geçmiş Okuma",
-
-        dashboardTitle: "TAROT'S",
-        singleCardTitle: "Aklındaki sorunun cevabı",
-        singleCardLabel: "I Kart",
-        singleCardAds: "1 Reklam",
-        threeCardTitle: "Geçmiş, Şimdi, Gelecek",
-        threeCardLabel: "III Kart",
-        threeCardAds: "3 Reklam",
-        adFree: "Reklamsız",
-        dailyLimit: "Günlük 5 oturum",
-        monthlyPrice: "Aylık 49,99 TL",
-        yearlyPrice: "Yıllık 399,99 TL",
-
-        dailyHoroscopeAreaTitle: "Günlük Burç Yorumu",
-        dailyHoroscopeAreaDesc: "Doğum bilgilerinizi giriniz",
-        dailyHoroscopeNoBirthInfo: "Doğum bilgileriniz eksik. Lütfen sidebar'dan doğum tarihinizi girin.",
-        dailyHoroscopeError: "Yorum alınırken bir hata oluştu",
-        dailyHoroscopeLoading: "Yorum hazırlanıyor...",
-        dailyHoroscopeCached: "Önbellekten",
-        dailyHoroscopeTapToView: "Yorum için dokunun",
-
+        cardsInfoUpright: "Düz Anlamı",
+        closeBtn: "Kapat",
+        continueButton: "Devam Et",
+        cooldownCloseBtn: "Kapat",
         cooldownMessage: "Şu anda kilitli",
-        cooldownTitle: "Günlük Ücretsiz Hakkın Doldu",
         cooldownRemainingPrefix: "Bir sonraki ücretsiz okumana kalan süre:",
+        cooldownTitle: "Günlük Ücretsiz Hakkın Doldu",
+        dailyHoroscopeAreaDesc: "Doğum bilgilerinizi giriniz",
+        dailyHoroscopeAreaTitle: "Günlük Burç Yorumu",
+        dashboardTitle: "TAROT'S",
+        email: "E-posta",
+        googleContinue: "Google ile devam et",
+        hidePassword: "Gizle",
+        intentTitle: "Niyet",
+        login: "Giriş Yap",
+        menuLabel: "Menü",
+        navHomeLabel: "Anasayfa",
+        password: "Şifre",
+        passwordConfirm: "Şifre Tekrar",
+        passwordsNotMatch: "Şifreler eşleşmiyor",
+        premiumCtaBtn: "Premium'a Geç",
         premiumFeature1: "Reklamsız okuma deneyimi",
         premiumFeature2: "Günde 5 okuma hakkı",
-        premiumCtaBtn: "Premium'a Geç",
-        cooldownCloseBtn: "Kapat",
-
-        intentTitle: "Niyet",
-
-        cardsPickOne: "Aklındaki soru için bir kart seç.",
-        cardsSelectedSingle: "Kart seçildi. Devam etmek için aşağıdaki butona basın.",
-        cardsSelectedOf: "kart seçildi",
-        cardsSelectedComplete: "Devam etmek için aşağıdaki butona basın.",
-        cardsContinueBtn: "Gönder",
-        cardAlt: "Tarot Kartı",
-        menuLabel: "Menü",
-
-        resultLoading: "Kartlar açılıyor...",
+        register: "Kayıt Ol",
         resultIntentLabel: "Niyetiniz",
         resultNotSpecified: "Belirtilmemiş",
         resultReversedBadge: "TERS",
-        resultUpright: "Düz",
-        resultReversed: "Ters",
-        positionPast: "Geçmiş",
-        positionPresent: "Şimdi",
-        positionFuture: "Gelecek",
-        aiTitle: "Yapay Zeka Yorumu",
-        aiDesc: "Bu alanda, çekilen kartlara özel yapay zeka destekli derinlemesine yorum yer alacak.<br>(Entegrasyon sonrası aktif olacaktır)",
-        aiFallback: "Bu çekim için yapay zeka yorumu bulunmuyor.",
-        aiExpired: "Yapay zeka yorumunun süresi dolmuş.",
-        homeBtn: "Ana Sayfa",
-        newReadingBtn: "Yeni Çekim",
-        resultErrorTitle: "Kartlar yüklenemedi",
-        resultErrorDesc: "Lütfen internet bağlantınızı kontrol edin.",
-        closeBtn: "Kapat"
+        showPassword: "Göster",
+        sidebarCards: "Kartlar",
+        sidebarLogout: "Çıkış",
+        termsAccept: "Okudum, kabul ediyorum",
+        termsRequired: "Devam etmek için onaylamanız gerekir",
+        termsText: `Tarot's uygulamasını kullanarak aşağıdaki şartları kabul etmiş olursunuz:
+        
+        1. KİŞİSEL VERİLER: E-posta adresiniz ve çekim geçmişiniz güvenli bir şekilde saklanır. Bilgileriniz üçüncü taraflarla paylaşılmaz.
+        
+        2. KULLANIM: Uygulama eğlence ve kişisel gelişim amaçlıdır. Tıbbi, hukuki veya finansal kararlar için kullanılmamalıdır.
+        
+        3. REKLAMLAR: Ücretsiz kullanımda ödüllü reklamlar gösterilir. Premium üyelikle reklamsız deneyim sunulur.
+        
+        4. ÜYELİK: Premium üyelik aylık veya yıllık olarak satın alınabilir. İptal istediğiniz an yapılabilir.
+        
+        5. SORUMLULUK REDDİ: Tarot çekimleri yorum niteliğindedir, bağlayıcı değildir.`,
+        termsTitle: "Gizlilik Politikası ve Kullanım Şartları"
     },
     en: {
+        aiFallback: "No AI interpretation available for this reading.",
         appName: "TAROT'S",
-        login: "Login",
-        register: "Register",
-        email: "Email",
-        password: "Password",
-        passwordConfirm: "Confirm Password",
-        googleContinue: "Continue with Google",
-        showPassword: "Show",
-        hidePassword: "Hide",
-        passwordsNotMatch: "Passwords do not match",
-        
-        verifyTitle: "Email Verification",
-        verifySent: "6-digit code sent",
-        verifyPlaceholder: "Enter code",
-        verifyButton: "Verify",
-        resendCode: "Resend",
-        resendWait: "s to resend",
-        invalidCode: "Invalid or expired code",
-        
-        termsTitle: "Privacy Policy and Terms of Use",
-        termsText: `By using the Tarot's app, you agree to the following terms:
-
-1. PERSONAL DATA: Your email address and draw history are stored securely. Your information is not shared with third parties.
-
-2. USAGE: The app is for entertainment and personal growth purposes only. It should not be used for medical, legal, or financial decisions.
-
-3. ADS: Rewarded ads are shown in free usage. Premium membership offers an ad-free experience.
-
-4. MEMBERSHIP: Premium membership can be purchased monthly or yearly. Cancellation can be done at any time.
-
-5. DISCLAIMER: Tarot draws are for interpretive purposes only and are not binding.`,
-        termsAccept: "I have read and agree",
-        termsRequired: "You must accept to continue",
-        continueButton: "Continue",
-
-        sidebarCards: "Cards",
-        sidebarBirthInfo: "Birth Information",
-        sidebarLogout: "Logout",
-
-        birthInfoTitle: "Birth Information",
-        birthInfoDesc: "Enter your birth details for horoscope readings.",
-        birthDay: "Day",
-        birthMonth: "Month",
-        birthYear: "Year",
-        birthHour: "Hour",
-        birthMinute: "Minute",
         birthCity: "Birth City",
         birthCountry: "Country",
+        birthDay: "Day",
+        birthHour: "Hour",
+        birthInfoDesc: "Enter your birth details for horoscope readings.",
+        birthInfoTitle: "Birth Information",
         birthLatitude: "Latitude",
         birthLongitude: "Longitude",
+        birthMinute: "Minute",
+        birthMonth: "Month",
+        birthRequired: "Please fill in all fields.",
         birthSaveBtn: "Save",
         birthSaved: "Birth information saved.",
-        birthRequired: "Please fill in all fields.",
-        birthBackBtn: "Go Back",
-
-        cardsInfoTitle: "CARD INFO",
+        birthYear: "Year",
+        cardAlt: "Tarot Card",
+        cardsContinueBtn: "Submit",
+        cardsInfoClose: "Close",
         cardsInfoMajor: "Major Arcana",
         cardsInfoMinor: "Minor Arcana",
-        cardsInfoUpright: "Upright Meaning",
         cardsInfoReversed: "Reversed Meaning",
-        cardsInfoClose: "Close",
-        navHomeLabel: "Home",
-        navCardsInfoLabel: "Card Info",
-        navHistoryLabel: "Reading History",
-
-        dashboardTitle: "TAROT'S",
-        singleCardTitle: "The answer to what's on your mind",
-        singleCardLabel: "I Card",
-        singleCardAds: "1 Ad",
-        threeCardTitle: "Past, Present, Future",
-        threeCardLabel: "III Card",
-        threeCardAds: "3 Ads",
-        adFree: "Ad-free",
-        dailyLimit: "5 sessions/day",
-        monthlyPrice: "Monthly 49.99 TL",
-        yearlyPrice: "Yearly 399.99 TL",
-
-        dailyHoroscopeAreaTitle: "Daily Horoscope",
-        dailyHoroscopeAreaDesc: "Enter your birth information",
-        dailyHoroscopeNoBirthInfo: "Birth information missing. Please enter your birth date from the sidebar.",
-        dailyHoroscopeError: "An error occurred while getting the reading",
-        dailyHoroscopeLoading: "Preparing reading...",
-        dailyHoroscopeCached: "From cache",
-        dailyHoroscopeTapToView: "Tap to view reading",
-
+        cardsInfoUpright: "Upright Meaning",
+        closeBtn: "Close",
+        continueButton: "Continue",
+        cooldownCloseBtn: "Close",
         cooldownMessage: "Currently locked",
-        cooldownTitle: "Your Free Daily Reading Is Used Up",
         cooldownRemainingPrefix: "Time until your next free reading:",
+        cooldownTitle: "Your Free Daily Reading Is Used Up",
+        dailyHoroscopeAreaDesc: "Enter your birth information",
+        dailyHoroscopeAreaTitle: "Daily Horoscope",
+        dashboardTitle: "TAROT'S",
+        email: "Email",
+        googleContinue: "Continue with Google",
+        hidePassword: "Hide",
+        intentTitle: "Intention",
+        login: "Login",
+        menuLabel: "Menu",
+        navHomeLabel: "Home",
+        password: "Password",
+        passwordConfirm: "Confirm Password",
+        passwordsNotMatch: "Passwords do not match",
+        premiumCtaBtn: "Upgrade to Premium",
         premiumFeature1: "Ad-free reading experience",
         premiumFeature2: "5 readings per day",
-        premiumCtaBtn: "Upgrade to Premium",
-        cooldownCloseBtn: "Close",
-
-        intentTitle: "Intention",
-
-        cardsPickOne: "Pick a card for what's on your mind.",
-        cardsSelectedSingle: "Card selected. Tap the button below to continue.",
-        cardsSelectedOf: "selected",
-        cardsSelectedComplete: "Tap the button below to continue.",
-        cardsContinueBtn: "Submit",
-        cardAlt: "Tarot Card",
-        menuLabel: "Menu",
-
-        resultLoading: "Revealing cards...",
+        register: "Register",
         resultIntentLabel: "Your Intention",
         resultNotSpecified: "Not specified",
         resultReversedBadge: "REVERSED",
-        resultUpright: "Upright",
-        resultReversed: "Reversed",
-        positionPast: "Past",
-        positionPresent: "Present",
-        positionFuture: "Future",
-        aiTitle: "AI Interpretation",
-        aiDesc: "This section will feature an in-depth AI-powered interpretation of your drawn cards.<br>(Will be active after integration)",
-        aiFallback: "No AI interpretation available for this reading.",
-        aiExpired: "AI interpretation has expired.",
-        homeBtn: "Home",
-        newReadingBtn: "New Reading",
-        resultErrorTitle: "Couldn't load the cards",
-        resultErrorDesc: "Please check your internet connection.",
-        closeBtn: "Close"
+        showPassword: "Show",
+        sidebarCards: "Cards",
+        sidebarLogout: "Logout",
+        termsAccept: "I have read and agree",
+        termsRequired: "You must accept to continue",
+        termsText: `By using the Tarot's app, you agree to the following terms:
+        
+        1. PERSONAL DATA: Your email address and draw history are stored securely. Your information is not shared with third parties.
+        
+        2. USAGE: The app is for entertainment and personal growth purposes only. It should not be used for medical, legal, or financial decisions.
+        
+        3. ADS: Rewarded ads are shown in free usage. Premium membership offers an ad-free experience.
+        
+        4. MEMBERSHIP: Premium membership can be purchased monthly or yearly. Cancellation can be done at any time.
+        
+        5. DISCLAIMER: Tarot draws are for interpretive purposes only and are not binding.`,
+        termsTitle: "Privacy Policy and Terms of Use"
     }
 };
 
