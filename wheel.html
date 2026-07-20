@@ -156,8 +156,9 @@
             border-radius: 8px;
         }
 
+        /* Kart durduğunda çıkacak mavi ışık efekti */
         .wheel-card-wrap.selected .wheel-card {
-            filter: drop-shadow(0 0 15px #D4AF37) drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
+            filter: drop-shadow(0 0 15px #00f0ff) drop-shadow(0 0 30px rgba(0, 240, 255, 0.4));
         }
 
         .bottom-nav {
@@ -558,7 +559,6 @@
             charCounter.textContent = intentInput.value.length + '/200';
             sendBtn.disabled = intentInput.value.trim().length === 0;
         });
-        // Dışarıya tıklayınca kapanma KALDIRILDI - sadece gönder butonuna tıklayınca kapanır
         sendBtn.addEventListener('click', () => {
             const intentText = intentInput.value.trim();
             if (!intentText) return;
