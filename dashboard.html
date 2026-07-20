@@ -645,18 +645,32 @@
         }
 
         // ===== GEMINI API İLE BURÇ YORUMU =====
-        async function fetchHoroscopeFromGemini(signTr, signEn) {
+                async function fetchHoroscopeFromGemini(signTr, signEn) {
             await remoteConfig.fetchAndActivate();
             const geminiApiKey = remoteConfig.getString('gemini_api_key');
             if (!geminiApiKey) throw new Error('API Key bulunamadı');
 
-            const prompt = `Sen deneyimli bir astrologsun. ${signTr} burcu için günlük burç yorumu yaz.
+            // Bugünün tarihini ekleyerek modelin her gün farklı bir zaman diliminde olduğumuzu algılamasını sağlıyoruz
+            const todayStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            // Çeşitlilik sağlamak için farklı odak noktaları listesi
+            const focusAngles = [
+                "Bugün özellikle içsel huzur, sezgiler ve ruhsal denge üzerine odaklan.",
+                "Bugün kariyer, hedefler, sorumluluklar ve iş hayatındaki yeni fırsatlara odaklan.",
+                "Bugün ikili ilişkiler, aşk, dostluklar ve sosyal bağlar üzerine odaklan.",
+                "Bugün kişisel gelişim, enerji yönetimi, motivasyon ve atılacak cesur adımlara odaklan."
+            ];
+            const randomFocus = focusAngles[Math.floor(Math.random() * focusAngles.length)];
+
+            const prompt = `Sen deneyimli ve sezgisel bir astrologsun. Bugün tarih ${todayStr}. ${signTr} (${signEn}) burcu için tamamen özgün, ezberden uzak ve taze bir günlük burç yorumu yaz.
+
+Önemli Odak Noktası: ${randomFocus}
 
 Kurallar:
 - Türkçe yaz.
-- Yorumun başında VEYA sonunda tarih, gün adı vb. BELİRTME. Sadece doğrudan yoruma başla.
-- Samimi ama profesyonel bir dil kullan.
-- Aşk, kariyer ve genel durum hakkında kısa ipuçları ver.
+- Yorumun başında VEYA sonunda tarih, gün adı vb. BURÇ İSMİ BELİRTME. Doğrudan yoruma başla.
+- Asla birbirini tekrar eden kalıp astrolog cümleleri kullanma; her seferinde farklı metaforlar ve taze bir bakış açısı seç.
+- Samimi, derin ama profesyonel bir ton kullan.
 - 4-5 cümle olacak şekilde kısa ve öz tut.
 - Markdown, yıldız, numara kullanma. Düz metin yaz.
 - Günün enerjisini pozitif ama gerçekçi aktar.`;
@@ -666,7 +680,8 @@ Kurallar:
             const requestBody = {
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.7,
+                    // Yaratıcılığı ve çeşitliliği artırmak için sıcaklık değerini biraz yükseltiyoruz
+                    temperature: 0.9,
                     maxOutputTokens: 512,
                     thinkingConfig: { thinkingBudget: 0 }
                 }
@@ -693,6 +708,7 @@ Kurallar:
                 throw new Error('Beklenmeyen yanıt');
             }
         }
+
 
         // ===== BURÇ YORUMU KAYDET (GÜNLÜK) =====
         async function saveHoroscope(userId, sign, text) {
