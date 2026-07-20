@@ -94,17 +94,17 @@
     position: absolute;
     inset: 0;
     border-radius: 12px;
-    padding: 6px;                    /* 3px → 6px (iki kat kalın) */
+    padding: 0 8px;              /* Üst/alt 0, sağ/sol 8px → sadece yan çerçeveler */
     background: linear-gradient(
         to bottom,
-        #cc0000 0%,                 /* Koyu kırmızı */
-        #990000 20%,                /* Kırmızı */
-        #550000 40%,                /* Kırmızı-siyah geçiş */
-        #000000 45%,                /* Siyah başlangıç (daha yukarıda) */
-        #000000 55%,                /* Siyah bitiş (daha aşağıda) */
-        #550000 60%,                /* Siyah-kırmızı geçiş */
-        #990000 80%,                /* Kırmızı */
-        #cc0000 100%                /* Koyu kırmızı */
+        #cc0000 0%,
+        #990000 20%,
+        #550000 35%,
+        #000000 45%,
+        #000000 55%,
+        #550000 65%,
+        #990000 80%,
+        #cc0000 100%
     );
     -webkit-mask: 
         linear-gradient(#fff 0 0) content-box, 
@@ -117,13 +117,11 @@
 .center-highlighter::after {
     content: '';
     position: absolute;
-    inset: 6px;                      /* 3px → 6px */
+    inset: 0 8px;                /* Üst/alt 0, sağ/sol 8px */
     border-radius: 9px;
     background: transparent;
     pointer-events: none;
 }
-
-
 
         /* Fade'ler ARKA PLANDA */
         .fade-top, .fade-bottom {
