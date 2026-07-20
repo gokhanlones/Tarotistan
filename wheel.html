@@ -156,11 +156,6 @@
             border-radius: 8px;
         }
 
-        /* Kart durduğunda çıkacak mavi ışık efekti */
-        .wheel-card-wrap.selected .wheel-card {
-            filter: drop-shadow(0 0 15px #00f0ff) drop-shadow(0 0 30px rgba(0, 240, 255, 0.4));
-        }
-
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -465,7 +460,6 @@
                     wrap.style.opacity   = opacity;
                     wrap.style.zIndex    = zIndex;
                 }
-                wrap.classList.remove('selected');
                 if (dist < minOffset) { minOffset = dist; activeIndex = i; }
             });
 
@@ -491,8 +485,7 @@
                     offsetY += diff * 0.15;
                     if (Math.abs(diff) < 0.5 && !snapDone) {
                         offsetY = targetOffY; snapDone = true;
-                        const activeIdx = renderCards();
-                        if (cards[activeIdx]) cards[activeIdx].classList.add('selected');
+                        renderCards();
                         stopSpinSound(); playStopSound();
                         if (navigator.vibrate) navigator.vibrate(50);
                         setTimeout(() => {
@@ -519,7 +512,6 @@
             if (!isIntentSet || !inCardZone(x)) return;
             initAudio(); isDragging = true; velocity = 0; lastY = y;
             snapDone = false; lastCardIndex = -1;
-            cards.forEach(w => w.classList.remove('selected'));
         }
         function handleMove(y) {
             if (!isDragging || !isIntentSet) return;
