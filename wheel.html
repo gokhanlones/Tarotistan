@@ -65,7 +65,8 @@
 
         .slot-window {
             position: relative;
-            width: 190px; height: 310px;
+            width: 190px; 
+            height: 100%;              /* 310px → 100%: banner altından bottom nav üstüne kadar */
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -77,51 +78,52 @@
             );
         }
 
-        /* ===== GOLD ÇERÇEVE - GRADIENT BORDER ===== */
+        /* ===== SOL/SAĞ KIRMIZI-SİYAH ÇERÇEVE ===== */
         .center-highlighter {
-         position: absolute;
-         top: 50%; left: 50%;
-         transform: translate(-50%, -50%);
-         width: 190px; height: 310px;
-         border-radius: 12px;
-         pointer-events: none;
-         z-index: 150;
-         overflow: hidden;
-       }
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 190px; 
+            height: 100%;              /* 310px → 100%: slot ile aynı boy */
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 150;
+            overflow: hidden;
+        }
 
-.center-highlighter::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 0 8px;              /* Üst/alt 0, sağ/sol 8px → sadece yan çerçeveler */
-    background: linear-gradient(
-        to bottom,
-        #cc0000 0%,
-        #990000 20%,
-        #550000 35%,
-        #000000 45%,
-        #000000 55%,
-        #550000 65%,
-        #990000 80%,
-        #cc0000 100%
-    );
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-}
+        .center-highlighter::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 0 8px;            /* 3px → 0 8px: üst/alt yok, sadece sağ/sol */
+            background: linear-gradient(
+                to bottom,
+                #cc0000 0%,            /* Altın → kırmızı */
+                #990000 20%,            /* Altın koyu → kırmızı koyu */
+                #550000 35%,            /* Geçiş tonu */
+                #000000 45%,            /* Siyah başlangıç */
+                #000000 55%,            /* Siyah bitiş (daraltıldı) */
+                #550000 65%,            /* Geçiş tonu */
+                #990000 80%,            /* Kırmızı koyu */
+                #cc0000 100%            /* Kırmızı */
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
 
-.center-highlighter::after {
-    content: '';
-    position: absolute;
-    inset: 0 8px;                /* Üst/alt 0, sağ/sol 8px */
-    border-radius: 9px;
-    background: transparent;
-    pointer-events: none;
-}
+        .center-highlighter::after {
+            content: '';
+            position: absolute;
+            inset: 0 8px;              /* 3px → 0 8px: üst/alt yok, sadece sağ/sol */
+            border-radius: 9px;
+            background: transparent;
+            pointer-events: none;
+        }
 
         /* Fade'ler ARKA PLANDA */
         .fade-top, .fade-bottom {
