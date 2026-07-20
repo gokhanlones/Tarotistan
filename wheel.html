@@ -66,7 +66,7 @@
         .slot-window {
             position: relative;
             width: 190px; 
-            height: 100%;              /* 310px → 100%: banner altından bottom nav üstüne kadar */
+            height: 100%;
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -84,7 +84,7 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 190px; 
-            height: 100%;              /* 310px → 100%: slot ile aynı boy */
+            height: 100%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
@@ -96,17 +96,17 @@
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            padding: 0 8px;            /* 3px → 0 8px: üst/alt yok, sadece sağ/sol */
+            padding: 0 8px;
             background: linear-gradient(
                 to bottom,
-                #cc0000 0%,            /* Altın → kırmızı */
-                #990000 20%,            /* Altın koyu → kırmızı koyu */
-                #550000 35%,            /* Geçiş tonu */
-                #000000 45%,            /* Siyah başlangıç */
-                #000000 55%,            /* Siyah bitiş (daraltıldı) */
-                #550000 65%,            /* Geçiş tonu */
-                #990000 80%,            /* Kırmızı koyu */
-                #cc0000 100%            /* Kırmızı */
+                #cc0000 0%,
+                #990000 20%,
+                #550000 35%,
+                #000000 45%,
+                #000000 55%,
+                #550000 65%,
+                #990000 80%,
+                #cc0000 100%
             );
             -webkit-mask: 
                 linear-gradient(#fff 0 0) content-box, 
@@ -119,27 +119,27 @@
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 0 8px;              /* 3px → 0 8px: üst/alt yok, sadece sağ/sol */
+            inset: 0 8px;
             border-radius: 9px;
             background: transparent;
             pointer-events: none;
         }
 
-        /* Fade'ler ARKA PLANDA */
-        .fade-top, .fade-bottom {
+        /* Kart gölge katmanları - çerçeve içinde, kartların üzerinde */
+        .shadow-top, .shadow-bottom {
             position: absolute;
-            left: 0; right: 0;
+            left: 8px; right: 8px;
             height: 10%;
             pointer-events: none;
-            z-index: 1;
+            z-index: 20;
         }
-        .fade-top {
+        .shadow-top {
             top: 0;
-            background: linear-gradient(to bottom, #a0a0a0 0%, rgba(160,160,160,0) 100%);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
         }
-        .fade-bottom {
+        .shadow-bottom {
             bottom: 0;
-            background: linear-gradient(to top, #a0a0a0 0%, rgba(160,160,160,0) 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
         }
 
         .wheel-card-wrap {
@@ -289,8 +289,8 @@
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter"></div>
         <div class="slot-window" id="slotWindow">
-            <div class="fade-top"></div>
-            <div class="fade-bottom"></div>
+            <div class="shadow-top"></div>
+            <div class="shadow-bottom"></div>
         </div>
     </div>
 
@@ -454,14 +454,14 @@
                 let renderY = y;
                 if (dist === d2) renderY = y - totalHeight;
                 if (dist === d3) renderY = y + totalHeight;
-                const opacity = Math.max(0.15, 1 - dist * 0.0035);
+                const opacity = 1;
                 const zIndex  = 100 - Math.floor(dist / 10);
                 if (opacity < 0.15) {
                     wrap.style.display = 'none';
                 } else {
                     wrap.style.display   = 'block';
                     wrap.style.transform = `translateY(${renderY}px)`;
-                    wrap.style.opacity   = opacity;
+                    // wrap.style.opacity = opacity; // Kartlar tam opak
                     wrap.style.zIndex    = zIndex;
                 }
                 if (dist < minOffset) { minOffset = dist; activeIndex = i; }
