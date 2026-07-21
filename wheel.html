@@ -65,8 +65,8 @@
 
         .slot-window {
             position: relative;
-            width: 190px;
-            height: 70%;
+            width: 90vw;
+            height: 90%;
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -82,8 +82,8 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 190px;
-            height: 70%;
+            width: 90vw;
+            height: 90%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
@@ -95,7 +95,7 @@
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            padding: 0 8px;
+            padding: 2px;
             background: linear-gradient(
                 to bottom,
                 #cc0000 0%,
@@ -118,58 +118,10 @@
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 0 8px;
-            border-radius: 9px;
+            inset: 2px;
+            border-radius: 10px;
             background: transparent;
             pointer-events: none;
-        }
-
-        /* === GERCEK DISA BOMBE (KONVEKS YARIM DAIRE) === */
-        .side-bulge {
-            position: absolute;
-            width: 24px;
-            height: 60%;
-            top: 20%;
-            pointer-events: none;
-            z-index: 151;
-        }
-
-        .bulge-left {
-            left: -14px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 0 100% 100% 0 / 0 45% 45% 0;
-            box-shadow:
-                inset -4px 0 8px rgba(0,0,0,0.5),
-                2px 0 6px rgba(0,0,0,0.3);
-        }
-
-        .bulge-right {
-            right: -14px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 100% 0 0 100% / 45% 0 0 45%;
-            box-shadow:
-                inset 4px 0 8px rgba(0,0,0,0.5),
-                -2px 0 6px rgba(0,0,0,0.3);
         }
 
         .shadow-top, .shadow-bottom {
@@ -190,9 +142,10 @@
 
         .wheel-card-wrap {
             position: absolute;
-            width: 160px; height: 270px;
+            width: 70vw;
+            height: calc(70vw * 1.6875);
             left: 50%;
-            margin-left: -80px;
+            transform: translateX(-50%);
             will-change: transform, opacity;
             border-radius: 8px;
             z-index: 10;
@@ -333,10 +286,7 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="center-highlighter">
-            <div class="side-bulge bulge-left"></div>
-            <div class="side-bulge bulge-right"></div>
-        </div>
+        <div class="center-highlighter"></div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
             <div class="shadow-bottom"></div>
@@ -493,7 +443,7 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (270 / 2);
+            const centerY    = containerH / 2 - (containerH * 0.45);
             let minOffset = Infinity, activeIndex = -1;
 
             cards.forEach((wrap, i) => {
@@ -534,7 +484,7 @@
                     offsetY += velocity; velocity *= 0.985;
                     if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
                 } else {
-                    const centerY    = containerH / 2 - (270 / 2);
+                    const centerY    = containerH / 2 - (containerH * 0.45);
                     const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
                     const diff       = targetOffY - offsetY;
                     offsetY += diff * 0.15;
