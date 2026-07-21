@@ -78,7 +78,6 @@
             );
         }
 
-        /* ===== SOL/SAĞ KIRMIZI-SİYAH ÇERÇEVE ===== */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
@@ -125,21 +124,21 @@
             pointer-events: none;
         }
 
-        /* Kart gölge katmanları - çerçeve içinde, kartların üzerinde */
         .shadow-top, .shadow-bottom {
             position: absolute;
             left: 8px; right: 8px;
             height: 10%;
             pointer-events: none;
-            z-index: 20;
+            z-index: 120;
         }
-        .shadow-top, .shadow-bottom {
-    position: absolute;
-    left: 8px; right: 8px;
-    height: 10%;
-    pointer-events: none;
-    z-index: 120;
-}
+        .shadow-top {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 100%);
+        }
+        .shadow-bottom {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 100%);
+        }
 
         .wheel-card-wrap {
             position: absolute;
@@ -438,6 +437,10 @@
             cards.push(wrap);
         }
 
+        // Shadow'ları kartların üstüne taşı (DOM sonuna append)
+        container.appendChild(document.querySelector('.shadow-top'));
+        container.appendChild(document.querySelector('.shadow-bottom'));
+
         function renderCards() {
             const containerH = container.clientHeight;
             const centerY    = containerH / 2 - (270 / 2);
@@ -460,7 +463,6 @@
                 } else {
                     wrap.style.display   = 'block';
                     wrap.style.transform = `translateY(${renderY}px)`;
-                    // wrap.style.opacity = opacity; // Kartlar tam opak
                     wrap.style.zIndex    = zIndex;
                 }
                 if (dist < minOffset) { minOffset = dist; activeIndex = i; }
@@ -540,7 +542,7 @@
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
 
-        /* ========== NİYET MODALI - KİTLİ ========== */
+        /* ========== NİYET MODALI ========== */
         const intentOverlay = document.getElementById('intentOverlay');
         const intentInput   = document.getElementById('intentInput');
         const charCounter   = document.getElementById('charCounter');
