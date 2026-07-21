@@ -133,14 +133,13 @@
             pointer-events: none;
             z-index: 20;
         }
-        .shadow-top {
-            top: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
-        }
-        .shadow-bottom {
-            bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
-        }
+        .shadow-top, .shadow-bottom {
+    position: absolute;
+    left: 8px; right: 8px;
+    height: 10%;
+    pointer-events: none;
+    z-index: 120;
+}
 
         .wheel-card-wrap {
             position: absolute;
