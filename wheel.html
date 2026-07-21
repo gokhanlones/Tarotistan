@@ -63,10 +63,12 @@
             isolation: isolate;
         }
 
+        /* Ekranın %90'ını kaplayacak şekilde güncellendi */
         .slot-window {
             position: relative;
-            width: 190px;
-            height: 70%;
+            width: 90%;
+            max-width: 450px;
+            height: 80%;
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -78,12 +80,14 @@
             );
         }
 
+        /* Vurgulayıcı alan da ana pencereyle aynı boyutlara çekildi */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 190px;
-            height: 70%;
+            width: 90%;
+            max-width: 450px;
+            height: 80%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
@@ -124,53 +128,7 @@
             pointer-events: none;
         }
 
-        /* === GERCEK DISA BOMBE (KONVEKS YARIM DAIRE) === */
-        .side-bulge {
-            position: absolute;
-            width: 24px;
-            height: 60%;
-            top: 20%;
-            pointer-events: none;
-            z-index: 151;
-        }
-
-        .bulge-left {
-            left: -14px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 0 100% 100% 0 / 0 45% 45% 0;
-            box-shadow:
-                inset -4px 0 8px rgba(0,0,0,0.5),
-                2px 0 6px rgba(0,0,0,0.3);
-        }
-
-        .bulge-right {
-            right: -14px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 100% 0 0 100% / 45% 0 0 45%;
-            box-shadow:
-                inset 4px 0 8px rgba(0,0,0,0.5),
-                -2px 0 6px rgba(0,0,0,0.3);
-        }
+        /* Bombe (yan yuvarlaklar) sınıfları silindi */
 
         .shadow-top, .shadow-bottom {
             position: absolute;
@@ -188,11 +146,12 @@
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
 
+        /* Kart boyutu genişliğe oranlı olacak şekilde güncellendi */
         .wheel-card-wrap {
             position: absolute;
-            width: 160px; height: 270px;
+            width: 85%;
+            aspect-ratio: 160 / 270; /* Kart en-boy oranı */
             left: 50%;
-            margin-left: -80px;
             will-change: transform, opacity;
             border-radius: 8px;
             z-index: 10;
@@ -334,8 +293,7 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter">
-            <div class="side-bulge bulge-left"></div>
-            <div class="side-bulge bulge-right"></div>
+            <!-- Bombe divleri buradan kaldırıldı -->
         </div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
@@ -392,7 +350,7 @@
             ? 'Sorunuzu veya niyetinizi buraya yazın...'
             : 'Write your question or intention here...';
 
-        const auth = firebase.auth();
+        const auth = typeof firebase !== 'undefined' ? firebase.auth() : { onAuthStateChanged: (cb) => cb({}), signOut: () => Promise.resolve() };
         auth.onAuthStateChanged(user => {
             if (!user) { window.location.href = 'auth.html'; return; }
             document.getElementById('authCheck').classList.add('hidden');
@@ -469,12 +427,18 @@
         const touchArea   = document.getElementById('wheelTouchArea');
         const container   = document.getElementById('slotWindow');
         const numCards    = 78;
-        const cardHeight  = 280;
-        const totalHeight = numCards * cardHeight;
-
-        let cards = [], offsetY = Math.random() * totalHeight, velocity = 0;
+        let cards = [];
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
+        
+        // Dinamik kart boyutlarını hesapla
+        const slotWidth = container.clientWidth; 
+        const cardWidthPx = slotWidth * 0.85; // %85 genişlik kullanıyoruz
+        const actualCardHeight = cardWidthPx * (270 / 160);
+        const cardHeight = actualCardHeight + 15; // 15px ara boşluk (gap)
+        const totalHeight = numCards * cardHeight;
+        
+        let offsetY = Math.random() * totalHeight, velocity = 0;
 
         for (let i = 0; i < numCards; i++) {
             const wrap = document.createElement('div');
@@ -493,7 +457,8 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (270 / 2);
+            // Merkezi dinamik kart yüksekliğine göre hesaplıyoruz
+            const centerY    = containerH / 2 - (actualCardHeight / 2);
             let minOffset = Infinity, activeIndex = -1;
 
             cards.forEach((wrap, i) => {
@@ -506,15 +471,15 @@
                 let renderY = y;
                 if (dist === d2) renderY = y - totalHeight;
                 if (dist === d3) renderY = y + totalHeight;
+                
                 const opacity = 1;
                 const zIndex  = 100 - Math.floor(dist / 10);
-                if (opacity < 0.15) {
-                    wrap.style.display = 'none';
-                } else {
-                    wrap.style.display   = 'block';
-                    wrap.style.transform = `translateY(${renderY}px)`;
-                    wrap.style.zIndex    = zIndex;
-                }
+                
+                wrap.style.display   = 'block';
+                // translate(-50%) kullanıyoruz ki, CSS'teki left: 50% ile merkezlensin.
+                wrap.style.transform = `translate(-50%, ${renderY}px)`;
+                wrap.style.zIndex    = zIndex;
+                
                 if (dist < minOffset) { minOffset = dist; activeIndex = i; }
             });
 
@@ -534,7 +499,7 @@
                     offsetY += velocity; velocity *= 0.985;
                     if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
                 } else {
-                    const centerY    = containerH / 2 - (270 / 2);
+                    const centerY    = containerH / 2 - (actualCardHeight / 2);
                     const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
                     const diff       = targetOffY - offsetY;
                     offsetY += diff * 0.15;
@@ -559,9 +524,10 @@
         renderCards();
         requestAnimationFrame(animate);
 
+        // Dokunma (Touch) alanı genişliği slotWindow genişliği oranında ayarlandı
         function inCardZone(clientX) {
             const rect = touchArea.getBoundingClientRect();
-            return Math.abs(clientX - (rect.left + rect.width / 2)) <= 120;
+            return Math.abs(clientX - (rect.left + rect.width / 2)) <= (container.clientWidth / 2);
         }
         function handleStart(y, x) {
             if (!isIntentSet || !inCardZone(x)) return;
