@@ -124,18 +124,18 @@
             pointer-events: none;
         }
 
-        /* === SAĞ VE SOL BOMBE (DIŞA DOĞRU YARIM DAİRE) === */
+        /* === GERCEK DISA BOMBE (KONVEKS YARIM DAIRE) === */
         .side-bulge {
             position: absolute;
-            width: 14px;
-            height: 50%;
-            top: 25%;
+            width: 24px;
+            height: 60%;
+            top: 20%;
             pointer-events: none;
             z-index: 151;
         }
 
         .bulge-left {
-            left: -6px;
+            left: -14px;
             background: linear-gradient(
                 to bottom,
                 #cc0000 0%,
@@ -147,12 +147,14 @@
                 #990000 80%,
                 #cc0000 100%
             );
-            border-radius: 0 50% 50% 0;
-            box-shadow: inset -2px 0 4px rgba(0,0,0,0.3);
+            border-radius: 0 100% 100% 0 / 0 45% 45% 0;
+            box-shadow:
+                inset -4px 0 8px rgba(0,0,0,0.5),
+                2px 0 6px rgba(0,0,0,0.3);
         }
 
         .bulge-right {
-            right: -6px;
+            right: -14px;
             background: linear-gradient(
                 to bottom,
                 #cc0000 0%,
@@ -164,8 +166,10 @@
                 #990000 80%,
                 #cc0000 100%
             );
-            border-radius: 50% 0 0 50%;
-            box-shadow: inset 2px 0 4px rgba(0,0,0,0.3);
+            border-radius: 100% 0 0 100% / 45% 0 0 45%;
+            box-shadow:
+                inset 4px 0 8px rgba(0,0,0,0.5),
+                -2px 0 6px rgba(0,0,0,0.3);
         }
 
         .shadow-top, .shadow-bottom {
@@ -461,7 +465,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== ÇARK ========== */
+        /* ========== CARK ========== */
         const touchArea   = document.getElementById('wheelTouchArea');
         const container   = document.getElementById('slotWindow');
         const numCards    = 78;
@@ -484,7 +488,6 @@
             cards.push(wrap);
         }
 
-        // Shadow'ları kartların üstüne taşı (DOM sonuna append)
         container.appendChild(document.querySelector('.shadow-top'));
         container.appendChild(document.querySelector('.shadow-bottom'));
 
@@ -589,7 +592,7 @@
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
 
-        /* ========== NİYET MODALI ========== */
+        /* ========== NIYET MODALI ========== */
         const intentOverlay = document.getElementById('intentOverlay');
         const intentInput   = document.getElementById('intentInput');
         const charCounter   = document.getElementById('charCounter');
