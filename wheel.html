@@ -79,7 +79,7 @@
             );
         }
 
-        /* === CERCEVE: Ust, Alt, Sag, Sol tam cerceve === */
+        /* === CERCEVE: Ust, Alt ince (3px); Sag, Sol kalin (7.5px) === */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
@@ -93,12 +93,13 @@
             overflow: visible;
         }
 
+        /* Ust ve Alt çerçeve - ince (3px) */
         .center-highlighter::before {
             content: '';
             position: absolute;
-            inset: 0;
+            top: 0; left: 3px; right: 7.5px; bottom: 0;
             border-radius: 12px;
-            padding: 3px;
+            padding: 3px 0;
             background: linear-gradient(
                 to bottom,
                 #000000 0%,
@@ -118,18 +119,35 @@
             pointer-events: none;
         }
 
+        /* Sag ve Sol çerçeve - kalin (7.5px) */
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 3px;
-            border-radius: 9px;
-            background: transparent;
+            top: 3px; left: 0; right: 0; bottom: 3px;
+            border-radius: 12px;
+            padding: 0 7.5px;
+            background: linear-gradient(
+                to bottom,
+                #000000 0%,
+                #000000 5%,
+                #550000 15%,
+                #cc0000 30%,
+                #cc0000 70%,
+                #550000 85%,
+                #000000 95%,
+                #000000 100%
+            );
+            -webkit-mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
             pointer-events: none;
         }
 
         .shadow-top, .shadow-bottom {
             position: absolute;
-            left: 3px; right: 3px;
+            left: 7.5px; right: 7.5px;
             height: 10%;
             pointer-events: none;
             z-index: 120;
