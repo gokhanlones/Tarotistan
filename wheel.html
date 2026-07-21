@@ -51,7 +51,7 @@
 
         .wheel-container {
             position: absolute;
-            top: 60px; bottom: 68px;
+            top: 60px; bottom: 68px; /* Üst ve alt barlara sıfırlandı */
             left: 0; right: 0;
             display: flex;
             justify-content: center;
@@ -63,12 +63,12 @@
             isolation: isolate;
         }
 
-        /* Ekranın %90'ını kaplayacak şekilde güncellendi */
+        /* Yükseklik %100 yapıldı (Tamamen doldurur) */
         .slot-window {
             position: relative;
             width: 90%;
             max-width: 450px;
-            height: 80%;
+            height: 100%; 
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -80,14 +80,14 @@
             );
         }
 
-        /* Vurgulayıcı alan da ana pencereyle aynı boyutlara çekildi */
+        /* Vurgulayıcı alan da ana pencereyle aynı boyutlara çekildi (Yükseklik %100) */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 450px;
-            height: 80%;
+            height: 100%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
@@ -128,8 +128,6 @@
             pointer-events: none;
         }
 
-        /* Bombe (yan yuvarlaklar) sınıfları silindi */
-
         .shadow-top, .shadow-bottom {
             position: absolute;
             left: 8px; right: 8px;
@@ -146,7 +144,7 @@
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
 
-        /* Kart boyutu genişliğe oranlı olacak şekilde güncellendi */
+        /* Kart boyutu genişliğe oranlı */
         .wheel-card-wrap {
             position: absolute;
             width: 85%;
@@ -293,7 +291,6 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter">
-            <!-- Bombe divleri buradan kaldırıldı -->
         </div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
@@ -431,11 +428,10 @@
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
         
-        // Dinamik kart boyutlarını hesapla
         const slotWidth = container.clientWidth; 
-        const cardWidthPx = slotWidth * 0.85; // %85 genişlik kullanıyoruz
+        const cardWidthPx = slotWidth * 0.85; 
         const actualCardHeight = cardWidthPx * (270 / 160);
-        const cardHeight = actualCardHeight + 15; // 15px ara boşluk (gap)
+        const cardHeight = actualCardHeight + 15; 
         const totalHeight = numCards * cardHeight;
         
         let offsetY = Math.random() * totalHeight, velocity = 0;
@@ -457,7 +453,6 @@
 
         function renderCards() {
             const containerH = container.clientHeight;
-            // Merkezi dinamik kart yüksekliğine göre hesaplıyoruz
             const centerY    = containerH / 2 - (actualCardHeight / 2);
             let minOffset = Infinity, activeIndex = -1;
 
@@ -476,7 +471,6 @@
                 const zIndex  = 100 - Math.floor(dist / 10);
                 
                 wrap.style.display   = 'block';
-                // translate(-50%) kullanıyoruz ki, CSS'teki left: 50% ile merkezlensin.
                 wrap.style.transform = `translate(-50%, ${renderY}px)`;
                 wrap.style.zIndex    = zIndex;
                 
@@ -524,7 +518,6 @@
         renderCards();
         requestAnimationFrame(animate);
 
-        // Dokunma (Touch) alanı genişliği slotWindow genişliği oranında ayarlandı
         function inCardZone(clientX) {
             const rect = touchArea.getBoundingClientRect();
             return Math.abs(clientX - (rect.left + rect.width / 2)) <= (container.clientWidth / 2);
