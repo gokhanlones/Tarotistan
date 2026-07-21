@@ -51,7 +51,7 @@
 
         .wheel-container {
             position: absolute;
-            top: 60px; bottom: 68px; /* Üst ve alt barlara sıfırlandı */
+            top: 60px; bottom: 68px;
             left: 0; right: 0;
             display: flex;
             justify-content: center;
@@ -63,12 +63,11 @@
             isolation: isolate;
         }
 
-        /* Yükseklik %100 yapıldı (Tamamen doldurur) */
         .slot-window {
             position: relative;
             width: 90%;
             max-width: 450px;
-            height: 100%; 
+            height: 100%;
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -80,7 +79,6 @@
             );
         }
 
-        /* Vurgulayıcı alan da ana pencereyle aynı boyutlara çekildi (Yükseklik %100) */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
@@ -99,16 +97,16 @@
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            padding: 0 8px;
+            padding: 0 3px;
             background: linear-gradient(
                 to bottom,
                 #000000 0%,
-                #000000 20%,
-                #550000 35%,
-                #cc0000 45%,
-                #cc0000 55%,
-                #550000 65%,
-                #000000 80%,
+                #000000 10%,
+                #550000 25%,
+                #cc0000 40%,
+                #cc0000 60%,
+                #550000 75%,
+                #000000 90%,
                 #000000 100%
             );
             -webkit-mask:
@@ -122,7 +120,7 @@
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 0 8px;
+            inset: 0 3px;
             border-radius: 9px;
             background: transparent;
             pointer-events: none;
@@ -144,11 +142,10 @@
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
 
-        /* Kart boyutu genişliğe oranlı */
         .wheel-card-wrap {
             position: absolute;
             width: 85%;
-            aspect-ratio: 160 / 270; /* Kart en-boy oranı */
+            aspect-ratio: 160 / 270;
             left: 50%;
             will-change: transform, opacity;
             border-radius: 8px;
