@@ -65,8 +65,8 @@
 
         .slot-window {
             position: relative;
-            width: 90vw;
-            height: 90%;
+            width: 190px;
+            height: 70%;
             overflow: hidden;
             border-radius: 12px;
             background: linear-gradient(
@@ -82,8 +82,8 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 90vw;
-            height: 90%;
+            width: 190px;
+            height: 70%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
@@ -95,7 +95,7 @@
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            padding: 2px;
+            padding: 0 8px;
             background: linear-gradient(
                 to bottom,
                 #cc0000 0%,
@@ -118,10 +118,54 @@
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 2px;
-            border-radius: 10px;
+            inset: 0 8px;
+            border-radius: 9px;
             background: transparent;
             pointer-events: none;
+        }
+
+        /* === SAĞ VE SOL BOMBE (DIŞA DOĞRU YARIM DAİRE) === */
+        .side-bulge {
+            position: absolute;
+            width: 14px;
+            height: 50%;
+            top: 25%;
+            pointer-events: none;
+            z-index: 151;
+        }
+
+        .bulge-left {
+            left: -6px;
+            background: linear-gradient(
+                to bottom,
+                #cc0000 0%,
+                #990000 20%,
+                #550000 35%,
+                #000000 45%,
+                #000000 55%,
+                #550000 65%,
+                #990000 80%,
+                #cc0000 100%
+            );
+            border-radius: 0 50% 50% 0;
+            box-shadow: inset -2px 0 4px rgba(0,0,0,0.3);
+        }
+
+        .bulge-right {
+            right: -6px;
+            background: linear-gradient(
+                to bottom,
+                #cc0000 0%,
+                #990000 20%,
+                #550000 35%,
+                #000000 45%,
+                #000000 55%,
+                #550000 65%,
+                #990000 80%,
+                #cc0000 100%
+            );
+            border-radius: 50% 0 0 50%;
+            box-shadow: inset 2px 0 4px rgba(0,0,0,0.3);
         }
 
         .shadow-top, .shadow-bottom {
@@ -142,10 +186,9 @@
 
         .wheel-card-wrap {
             position: absolute;
-            width: 70vw;
-            height: calc(70vw * 1.6875);
+            width: 160px; height: 270px;
             left: 50%;
-            transform: translateX(-50%);
+            margin-left: -80px;
             will-change: transform, opacity;
             border-radius: 8px;
             z-index: 10;
@@ -286,7 +329,10 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="center-highlighter"></div>
+        <div class="center-highlighter">
+            <div class="side-bulge bulge-left"></div>
+            <div class="side-bulge bulge-right"></div>
+        </div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
             <div class="shadow-bottom"></div>
@@ -415,7 +461,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== CARK ========== */
+        /* ========== ÇARK ========== */
         const touchArea   = document.getElementById('wheelTouchArea');
         const container   = document.getElementById('slotWindow');
         const numCards    = 78;
@@ -438,12 +484,13 @@
             cards.push(wrap);
         }
 
+        // Shadow'ları kartların üstüne taşı (DOM sonuna append)
         container.appendChild(document.querySelector('.shadow-top'));
         container.appendChild(document.querySelector('.shadow-bottom'));
 
         function renderCards() {
             const containerH = container.clientHeight;
-            const centerY    = containerH / 2 - (containerH * 0.45);
+            const centerY    = containerH / 2 - (270 / 2);
             let minOffset = Infinity, activeIndex = -1;
 
             cards.forEach((wrap, i) => {
@@ -484,7 +531,7 @@
                     offsetY += velocity; velocity *= 0.985;
                     if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
                 } else {
-                    const centerY    = containerH / 2 - (containerH * 0.45);
+                    const centerY    = containerH / 2 - (270 / 2);
                     const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
                     const diff       = targetOffY - offsetY;
                     offsetY += diff * 0.15;
@@ -542,7 +589,7 @@
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
 
-        /* ========== NIYET MODALI ========== */
+        /* ========== NİYET MODALI ========== */
         const intentOverlay = document.getElementById('intentOverlay');
         const intentInput   = document.getElementById('intentInput');
         const charCounter   = document.getElementById('charCounter');
