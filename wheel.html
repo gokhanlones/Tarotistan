@@ -65,7 +65,7 @@
 
         .slot-window {
             position: relative;
-            width: 190px;
+            width: 190px; 
             height: 70%;
             overflow: hidden;
             border-radius: 12px;
@@ -82,12 +82,12 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 190px;
+            width: 190px; 
             height: 70%;
             border-radius: 12px;
             pointer-events: none;
             z-index: 150;
-            overflow: visible;
+            overflow: hidden;
         }
 
         .center-highlighter::before {
@@ -107,8 +107,8 @@
                 #990000 80%,
                 #cc0000 100%
             );
-            -webkit-mask:
-                linear-gradient(#fff 0 0) content-box,
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
                 linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -122,50 +122,6 @@
             border-radius: 9px;
             background: transparent;
             pointer-events: none;
-        }
-
-        /* === SAĞ VE SOL BOMBE (DIŞA DOĞRU YARIM DAİRE) === */
-        .side-bulge {
-            position: absolute;
-            width: 14px;
-            height: 50%;
-            top: 25%;
-            pointer-events: none;
-            z-index: 151;
-        }
-
-        .bulge-left {
-            left: -6px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 0 50% 50% 0;
-            box-shadow: inset -2px 0 4px rgba(0,0,0,0.3);
-        }
-
-        .bulge-right {
-            right: -6px;
-            background: linear-gradient(
-                to bottom,
-                #cc0000 0%,
-                #990000 20%,
-                #550000 35%,
-                #000000 45%,
-                #000000 55%,
-                #550000 65%,
-                #990000 80%,
-                #cc0000 100%
-            );
-            border-radius: 50% 0 0 50%;
-            box-shadow: inset 2px 0 4px rgba(0,0,0,0.3);
         }
 
         .shadow-top, .shadow-bottom {
@@ -329,10 +285,7 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="center-highlighter">
-            <div class="side-bulge bulge-left"></div>
-            <div class="side-bulge bulge-right"></div>
-        </div>
+        <div class="center-highlighter"></div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
             <div class="shadow-bottom"></div>
