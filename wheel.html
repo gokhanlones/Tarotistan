@@ -143,9 +143,10 @@
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
 
+        /* Kart gorseli %30 kucultuldu: width 85% -> 59.5% */
         .wheel-card-wrap {
             position: absolute;
-            width: 85%;
+            width: 59.5%;
             aspect-ratio: 160 / 270;
             left: 50%;
             will-change: transform, opacity;
@@ -427,7 +428,7 @@
         let snapDone = false, hasSpun = false, isIntentSet = false;
         
         const slotWidth = container.clientWidth; 
-        const cardWidthPx = slotWidth * 0.85; 
+        const cardWidthPx = slotWidth * 0.595; 
         const actualCardHeight = cardWidthPx * (270 / 160);
         const cardHeight = actualCardHeight + 15; 
         const totalHeight = numCards * cardHeight;
