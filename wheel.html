@@ -51,7 +51,7 @@
 
         .wheel-container {
             position: absolute;
-            top: 60px; bottom: 68px; /* Üst ve alt barlara sıfırlandı */
+            top: 60px; bottom: 68px;
             left: 0; right: 0;
             display: flex;
             justify-content: center;
@@ -63,7 +63,6 @@
             isolation: isolate;
         }
 
-        /* Yükseklik %100 yapıldı (Tamamen doldurur) */
         .slot-window {
             position: relative;
             width: 90%;
@@ -80,7 +79,6 @@
             );
         }
 
-        /* Vurgulayıcı alan da ana pencereyle aynı boyutlara çekildi (Yükseklik %100) */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
@@ -128,29 +126,29 @@
             pointer-events: none;
         }
 
+        /* 3D Etkisi İçin Güçlendirilmiş Gölgeler */
         .shadow-top, .shadow-bottom {
             position: absolute;
-            left: 8px; right: 8px;
-            height: 10%;
+            left: 0; right: 0;
+            height: 25%;
             pointer-events: none;
             z-index: 120;
         }
         .shadow-top {
             top: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
         }
         .shadow-bottom {
             bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
         }
 
-        /* Kart boyutu genişliğe oranlı */
         .wheel-card-wrap {
             position: absolute;
             width: 85%;
-            aspect-ratio: 160 / 270; /* Kart en-boy oranı */
+            aspect-ratio: 160 / 270;
             left: 50%;
-            will-change: transform, opacity;
+            will-change: transform, filter, opacity;
             border-radius: 8px;
             z-index: 10;
         }
@@ -459,19 +457,30 @@
             cards.forEach((wrap, i) => {
                 let y = (i * cardHeight + offsetY) % totalHeight;
                 if (y < 0) y += totalHeight;
+                
                 const d1 = Math.abs(y - centerY);
                 const d2 = Math.abs(y - totalHeight - centerY);
                 const d3 = Math.abs(y + totalHeight - centerY);
                 let dist = Math.min(d1, d2, d3);
+                
                 let renderY = y;
                 if (dist === d2) renderY = y - totalHeight;
                 if (dist === d3) renderY = y + totalHeight;
                 
-                const opacity = 1;
+                // 3D SİLİNDİR HESAPLAMALARI
+                const offsetFromCenter = renderY - centerY;
+                const normalizedDist = offsetFromCenter / (containerH / 2); 
+                const absDist = Math.abs(normalizedDist); 
+                
+                const scale = 1 - (absDist * 0.25); 
+                const rotateX = normalizedDist * 60; 
+                const brightness = 1 - (absDist * 0.6);
+                
                 const zIndex  = 100 - Math.floor(dist / 10);
                 
                 wrap.style.display   = 'block';
-                wrap.style.transform = `translate(-50%, ${renderY}px)`;
+                wrap.style.transform = `translate(-50%, ${renderY}px) perspective(800px) rotateX(${rotateX}deg) scale(${scale})`;
+                wrap.style.filter    = `brightness(${brightness})`;
                 wrap.style.zIndex    = zIndex;
                 
                 if (dist < minOffset) { minOffset = dist; activeIndex = i; }
