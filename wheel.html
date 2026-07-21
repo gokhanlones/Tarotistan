@@ -79,6 +79,7 @@
             );
         }
 
+        /* === CERCEVE: Ust, Alt, Sag, Sol tam cerceve === */
         .center-highlighter {
             position: absolute;
             top: 50%; left: 50%;
@@ -97,16 +98,16 @@
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            padding: 0 3px;
+            padding: 3px;
             background: linear-gradient(
                 to bottom,
                 #000000 0%,
-                #000000 10%,
-                #550000 25%,
-                #cc0000 40%,
-                #cc0000 60%,
-                #550000 75%,
-                #000000 90%,
+                #000000 5%,
+                #550000 15%,
+                #cc0000 30%,
+                #cc0000 70%,
+                #550000 85%,
+                #000000 95%,
                 #000000 100%
             );
             -webkit-mask:
@@ -120,7 +121,7 @@
         .center-highlighter::after {
             content: '';
             position: absolute;
-            inset: 0 3px;
+            inset: 3px;
             border-radius: 9px;
             background: transparent;
             pointer-events: none;
@@ -128,17 +129,17 @@
 
         .shadow-top, .shadow-bottom {
             position: absolute;
-            left: 8px; right: 8px;
+            left: 3px; right: 3px;
             height: 10%;
             pointer-events: none;
             z-index: 120;
         }
         .shadow-top {
-            top: 0;
+            top: 3px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
         .shadow-bottom {
-            bottom: 0;
+            bottom: 3px;
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         }
 
