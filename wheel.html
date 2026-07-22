@@ -100,16 +100,18 @@
             border-radius: 12px;
             padding: 3px 15px;
             background: linear-gradient(
-                to bottom,
-                #000000 0%,
-                #000000 5%,
-                #550000 15%,
-                #cc0000 30%,
-                #cc0000 70%,
-                #550000 85%,
-                #000000 95%,
-                #000000 100%
-            );
+    to bottom,
+    #000000 0%,
+    #000000 2%,      /* önce: 5% */
+    #330000 8%,      /* önce: 15% - yeni ara renk */
+    #550000 18%,     /* önce: 15% */
+    #cc0000 35%,     /* önce: 30% */
+    #cc0000 65%,     /* önce: 70% */
+    #550000 82%,     /* önce: 85% */
+    #330000 92%,     /* önce: yok - yeni ara renk */
+    #000000 98%,     /* önce: 95% */
+    #000000 100%
+);
             -webkit-mask:
                 linear-gradient(#fff 0 0) content-box,
                 linear-gradient(#fff 0 0);
