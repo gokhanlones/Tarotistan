@@ -93,6 +93,7 @@
             overflow: visible;
         }
 
+        /* Ana çerçeve - iç fade alanı genişletildi */
         .center-highlighter::before {
             content: '';
             position: absolute;
@@ -100,18 +101,20 @@
             border-radius: 12px;
             padding: 3px 15px;
             background: linear-gradient(
-    to bottom,
-    #000000 0%,
-    #000000 2%,      /* önce: 5% */
-    #330000 8%,      /* önce: 15% - yeni ara renk */
-    #550000 18%,     /* önce: 15% */
-    #cc0000 35%,     /* önce: 30% */
-    #cc0000 65%,     /* önce: 70% */
-    #550000 82%,     /* önce: 85% */
-    #330000 92%,     /* önce: yok - yeni ara renk */
-    #000000 98%,     /* önce: 95% */
-    #000000 100%
-);
+                to bottom,
+                #000000 0%,
+                #000000 1%,
+                #1a0000 5%,
+                #330000 12%,
+                #550000 22%,
+                #cc0000 40%,
+                #cc0000 60%,
+                #550000 78%,
+                #330000 88%,
+                #1a0000 95%,
+                #000000 99%,
+                #000000 100%
+            );
             -webkit-mask:
                 linear-gradient(#fff 0 0) content-box,
                 linear-gradient(#fff 0 0);
@@ -119,15 +122,18 @@
             mask-composite: exclude;
             pointer-events: none;
         }
+
+        /* İç gölge - çerçevenin iç çizgisine hafif glow/shadow */
         .center-highlighter::after {
-    content: '';
-    position: absolute;
-    top: 3px; left: 15px; right: 15px; bottom: 3px;
-    border-radius: 9px;
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.35), inset 0 0 4px rgba(0, 0, 0, 0.2);
-    pointer-events: none;
-    z-index: 151;
-}
+            content: '';
+            position: absolute;
+            top: 3px; left: 15px; right: 15px; bottom: 3px;
+            border-radius: 9px;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.35), inset 0 0 4px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 151;
+        }
+
         .shadow-top, .shadow-bottom {
             position: absolute;
             left: 15px; right: 15px;
