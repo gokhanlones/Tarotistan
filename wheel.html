@@ -129,7 +129,7 @@
             position: absolute;
             top: 3px; left: 15px; right: 15px; bottom: 3px;
             border-radius: 9px;
-            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.35), inset 0 0 4px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.45), inset 0 0 8px rgba(0, 0, 0, 0.25);
             pointer-events: none;
             z-index: 151;
         }
@@ -137,17 +137,68 @@
         .shadow-top, .shadow-bottom {
             position: absolute;
             left: 15px; right: 15px;
-            height: 10%;
+            height: 22%;
             pointer-events: none;
             z-index: 120;
         }
         .shadow-top {
             top: 3px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
         }
         .shadow-bottom {
             bottom: 3px;
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        /* === Bombeli Cam Katmanı === */
+        .glass-lens {
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 152;
+            background: radial-gradient(
+                ellipse 90% 70% at 50% 45%,
+                rgba(255, 255, 255, 0.14) 0%,
+                rgba(255, 255, 255, 0.05) 35%,
+                rgba(255, 255, 255, 0.01) 55%,
+                rgba(0, 0, 0, 0.2) 80%,
+                rgba(0, 0, 0, 0.4) 100%
+            );
+            box-shadow: 
+                inset 0 15px 35px rgba(255, 255, 255, 0.2),
+                inset 0 -10px 30px rgba(0, 0, 0, 0.3),
+                inset 0 0 70px rgba(255, 255, 255, 0.06);
+        }
+
+        /* === Cam Parlaması (üst yarı) === */
+        .glass-glare {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 52%;
+            border-radius: 12px 12px 45% 45%;
+            pointer-events: none;
+            z-index: 153;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.15) 20%,
+                rgba(255, 255, 255, 0.04) 45%,
+                transparent 100%
+            );
+        }
+
+        /* === İnce Cam Kenarı === */
+        .glass-rim {
+            position: absolute;
+            top: 4px; left: 16px; right: 16px; bottom: 4px;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 154;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 
+                0 0 12px rgba(255, 255, 255, 0.1),
+                inset 0 0 18px rgba(255, 255, 255, 0.06);
         }
 
         /* Kart gorseli %30 kucultuldu: width 85% -> 59.5% */
@@ -297,6 +348,9 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter">
+            <div class="glass-lens"></div>
+            <div class="glass-glare"></div>
+            <div class="glass-rim"></div>
         </div>
         <div class="slot-window" id="slotWindow">
             <div class="shadow-top"></div>
