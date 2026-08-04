@@ -134,59 +134,42 @@
             z-index: 151;
         }
 
-        /* === Ust / Alt Gölgeler: Daha transparan === */
+        /* === Ust / Alt Gölgeler: Daha hafif ve kisa === */
         .shadow-top, .shadow-bottom {
             position: absolute;
             left: 15px; right: 15px;
-            height: 48%;
+            height: 35%;
             pointer-events: none;
             z-index: 120;
         }
         .shadow-top {
             top: 3px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.12) 40%, rgba(0,0,0,0) 75%, transparent 100%);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.05) 60%, transparent 100%);
         }
         .shadow-bottom {
             bottom: 3px;
-            background: linear-gradient(to top, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0.12) 40%, rgba(0,0,0,0) 75%, transparent 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.05) 60%, transparent 100%);
         }
 
-        /* === Bombeli Cam Katmanı (merkez daha parlak) === */
+        /* === Bombeli Cam Katmanı: Tek sürekli mercek === */
         .glass-lens {
             position: absolute;
             inset: 0;
             border-radius: 12px;
             pointer-events: none;
             z-index: 152;
-            background: radial-gradient(
-                ellipse 85% 65% at 50% 50%,
-                rgba(255, 255, 255, 0.28) 0%,
-                rgba(255, 255, 255, 0.10) 25%,
-                rgba(255, 255, 255, 0.02) 45%,
-                rgba(0, 0, 0, 0.18) 75%,
-                rgba(0, 0, 0, 0.45) 100%
-            );
+            background: 
+                /* Üstten ince ışık yansıması */
+                linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, transparent 12%),
+                /* Tek mercek odağı - ortada yatay parlak şerit */
+                radial-gradient(ellipse 85% 35% at 50% 50%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 45%, transparent 70%),
+                /* Genel cam bombesi - merkez hafif parlak, kenar koyu */
+                radial-gradient(ellipse 90% 75% at 50% 50%, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.12) 65%, rgba(0, 0, 0, 0.35) 100%),
+                /* Alttan hafif koyulaşma */
+                linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, transparent 20%);
             box-shadow: 
-                inset 0 18px 40px rgba(255, 255, 255, 0.28),
-                inset 0 -12px 35px rgba(0, 0, 0, 0.35),
-                inset 0 0 80px rgba(255, 255, 255, 0.08);
-        }
-
-        /* === Cam Parlaması (daha dar, orta-ust) === */
-        .glass-glare {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 38%;
-            border-radius: 12px 12px 45% 45%;
-            pointer-events: none;
-            z-index: 153;
-            background: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.45) 0%,
-                rgba(255, 255, 255, 0.18) 25%,
-                rgba(255, 255, 255, 0.03) 50%,
-                transparent 100%
-            );
+                inset 0 0 30px rgba(255, 255, 255, 0.08),
+                inset 0 0 60px rgba(0, 0, 0, 0.15);
         }
 
         /* === İnce Cam Kenarı === */
@@ -350,7 +333,6 @@
     <div class="wheel-container" id="wheelTouchArea">
         <div class="center-highlighter">
             <div class="glass-lens"></div>
-            <div class="glass-glare"></div>
             <div class="glass-rim"></div>
         </div>
         <div class="slot-window" id="slotWindow">
