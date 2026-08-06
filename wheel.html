@@ -63,14 +63,16 @@
             isolation: isolate;
         }
 
-        /* Dış katman: çizgileri taşır, tam yükseklik (kart + padding*2) */
-        .slot-outer {
+        /* Slot Penceresi: overflow:hidden ile kartları çizgilerin dışına çıkmasını kesin olarak engeller */
+        .slot-window {
             position: relative;
             width: 90%;
             max-width: 450px;
+            overflow: hidden;
+            background: transparent;
         }
 
-        /* Çizgiler: dış katmanın en üstü ve en altı */
+        /* Çizgiler: Doğrudan pencerenin en üst ve en alt sınırlarında yer alır */
         .selector-line {
             position: absolute;
             left: 0; right: 0;
@@ -81,17 +83,6 @@
         }
         .selector-top    { top: 0; }
         .selector-bottom { bottom: 0; }
-
-        /* İç katman: overflow:hidden ile kartları çizgilerin dışında tamamen gizler */
-        .slot-window {
-            position: absolute;
-            left: 0; right: 0;
-            overflow: hidden;
-            background: transparent;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
         .wheel-card-wrap {
             position: absolute;
@@ -236,10 +227,9 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="slot-outer" id="slotOuter">
+        <div class="slot-window" id="slotWindow">
             <div class="selector-line selector-top"></div>
             <div class="selector-line selector-bottom"></div>
-            <div class="slot-window" id="slotWindow"></div>
         </div>
     </div>
 
@@ -367,29 +357,19 @@
 
         /* ========== ÇARK ========== */
         const touchArea = document.getElementById('wheelTouchArea');
-        const slotOuter = document.getElementById('slotOuter');
         const container = document.getElementById('slotWindow');
         const numCards  = 78;
         let cards = [];
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        const LINE_PADDING = 28; /* Kartların üstünde ve altında bırakılacak boşluk mesafesi */
-
-        const slotWidth   = slotOuter.clientWidth;
+        const slotWidth   = container.clientWidth;
         const cardGap     = 12;
         const cardWidthPx = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /* Dış katman çizgileri kapsar (kart yüksekliği + üst ve alt boşluklar) */
-        slotOuter.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
-        
-        /* İç pencere sadece kart yüksekliğinde olur ve üstten LINE_PADDING kadar içeride konumlandırılır (overflow: hidden ile kırpılır) */
+        /* Pencere yüksekliği tam olarak kartın yüksekliğine ayarlanır; çizgiler tam bu sınırda (0 ve bottom) konumlanır */
         container.style.height = actualCardHeight + 'px';
-        container.style.top = LINE_PADDING + 'px';
-
-        document.querySelector('.selector-top').style.top      = '0px';
-        document.querySelector('.selector-bottom').style.bottom = '0px';
 
         const cardHeight  = actualCardHeight + 15;
         const totalHeight = numCards * cardHeight;
@@ -473,7 +453,7 @@
         requestAnimationFrame(animate);
 
         function inSlotZone(clientX, clientY) {
-            const rect = slotOuter.getBoundingClientRect();
+            const rect = container.getBoundingClientRect();
             return (
                 clientX >= rect.left  &&
                 clientX <= rect.right &&
