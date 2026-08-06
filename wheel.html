@@ -239,11 +239,9 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <!-- Dış: çizgileri tutar, tam yükseklik -->
         <div class="slot-outer" id="slotOuter">
             <div class="selector-line selector-top"></div>
             <div class="selector-line selector-bottom"></div>
-            <!-- İç: overflow:hidden ile kartları kliplar -->
             <div class="slot-window" id="slotWindow"></div>
         </div>
     </div>
@@ -372,31 +370,26 @@
 
         /* ========== ÇARK ========== */
         const touchArea = document.getElementById('wheelTouchArea');
-        const slotOuter = document.getElementById('slotOuter');   /* çizgiler burada */
-        const container = document.getElementById('slotWindow');   /* overflow:hidden, kartlar burada */
+        const slotOuter = document.getElementById('slotOuter');
+        const container = document.getElementById('slotWindow');
         const numCards  = 78;
         let cards = [];
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        /* Çizgi ile kart kenarı arasındaki boşluk */
-        const LINE_PADDING = 24; /* px */
+        const LINE_PADDING = 24; /* Kartların üstünde ve altında bırakılacak boşluk mesafesi */
 
-        /* Kart genişliği: 3 kart + 2 gap */
         const slotWidth   = slotOuter.clientWidth;
         const cardGap     = 12;
         const cardWidthPx = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /*
-         * slot-outer  = actualCardHeight + 2*LINE_PADDING  → çizgiler en üst/alt kenarda
-         * slot-window = actualCardHeight                    → overflow:hidden tam kart boyutunda
-         *
-         * Kartlar slot-window içinde clip edilir; çizgiler dışında görünmez.
-         * Çizgi ile kartın kenarı arasında LINE_PADDING kadar boşluk kalır.
-         */
+        /* Çizgiler sınırda, pencere yüksekliği kart boyutu + üst/alt boşluklar kadar ayarlanır */
         slotOuter.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
-        container.style.height  = actualCardHeight + 'px';
+        container.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
+
+        document.querySelector('.selector-top').style.top      = LINE_PADDING + 'px';
+        document.querySelector('.selector-bottom').style.bottom = LINE_PADDING + 'px';
 
         const cardHeight  = actualCardHeight + 15;
         const totalHeight = numCards * cardHeight;
@@ -479,7 +472,6 @@
         renderCards();
         requestAnimationFrame(animate);
 
-        /* Dokunuş sadece çizgiler arasında (slotOuter) ise aktif */
         function inSlotZone(clientX, clientY) {
             const rect = slotOuter.getBoundingClientRect();
             return (
