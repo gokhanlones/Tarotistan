@@ -68,12 +68,9 @@
             position: relative;
             width: 90%;
             max-width: 450px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* Çizgiler: dış katmanın en üstü ve en altı = görünür sınır */
+        /* Çizgiler: dış katmanın en üstü ve en altı */
         .selector-line {
             position: absolute;
             left: 0; right: 0;
@@ -85,10 +82,10 @@
         .selector-top    { top: 0; }
         .selector-bottom { bottom: 0; }
 
-        /* İç katman: overflow:hidden ile kartları sadece kendi içinde gösterir */
+        /* İç katman: overflow:hidden ile kartları çizgilerin dışında tamamen gizler */
         .slot-window {
-            position: relative;
-            width: 100%;
+            position: absolute;
+            left: 0; right: 0;
             overflow: hidden;
             background: transparent;
             display: flex;
@@ -377,19 +374,22 @@
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        const LINE_PADDING = 24; /* Kartların üstünde ve altında bırakılacak boşluk mesafesi */
+        const LINE_PADDING = 28; /* Kartların üstünde ve altında bırakılacak boşluk mesafesi */
 
         const slotWidth   = slotOuter.clientWidth;
         const cardGap     = 12;
         const cardWidthPx = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /* Çizgiler sınırda, pencere yüksekliği kart boyutu + üst/alt boşluklar kadar ayarlanır */
+        /* Dış katman çizgileri kapsar (kart yüksekliği + üst ve alt boşluklar) */
         slotOuter.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
-        container.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
+        
+        /* İç pencere sadece kart yüksekliğinde olur ve üstten LINE_PADDING kadar içeride konumlandırılır (overflow: hidden ile kırpılır) */
+        container.style.height = actualCardHeight + 'px';
+        container.style.top = LINE_PADDING + 'px';
 
-        document.querySelector('.selector-top').style.top      = LINE_PADDING + 'px';
-        document.querySelector('.selector-bottom').style.bottom = LINE_PADDING + 'px';
+        document.querySelector('.selector-top').style.top      = '0px';
+        document.querySelector('.selector-bottom').style.bottom = '0px';
 
         const cardHeight  = actualCardHeight + 15;
         const totalHeight = numCards * cardHeight;
