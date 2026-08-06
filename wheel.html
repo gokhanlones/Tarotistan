@@ -63,7 +63,6 @@
             isolation: isolate;
         }
 
-        /* Slot Penceresi: overflow:hidden ile kartları çizgilerin dışına çıkmasını kesin olarak engeller */
         .slot-window {
             position: relative;
             width: 90%;
@@ -72,17 +71,17 @@
             background: transparent;
         }
 
-        /* Çizgiler: Doğrudan pencerenin en üst ve en alt sınırlarında yer alır */
+        /* Dikey çizgiler — kart yüksekliği kadar (top:0 bottom:0), JS ile left/right konumu ayarlanır */
         .selector-line {
             position: absolute;
-            left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
+            top: 0; bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
             z-index: 100;
             pointer-events: none;
         }
-        .selector-top    { top: 0; }
-        .selector-bottom { bottom: 0; }
+        .selector-left  { left: 0; }
+        .selector-right { right: 0; }
 
         .wheel-card-wrap {
             position: absolute;
@@ -228,8 +227,9 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="slot-window" id="slotWindow">
-            <div class="selector-line selector-top"></div>
-            <div class="selector-line selector-bottom"></div>
+            <!-- Dikey çizgiler: kart yüksekliği kadar, sol ve sağ kenarda -->
+            <div class="selector-line selector-left"></div>
+            <div class="selector-line selector-right"></div>
         </div>
     </div>
 
@@ -363,13 +363,19 @@
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        const slotWidth   = container.clientWidth;
-        const cardGap     = 12;
-        const cardWidthPx = (slotWidth - 2 * cardGap) / 3;
+        const slotWidth       = container.clientWidth;
+        const cardGap         = 12;
+        const cardWidthPx     = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /* Pencere yüksekliği tam olarak kartın yüksekliğine ayarlanır; çizgiler tam bu sınırda (0 ve bottom) konumlanır */
+        /* Slot penceresi yüksekliği = kart yüksekliği */
         container.style.height = actualCardHeight + 'px';
+
+        /* Dikey çizgileri kartın sol ve sağ kenarından biraz dışa al */
+        const lineGap    = 10;  // kart ile çizgi arası boşluk (px)
+        const lineOffset = (slotWidth - cardWidthPx) / 2 - lineGap;
+        document.querySelector('.selector-left').style.left   = lineOffset + 'px';
+        document.querySelector('.selector-right').style.right = lineOffset + 'px';
 
         const cardHeight  = actualCardHeight + 15;
         const totalHeight = numCards * cardHeight;
