@@ -63,18 +63,17 @@
             isolation: isolate;
         }
 
-        .slot-window {
+        /* Dış katman: çizgileri taşır, tam yükseklik (kart + padding*2) */
+        .slot-outer {
             position: relative;
             width: 90%;
             max-width: 450px;
-            overflow: hidden;
-            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Çizgiler: kartın üstünde/altında boşluk bırakacak şekilde içeri çekildi */
+        /* Çizgiler: dış katmanın en üstü ve en altı = görünür sınır */
         .selector-line {
             position: absolute;
             left: 0; right: 0;
@@ -83,8 +82,19 @@
             z-index: 100;
             pointer-events: none;
         }
-        .selector-top    { top: 20px; }
-        .selector-bottom { bottom: 20px; }
+        .selector-top    { top: 0; }
+        .selector-bottom { bottom: 0; }
+
+        /* İç katman: overflow:hidden ile kartları sadece kendi içinde gösterir */
+        .slot-window {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
         .wheel-card-wrap {
             position: absolute;
@@ -94,7 +104,6 @@
             border-radius: 8px;
             z-index: 10;
         }
-
         .wheel-card {
             width: 100%;
             height: 100%;
@@ -230,9 +239,12 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="slot-window" id="slotWindow">
+        <!-- Dış: çizgileri tutar, tam yükseklik -->
+        <div class="slot-outer" id="slotOuter">
             <div class="selector-line selector-top"></div>
             <div class="selector-line selector-bottom"></div>
+            <!-- İç: overflow:hidden ile kartları kliplar -->
+            <div class="slot-window" id="slotWindow"></div>
         </div>
     </div>
 
@@ -358,26 +370,33 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== CARK ========== */
+        /* ========== ÇARK ========== */
         const touchArea = document.getElementById('wheelTouchArea');
-        const container = document.getElementById('slotWindow');
+        const slotOuter = document.getElementById('slotOuter');   /* çizgiler burada */
+        const container = document.getElementById('slotWindow');   /* overflow:hidden, kartlar burada */
         const numCards  = 78;
         let cards = [];
         let isDragging = false, lastY = 0, isSnapping = false;
         let snapDone = false, hasSpun = false, isIntentSet = false;
 
-        /* Çizgi içi boşluk miktarı — CSS'deki top/bottom değeriyle eşleşmeli */
-        const LINE_PADDING = 20; /* px — çizgi ile kartın kenarı arasındaki boşluk */
+        /* Çizgi ile kart kenarı arasındaki boşluk */
+        const LINE_PADDING = 24; /* px */
 
-        /* 3 kart yan yana + aralarında gap hesabı */
-        const slotWidth   = container.clientWidth;
+        /* Kart genişliği: 3 kart + 2 gap */
+        const slotWidth   = slotOuter.clientWidth;
         const cardGap     = 12;
         const cardWidthPx = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /* Container yüksekliği = kart + üst/alt padding (çizgiler bu paddingın ucunda) */
-        const containerH = actualCardHeight + LINE_PADDING * 2;
-        container.style.height = containerH + 'px';
+        /*
+         * slot-outer  = actualCardHeight + 2*LINE_PADDING  → çizgiler en üst/alt kenarda
+         * slot-window = actualCardHeight                    → overflow:hidden tam kart boyutunda
+         *
+         * Kartlar slot-window içinde clip edilir; çizgiler dışında görünmez.
+         * Çizgi ile kartın kenarı arasında LINE_PADDING kadar boşluk kalır.
+         */
+        slotOuter.style.height = (actualCardHeight + LINE_PADDING * 2) + 'px';
+        container.style.height  = actualCardHeight + 'px';
 
         const cardHeight  = actualCardHeight + 15;
         const totalHeight = numCards * cardHeight;
@@ -398,8 +417,8 @@
         }
 
         function renderCards() {
-            /* Kart ortası: padding'i hesaba katarak tam ortada */
-            const centerY = containerH / 2 - actualCardHeight / 2;
+            const containerH = container.clientHeight;
+            const centerY    = containerH / 2 - actualCardHeight / 2;
             let minOffset = Infinity, activeIndex = -1;
 
             cards.forEach((wrap, i) => {
@@ -427,6 +446,7 @@
         }
 
         function animate() {
+            const containerH = container.clientHeight;
             if (isDragging) {
                 isSnapping = false; snapDone = false;
             } else {
@@ -459,9 +479,9 @@
         renderCards();
         requestAnimationFrame(animate);
 
-        /* Dokunuşun sadece çizgiler arasında (slot-window içinde) olup olmadığını kontrol et */
+        /* Dokunuş sadece çizgiler arasında (slotOuter) ise aktif */
         function inSlotZone(clientX, clientY) {
-            const rect = container.getBoundingClientRect();
+            const rect = slotOuter.getBoundingClientRect();
             return (
                 clientX >= rect.left  &&
                 clientX <= rect.right &&
@@ -499,7 +519,7 @@
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
 
-        /* ========== NIYET MODALI ========== */
+        /* ========== NİYET MODALI ========== */
         const intentOverlay = document.getElementById('intentOverlay');
         const intentInput   = document.getElementById('intentInput');
         const charCounter   = document.getElementById('charCounter');
