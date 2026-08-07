@@ -67,7 +67,7 @@
             position: relative;
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             width: 90%;
             max-width: 450px;
         }
@@ -85,6 +85,20 @@
             overflow: hidden;
             background: transparent;
         }
+
+        /* === Sadece ortadaki sütunda 2 çizgi === */
+        .slot-column:nth-child(2) .selector-line {
+            position: absolute;
+            top: -24px;
+            bottom: -24px;
+            width: 1px;
+            background: linear-gradient(180deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
+            z-index: 150;
+            pointer-events: none;
+        }
+        /* gap 12px = 6px + 6px. Çizgiler tam ortada, her karta eşit uzaklıkta */
+        .slot-column:nth-child(2) .selector-left  { left: -6px; }
+        .slot-column:nth-child(2) .selector-right { right: -6px; }
 
         .wheel-card-wrap {
             position: absolute;
@@ -236,6 +250,8 @@
                 <div class="slot-window" id="slotWindow0"></div>
             </div>
             <div class="slot-column" data-col="1">
+                <div class="selector-line selector-left"></div>
+                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow1"></div>
             </div>
             <div class="slot-column" data-col="2">
@@ -366,7 +382,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== 3'LÜ ÇARK — HER SÜTUN TAMAMEN BAĞIMSIZ ========== */
+        /* ========== 3'LÜ ÇARK — HER SÜTUN BAĞIMSIZ ========== */
         const touchArea  = document.getElementById('wheelTouchArea');
         const wrapper    = document.getElementById('slotWrapper');
         const containers = [
@@ -385,7 +401,7 @@
         let isIntentSet = false;
 
         const wrapperWidth     = wrapper.clientWidth;
-        const gap              = 8;
+        const gap              = 12;
         const cardWidthPx      = (wrapperWidth - 2 * gap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
         const cardHeight       = actualCardHeight + 15;
