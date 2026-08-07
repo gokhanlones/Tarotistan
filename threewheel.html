@@ -86,18 +86,6 @@
             background: transparent;
         }
 
-        .selector-line {
-            position: absolute;
-            top: -24px;
-            bottom: -24px;
-            width: 1px;
-            background: linear-gradient(180deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
-            z-index: 150;
-            pointer-events: none;
-        }
-        .selector-left  { left: -6px; }
-        .selector-right { right: -6px; }
-
         .wheel-card-wrap {
             position: absolute;
             width: 100%;
@@ -245,18 +233,12 @@
     <div class="wheel-container" id="wheelTouchArea">
         <div class="slot-wrapper" id="slotWrapper">
             <div class="slot-column" data-col="0">
-                <div class="selector-line selector-left"></div>
-                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow0"></div>
             </div>
             <div class="slot-column" data-col="1">
-                <div class="selector-line selector-left"></div>
-                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow1"></div>
             </div>
             <div class="slot-column" data-col="2">
-                <div class="selector-line selector-left"></div>
-                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow2"></div>
             </div>
         </div>
