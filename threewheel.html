@@ -63,7 +63,6 @@
             isolation: isolate;
         }
 
-        /* === 3 Sütunlu Wrapper === */
         .slot-wrapper {
             position: relative;
             display: flex;
@@ -87,7 +86,6 @@
             background: transparent;
         }
 
-        /* === Çizgiler: Sadece ortadaki kartın (index 1) sol ve sağında === */
         .selector-line {
             position: absolute;
             top: -24px;
@@ -246,18 +244,15 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="slot-wrapper" id="slotWrapper">
-            <!-- Sütun 1 -->
-            <div class="slot-column">
+            <div class="slot-column" data-col="0">
                 <div class="slot-window" id="slotWindow0"></div>
             </div>
-            <!-- Sütun 2: Sadece ortada çizgiler var -->
-            <div class="slot-column">
+            <div class="slot-column" data-col="1">
                 <div class="selector-line selector-left"></div>
                 <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow1"></div>
             </div>
-            <!-- Sütun 3 -->
-            <div class="slot-column">
+            <div class="slot-column" data-col="2">
                 <div class="slot-window" id="slotWindow2"></div>
             </div>
         </div>
@@ -332,7 +327,7 @@
 
         /* ========== SES ========== */
         let audioCtx = null, noiseNode = null, noiseGain = null;
-        let lastCardIndex = -1, spinActive = false;
+        let spinActive = false;
 
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -385,7 +380,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== 3'LÜ ÇARK — HER SÜTUN BAĞIMSIZ ========== */
+        /* ========== 3'LÜ ÇARK — HER SÜTUN TAMAMEN BAĞIMSIZ ========== */
         const touchArea  = document.getElementById('wheelTouchArea');
         const wrapper    = document.getElementById('slotWrapper');
         const containers = [
@@ -395,14 +390,14 @@
         ];
         const numCards = 78;
 
-        /* Her sütun kendi state'ine sahip */
+        /* Her sütun kendi tamamen bağımsız state'ine sahip */
         const cols = [
-            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 },
-            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 },
-            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 }
+            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
+            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
+            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 }
         ];
 
-        let isDragging = false, lastY = 0, isIntentSet = false;
+        let isIntentSet = false;
 
         const wrapperWidth     = wrapper.clientWidth;
         const gap              = 8;
@@ -465,6 +460,10 @@
             return cols.every(c => c.snapDone);
         }
 
+        function allSpun() {
+            return cols.every(c => c.hasSpun);
+        }
+
         function animate() {
             let anyMoving = false;
 
@@ -472,7 +471,7 @@
                 const col = cols[i];
                 const containerH = containers[i].clientHeight;
 
-                if (isDragging) {
+                if (col.isDragging) {
                     col.isSnapping = false;
                     col.snapDone   = false;
                 } else {
@@ -495,14 +494,14 @@
                     }
                 }
 
-                if (!col.snapDone || isDragging) {
+                if (!col.snapDone || col.isDragging) {
                     renderColumn(i);
                     anyMoving = true;
                 }
             }
 
             /* Tümü durduğunda ses + vibrate */
-            if (!isDragging && allStopped() && cols.some(c => c.hasSpun)) {
+            if (allStopped() && allSpun()) {
                 stopSpinSound(); playStopSound();
                 if (navigator.vibrate) navigator.vibrate(50);
                 /* Tek seferlik: hasSpun'ları sıfırla ki tekrar tetiklenmesin */
@@ -530,51 +529,94 @@
         for (let i = 0; i < 3; i++) renderColumn(i);
         requestAnimationFrame(animate);
 
-        function inSlotZone(clientX, clientY) {
+        /* Hangi kolona dokunulduğunu tespit et */
+        function getColIndex(clientX) {
+            const colWidth = wrapper.clientWidth / 3;
             const rect = wrapper.getBoundingClientRect();
-            return (
-                clientX >= rect.left  &&
-                clientX <= rect.right &&
-                clientY >= rect.top   &&
-                clientY <= rect.bottom
-            );
+            const relX = clientX - rect.left;
+            if (relX < colWidth) return 0;
+            if (relX < colWidth * 2) return 1;
+            return 2;
         }
 
         function handleStart(y, x) {
-            if (!isIntentSet || !inSlotZone(x, y)) return;
-            initAudio(); isDragging = true; velocity = 0; lastY = y;
-            cols.forEach(c => { c.snapDone = false; c.lastIndex = -1; });
-        }
-        function handleMove(y) {
-            if (!isDragging || !isIntentSet) return;
-            const dy = y - lastY;
-            cols.forEach(c => {
-                c.hasSpun = true;
-                c.offsetY += dy;
-                c.velocity = dy;
-            });
-            lastY = y;
-            if (Math.abs(dy) > 5) startSpinSound();
-        }
-        function handleEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            cols.forEach(c => {
-                if (c.hasSpun) {
-                    c.velocity = Math.abs(c.velocity) < 10 ? (c.velocity >= 0 ? 80 : -80) : c.velocity * 4;
-                    if (c.velocity >  150) c.velocity =  150;
-                    if (c.velocity < -150) c.velocity = -150;
-                }
-            });
+            if (!isIntentSet) return;
+            const colIdx = getColIndex(x);
+            const col = cols[colIdx];
+            initAudio();
+            col.isDragging = true;
+            col.velocity = 0;
+            col.lastY = y;
+            col.snapDone = false;
+            col.lastIndex = -1;
         }
 
-        touchArea.addEventListener('touchstart', e => handleStart(e.touches[0].clientY, e.touches[0].clientX), { passive: false });
-        touchArea.addEventListener('touchmove',  e => { if (!isDragging) return; e.preventDefault(); handleMove(e.touches[0].clientY); }, { passive: false });
-        touchArea.addEventListener('touchend',   handleEnd);
-        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
-        touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
-        touchArea.addEventListener('mouseup',    handleEnd);
-        touchArea.addEventListener('mouseleave', handleEnd);
+        function handleMove(y, x) {
+            if (!isIntentSet) return;
+            const colIdx = getColIndex(x);
+            const col = cols[colIdx];
+            if (!col.isDragging) return;
+
+            col.hasSpun = true;
+            const dy = y - col.lastY;
+            col.offsetY += dy;
+            col.velocity = dy;
+            col.lastY = y;
+
+            if (Math.abs(dy) > 5) startSpinSound();
+        }
+
+        function handleEnd(x) {
+            if (!isIntentSet) return;
+            const colIdx = getColIndex(x);
+            const col = cols[colIdx];
+            if (!col.isDragging) return;
+
+            col.isDragging = false;
+            if (col.hasSpun) {
+                col.velocity = Math.abs(col.velocity) < 10 ? (col.velocity >= 0 ? 80 : -80) : col.velocity * 4;
+                if (col.velocity >  150) col.velocity =  150;
+                if (col.velocity < -150) col.velocity = -150;
+            }
+        }
+
+        touchArea.addEventListener('touchstart', e => {
+            handleStart(e.touches[0].clientY, e.touches[0].clientX);
+        }, { passive: false });
+
+        touchArea.addEventListener('touchmove', e => {
+            handleMove(e.touches[0].clientY, e.touches[0].clientX);
+        }, { passive: false });
+
+        touchArea.addEventListener('touchend', e => {
+            handleEnd(e.changedTouches[0].clientX);
+        });
+
+        touchArea.addEventListener('mousedown', e => {
+            handleStart(e.clientY, e.clientX);
+        });
+
+        touchArea.addEventListener('mousemove', e => {
+            handleMove(e.clientY, e.clientX);
+        });
+
+        touchArea.addEventListener('mouseup', e => {
+            handleEnd(e.clientX);
+        });
+
+        touchArea.addEventListener('mouseleave', e => {
+            /* Hangi kolon sürükleniyorsa onu bırak */
+            for (let i = 0; i < 3; i++) {
+                if (cols[i].isDragging) {
+                    cols[i].isDragging = false;
+                    if (cols[i].hasSpun) {
+                        cols[i].velocity = Math.abs(cols[i].velocity) < 10 ? (cols[i].velocity >= 0 ? 80 : -80) : cols[i].velocity * 4;
+                        if (cols[i].velocity >  150) cols[i].velocity =  150;
+                        if (cols[i].velocity < -150) cols[i].velocity = -150;
+                    }
+                }
+            }
+        });
 
         /* ========== NİYET MODALI ========== */
         const intentOverlay = document.getElementById('intentOverlay');
