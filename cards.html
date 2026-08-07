@@ -57,10 +57,7 @@
             padding: 0; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
-        .turn-btn img {
-            width: 100%; height: 100%;
-            object-fit: contain;
-        }
+        .turn-btn img { width: 100%; height: 100%; object-fit: contain; }
         .topbar-counter {
             min-width: 28px;
             text-align: right;
@@ -89,20 +86,13 @@
             animation: cardAppear 0.4s ease-out forwards;
             transition: box-shadow 0.2s, transform 0.2s;
         }
-        .card-item img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-        }
+        .card-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .card-item.selected {
             box-shadow: 0 0 14px 4px rgba(255, 141, 184, 0.75);
             transform: scale(1.06);
             z-index: 2;
         }
-
-        @keyframes cardAppear {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -122,62 +112,33 @@
             cursor: pointer;
         }
         .nav-btn.active { background: #f2f2f5; }
-        .nav-btn svg { width: 26px; height: 26px; }
-        .nav-btn img {
-            width: 34px; height: 34px;
-            object-fit: contain; border-radius: 6px;
-        }
-        
-        .btn-continue-container {
+        .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
+
+        /* Devam butonu — alt navın hemen üstünde */
+        .submit-bar {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            z-index: 20;
+            bottom: 68px; left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 12px 16px;
+            z-index: 9;
+            pointer-events: none;
+        }
+        .btn-continue {
+            pointer-events: auto;
+            width: 64px; height: 64px;
+            padding: 0;
             background: transparent;
-        }
-        .btn-continue-container.visible {
-            display: flex;
-        }
-        
-        .roman-numeral-wrapper {
-            display: flex;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 6.5rem; /* %300 oranında büyütüldü */
-            font-weight: bold;
-            color: #000;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-            letter-spacing: 6px;
-        }
-
-        .roman-numeral-wrapper span {
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        
-        .roman-numeral-wrapper span.hidden {
-            opacity: 0;
-            transform: scale(0.5);
-        }
-
-        .btn-close-anim {
-            margin-top: 15px;
-            background: #000;
-            color: #fff;
             border: none;
-            width: 32px;
-            height: 32px;
             border-radius: 50%;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         }
+        .btn-continue img { width: 100%; height: 100%; border-radius: 50%; display: block; }
+        .btn-continue.visible { display: flex; }
     </style>
 </head>
 <body>
@@ -199,13 +160,10 @@
         <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
-    <div class="submit-bar" id="submitBar"></div>
-
-    <div class="btn-continue-container" id="continueContainer">
-        <div class="roman-numeral-wrapper" id="romanWrapper">
-            <span id="roman1">I</span><span id="roman2">I</span><span id="roman3">I</span>
-        </div>
-        <button class="btn-close-anim" id="closeAnimBtn">X</button>
+    <div class="submit-bar">
+        <button class="btn-continue" id="continueBtn">
+            <img src="eye_result.png" alt="">
+        </button>
     </div>
 
     <div class="bottom-nav">
@@ -220,25 +178,16 @@
         document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
 
         const readingType = sessionStorage.getItem('tarotReadingType');
-        const intent = sessionStorage.getItem('tarotIntent');
+        const intent      = sessionStorage.getItem('tarotIntent');
 
-        if (!readingType || !intent) {
-            window.location.href = 'dashboard.html';
-        }
+        if (!readingType || !intent) { window.location.href = 'dashboard.html'; }
 
-        const maxSelect = readingType === 'single' ? 1 : 3;
+        const maxSelect   = readingType === 'single' ? 1 : 3;
         let selectedCount = 0;
-        let animationTimeouts = [];
 
-        const grid = document.getElementById('cardsGrid');
+        const grid        = document.getElementById('cardsGrid');
         const topbarCounter = document.getElementById('topbarCounter');
-        const continueContainer = document.getElementById('continueContainer');
-        const closeAnimBtn = document.getElementById('closeAnimBtn');
-        const romanWrapper = document.getElementById('romanWrapper');
-
-        if (maxSelect === 1) {
-            romanWrapper.innerHTML = '<span id="roman1">I</span>';
-        }
+        const continueBtn = document.getElementById('continueBtn');
 
         document.getElementById('turnBtn').addEventListener('click', function () {
             window.location.href = readingType === 'single' ? 'wheel.html' : 'threewheel.html';
@@ -249,24 +198,15 @@
         }
 
         function updateContinueButton() {
-            if (selectedCount === maxSelect) {
-                continueContainer.classList.add('visible');
-                resetRomanVisibility();
-                startRomanAnimation(); // Tıklama beklenmeden otomatik başlar
-            } else {
-                continueContainer.classList.remove('visible');
-                clearAnimationTimeouts();
+            continueBtn.classList.toggle('visible', selectedCount === maxSelect);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-        }
-
-        function resetRomanVisibility() {
-            const spans = romanWrapper.querySelectorAll('span');
-            spans.forEach(span => span.classList.remove('hidden'));
-        }
-
-        function clearAnimationTimeouts() {
-            animationTimeouts.forEach(timeout => clearTimeout(timeout));
-            animationTimeouts = [];
+            return array;
         }
 
         const TOTAL_CARDS = 78;
@@ -283,9 +223,7 @@
             card.appendChild(img);
             grid.appendChild(card);
 
-            card.addEventListener('click', function() {
-                if (continueContainer.classList.contains('visible')) return;
-
+            card.addEventListener('click', function () {
                 if (card.classList.contains('selected')) {
                     card.classList.remove('selected');
                     selectedCount--;
@@ -302,53 +240,12 @@
 
         updateInfo();
 
-        closeAnimBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            clearAnimationTimeouts();
-            continueContainer.classList.remove('visible');
-            resetRomanVisibility();
+        continueBtn.addEventListener('click', function () {
+            if (selectedCount !== maxSelect) return;
 
-            document.querySelectorAll('.card-item.selected').forEach(card => {
-                card.classList.remove('selected');
-            });
-            selectedCount = 0;
-            updateInfo();
-        });
-
-        function startRomanAnimation() {
-            clearAnimationTimeouts();
-            resetRomanVisibility();
-
-            if (maxSelect === 3) {
-                // 1. saniye: Sağdaki rakamı kaybet
-                animationTimeouts.push(setTimeout(() => {
-                    document.getElementById('roman3').classList.add('hidden');
-                }, 1000));
-
-                // 2. saniye: Soldaki rakamı kaybet
-                animationTimeouts.push(setTimeout(() => {
-                    document.getElementById('roman1').classList.add('hidden');
-                }, 2000));
-
-                // 3. saniye: Ortadaki rakamı kaybet ve yönlendir
-                animationTimeouts.push(setTimeout(() => {
-                    document.getElementById('roman2').classList.add('hidden');
-                    proceedToAd();
-                }, 3000));
-            } else {
-                // Tekli seçimse 1 saniye sonra direkt yönlendir
-                animationTimeouts.push(setTimeout(() => {
-                    document.getElementById('roman1').classList.add('hidden');
-                    proceedToAd();
-                }, 1000));
-            }
-        }
-
-        function proceedToAd() {
-            const deck = Array.from({length: 78}, (_, i) => i);
-            const shuffled = shuffle(deck);
-            const drawnIds = shuffled.slice(0, maxSelect);
-
+            const deck      = Array.from({length: 78}, (_, i) => i);
+            const shuffled  = shuffle(deck);
+            const drawnIds  = shuffled.slice(0, maxSelect);
             const drawnCards = drawnIds.map(id => ({
                 id: id,
                 reversed: Math.random() < 0.5
@@ -356,17 +253,9 @@
 
             sessionStorage.setItem('tarotDrawnCards', JSON.stringify(drawnCards));
             window.location.href = 'ad.html';
-        }
+        });
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        document.getElementById('menuBtn').addEventListener('click', function() {
+        document.getElementById('menuBtn').addEventListener('click', function () {
             console.log('Menü açılacak');
         });
     </script>
