@@ -245,6 +245,8 @@
     <div class="wheel-container" id="wheelTouchArea">
         <div class="slot-wrapper" id="slotWrapper">
             <div class="slot-column" data-col="0">
+                <div class="selector-line selector-left"></div>
+                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow0"></div>
             </div>
             <div class="slot-column" data-col="1">
@@ -253,6 +255,8 @@
                 <div class="slot-window" id="slotWindow1"></div>
             </div>
             <div class="slot-column" data-col="2">
+                <div class="selector-line selector-left"></div>
+                <div class="selector-line selector-right"></div>
                 <div class="slot-window" id="slotWindow2"></div>
             </div>
         </div>
@@ -390,7 +394,6 @@
         ];
         const numCards = 78;
 
-        /* Her sütun kendi tamamen bağımsız state'ine sahip */
         const cols = [
             { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
             { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
@@ -408,7 +411,6 @@
 
         containers.forEach(c => c.style.height = actualCardHeight + 'px');
 
-        /* Kartları oluştur */
         for (let col = 0; col < 3; col++) {
             cols[col].offsetY = Math.random() * totalHeight;
             for (let i = 0; i < numCards; i++) {
@@ -465,8 +467,6 @@
         }
 
         function animate() {
-            let anyMoving = false;
-
             for (let i = 0; i < 3; i++) {
                 const col = cols[i];
                 const containerH = containers[i].clientHeight;
@@ -496,15 +496,12 @@
 
                 if (!col.snapDone || col.isDragging) {
                     renderColumn(i);
-                    anyMoving = true;
                 }
             }
 
-            /* Tümü durduğunda ses + vibrate */
             if (allStopped() && allSpun()) {
                 stopSpinSound(); playStopSound();
                 if (navigator.vibrate) navigator.vibrate(50);
-                /* Tek seferlik: hasSpun'ları sıfırla ki tekrar tetiklenmesin */
                 cols.forEach(c => c.hasSpun = false);
 
                 setTimeout(() => {
@@ -529,7 +526,6 @@
         for (let i = 0; i < 3; i++) renderColumn(i);
         requestAnimationFrame(animate);
 
-        /* Hangi kolona dokunulduğunu tespit et */
         function getColIndex(clientX) {
             const colWidth = wrapper.clientWidth / 3;
             const rect = wrapper.getBoundingClientRect();
@@ -605,7 +601,6 @@
         });
 
         touchArea.addEventListener('mouseleave', e => {
-            /* Hangi kolon sürükleniyorsa onu bırak */
             for (let i = 0; i < 3; i++) {
                 if (cols[i].isDragging) {
                     cols[i].isDragging = false;
