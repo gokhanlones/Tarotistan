@@ -36,16 +36,11 @@
             gap: 5px; cursor: pointer;
             flex-shrink: 0;
         }
-        .hamburger-btn span {
-            display: block; width: 22px; height: 2px;
-            background: #000;
-        }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: #000; }
         .topbar-title {
-            flex: 1;
-            text-align: center;
+            flex: 1; text-align: center;
             font-size: 1.25rem; font-weight: 700;
-            letter-spacing: 3px;
-            color: #000;
+            letter-spacing: 3px; color: #000;
         }
         .topbar-spacer { width: 40px; flex-shrink: 0; }
 
@@ -54,8 +49,10 @@
             top: 60px; bottom: 68px;
             left: 0; right: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 28px;
             background-image: url('wheelbackplan.png');
             background-size: cover;
             background-position: center;
@@ -63,13 +60,22 @@
             isolation: isolate;
         }
 
+        /* Çark + buton dikey hizalama */
+        .wheel-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+            width: 90%;
+            max-width: 450px;
+        }
+
         .slot-wrapper {
             position: relative;
             display: flex;
             justify-content: center;
             gap: 12px;
-            width: 90%;
-            max-width: 450px;
+            width: 100%;
         }
 
         .slot-column {
@@ -86,11 +92,10 @@
             background: transparent;
         }
 
-        /* === Sadece ortadaki sütunda 2 çizgi === */
+        /* Sadece ortadaki sütunda çizgiler */
         .slot-column:nth-child(2) .selector-line {
             position: absolute;
-            top: -24px;
-            bottom: -24px;
+            top: -24px; bottom: -24px;
             width: 1px;
             background: linear-gradient(180deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
             z-index: 150;
@@ -108,29 +113,32 @@
             border-radius: 8px;
             z-index: 10;
         }
-
         .wheel-card {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
+            width: 100%; height: 100%;
+            object-fit: contain; display: block;
             border-radius: 8px;
         }
 
+        /* turn.png butonu */
+        .turn-spin-btn {
+            width: 56px; height: 56px;
+            background: none; border: none;
+            padding: 0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
+
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            height: 68px;
-            background: #ffffff;
+            height: 68px; background: #ffffff;
             z-index: 110;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
+            display: flex; align-items: center;
+            justify-content: center; gap: 30px;
         }
         .nav-btn {
             background: none; border: none; padding: 0;
-            width: 44px; height: 44px;
-            border-radius: 10px;
+            width: 44px; height: 44px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
         }
@@ -140,51 +148,42 @@
         .sidebar-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.45);
-            z-index: 150;
-            display: none;
-            opacity: 0;
+            z-index: 150; display: none; opacity: 0;
             transition: opacity 0.3s;
         }
         .sidebar-overlay.active { display: block; opacity: 1; }
         .sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
-            width: 260px;
-            background: #ffffff;
-            z-index: 151;
-            transform: translateX(-100%);
+            width: 260px; background: #ffffff;
+            z-index: 151; transform: translateX(-100%);
             transition: transform 0.3s ease;
             display: flex; flex-direction: column;
             box-shadow: 4px 0 20px rgba(0,0,0,0.12);
         }
         .sidebar.active { transform: translateX(0); }
         .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid #e8e8ed;
+            padding: 24px 20px; border-bottom: 1px solid #e8e8ed;
             font-size: 1.1rem; font-weight: 700;
             letter-spacing: 2px; color: #000;
         }
         .sidebar-menu { display: flex; flex-direction: column; }
         .sidebar-item {
-            padding: 18px 20px;
-            font-size: 1rem; color: #000;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
+            padding: 18px 20px; font-size: 1rem; color: #000;
+            border-bottom: 1px solid #f0f0f0; cursor: pointer;
             transition: background 0.15s;
             display: flex; align-items: center; gap: 12px;
         }
         .sidebar-item:active { background: #f5f5f7; }
 
         .auth-check {
-            position: fixed; inset: 0;
-            background: #fff;
+            position: fixed; inset: 0; background: #fff;
             display: flex; align-items: center; justify-content: center;
             z-index: 300;
         }
         .auth-check.hidden { display: none; }
         .spinner {
             width: 40px; height: 40px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
+            border: 3px solid #e8e8ed; border-top-color: #000;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -206,18 +205,25 @@
     </div>
 
     <div class="wheel-container" id="wheelTouchArea">
-        <div class="slot-wrapper" id="slotWrapper">
-            <div class="slot-column" data-col="0">
-                <div class="slot-window" id="slotWindow0"></div>
+        <div class="wheel-inner">
+            <div class="slot-wrapper" id="slotWrapper">
+                <div class="slot-column" data-col="0">
+                    <div class="slot-window" id="slotWindow0"></div>
+                </div>
+                <div class="slot-column" data-col="1">
+                    <div class="selector-line selector-left"></div>
+                    <div class="selector-line selector-right"></div>
+                    <div class="slot-window" id="slotWindow1"></div>
+                </div>
+                <div class="slot-column" data-col="2">
+                    <div class="slot-window" id="slotWindow2"></div>
+                </div>
             </div>
-            <div class="slot-column" data-col="1">
-                <div class="selector-line selector-left"></div>
-                <div class="selector-line selector-right"></div>
-                <div class="slot-window" id="slotWindow1"></div>
-            </div>
-            <div class="slot-column" data-col="2">
-                <div class="slot-window" id="slotWindow2"></div>
-            </div>
+
+            <!-- Otomatik döndürme butonu -->
+            <button class="turn-spin-btn" id="turnSpinBtn">
+                <img src="turn.png" alt="Döndür">
+            </button>
         </div>
     </div>
 
@@ -274,8 +280,7 @@
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
         /* ========== SES ========== */
-        let audioCtx = null, noiseNode = null, noiseGain = null;
-        let spinActive = false;
+        let audioCtx = null, noiseNode = null, noiseGain = null, spinActive = false;
 
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -328,7 +333,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        /* ========== 3'LÜ ÇARK — HER SÜTUN BAĞIMSIZ ========== */
+        /* ========== 3'LÜ ÇARK ========== */
         const touchArea  = document.getElementById('wheelTouchArea');
         const wrapper    = document.getElementById('slotWrapper');
         const containers = [
@@ -400,13 +405,10 @@
             return activeIndex;
         }
 
-        function allStopped() {
-            return cols.every(c => c.snapDone);
-        }
+        function allStopped() { return cols.every(c => c.snapDone); }
+        function allSpun()    { return cols.every(c => c.hasSpun); }
 
-        function allSpun() {
-            return cols.every(c => c.hasSpun);
-        }
+        let resultSent = false;
 
         function animate() {
             for (let i = 0; i < 3; i++) {
@@ -418,7 +420,7 @@
                     col.snapDone   = false;
                 } else {
                     if (!col.isSnapping) {
-                        col.offsetY += col.velocity;
+                        col.offsetY  += col.velocity;
                         col.velocity *= 0.985;
                         if (Math.abs(col.velocity) < 1.5 && col.hasSpun) {
                             col.velocity = 0;
@@ -436,15 +438,14 @@
                     }
                 }
 
-                if (!col.snapDone || col.isDragging) {
-                    renderColumn(i);
-                }
+                if (!col.snapDone || col.isDragging) renderColumn(i);
             }
 
-            if (allStopped() && allSpun()) {
+            if (allStopped() && allSpun() && !resultSent) {
+                resultSent = true;
                 stopSpinSound(); playStopSound();
                 if (navigator.vibrate) navigator.vibrate(50);
-                cols.forEach(c => c.hasSpun = false);
+                cols.forEach(c => { c.hasSpun = false; c.snapDone = false; });
 
                 setTimeout(() => {
                     const drawnCards = [];
@@ -468,6 +469,29 @@
         for (let i = 0; i < 3; i++) renderColumn(i);
         requestAnimationFrame(animate);
 
+        /* ========== TURN.PNG — OTOMATİK DÖNDÜR ========== */
+        const turnSpinBtn = document.getElementById('turnSpinBtn');
+
+        // Butonun touch/mouse olaylarının çark sürükleme mantığını tetiklememesi için durdur
+        turnSpinBtn.addEventListener('mousedown',  e => e.stopPropagation());
+        turnSpinBtn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
+
+        turnSpinBtn.addEventListener('click', function () {
+            initAudio();
+            resultSent = false;
+            cols.forEach(col => {
+                col.isDragging = false;
+                col.isSnapping = false;
+                col.snapDone   = false;
+                col.lastIndex  = -1;
+                col.hasSpun    = true;
+                // Her sütuna rastgele bir hız ver (hepsi aynı yönde)
+                col.velocity   = 120 + Math.random() * 30;
+            });
+            startSpinSound();
+        });
+
+        /* ========== MANUEL SÜRÜKLEME ========== */
         function getColIndex(clientX) {
             const colWidth = wrapper.clientWidth / 3;
             const rect = wrapper.getBoundingClientRect();
@@ -482,23 +506,21 @@
             const col = cols[colIdx];
             initAudio();
             col.isDragging = true;
-            col.velocity = 0;
-            col.lastY = y;
-            col.snapDone = false;
-            col.lastIndex = -1;
+            col.velocity   = 0;
+            col.lastY      = y;
+            col.snapDone   = false;
+            col.lastIndex  = -1;
         }
 
         function handleMove(y, x) {
             const colIdx = getColIndex(x);
             const col = cols[colIdx];
             if (!col.isDragging) return;
-
             col.hasSpun = true;
             const dy = y - col.lastY;
             col.offsetY += dy;
             col.velocity = dy;
-            col.lastY = y;
-
+            col.lastY    = y;
             if (Math.abs(dy) > 5) startSpinSound();
         }
 
@@ -506,7 +528,6 @@
             const colIdx = getColIndex(x);
             const col = cols[colIdx];
             if (!col.isDragging) return;
-
             col.isDragging = false;
             if (col.hasSpun) {
                 col.velocity = Math.abs(col.velocity) < 10 ? (col.velocity >= 0 ? 80 : -80) : col.velocity * 4;
@@ -515,41 +536,22 @@
             }
         }
 
-        touchArea.addEventListener('touchstart', e => {
-            handleStart(e.touches[0].clientY, e.touches[0].clientX);
-        }, { passive: false });
-
-        touchArea.addEventListener('touchmove', e => {
-            handleMove(e.touches[0].clientY, e.touches[0].clientX);
-        }, { passive: false });
-
-        touchArea.addEventListener('touchend', e => {
-            handleEnd(e.changedTouches[0].clientX);
-        });
-
-        touchArea.addEventListener('mousedown', e => {
-            handleStart(e.clientY, e.clientX);
-        });
-
-        touchArea.addEventListener('mousemove', e => {
-            handleMove(e.clientY, e.clientX);
-        });
-
-        touchArea.addEventListener('mouseup', e => {
-            handleEnd(e.clientX);
-        });
-
-        touchArea.addEventListener('mouseleave', e => {
-            for (let i = 0; i < 3; i++) {
-                if (cols[i].isDragging) {
-                    cols[i].isDragging = false;
-                    if (cols[i].hasSpun) {
-                        cols[i].velocity = Math.abs(cols[i].velocity) < 10 ? (cols[i].velocity >= 0 ? 80 : -80) : cols[i].velocity * 4;
-                        if (cols[i].velocity >  150) cols[i].velocity =  150;
-                        if (cols[i].velocity < -150) cols[i].velocity = -150;
-                    }
+        touchArea.addEventListener('touchstart', e => handleStart(e.touches[0].clientY, e.touches[0].clientX), { passive: false });
+        touchArea.addEventListener('touchmove',  e => handleMove(e.touches[0].clientY, e.touches[0].clientX),  { passive: false });
+        touchArea.addEventListener('touchend',   e => handleEnd(e.changedTouches[0].clientX));
+        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
+        touchArea.addEventListener('mousemove',  e => handleMove(e.clientY, e.clientX));
+        touchArea.addEventListener('mouseup',    e => handleEnd(e.clientX));
+        touchArea.addEventListener('mouseleave', () => {
+            cols.forEach(col => {
+                if (!col.isDragging) return;
+                col.isDragging = false;
+                if (col.hasSpun) {
+                    col.velocity = Math.abs(col.velocity) < 10 ? (col.velocity >= 0 ? 80 : -80) : col.velocity * 4;
+                    if (col.velocity >  150) col.velocity =  150;
+                    if (col.velocity < -150) col.velocity = -150;
                 }
-            }
+            });
         });
     </script>
 </body>
