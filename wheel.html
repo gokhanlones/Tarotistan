@@ -63,14 +63,12 @@
             isolation: isolate;
         }
 
-        /* Wrapper: çizgileri taşır, overflow yok — kartları kırpmaz */
         .slot-wrapper {
             position: relative;
             width: 90%;
             max-width: 450px;
         }
 
-        /* Slot Penceresi: kartları kırpar */
         .slot-window {
             position: relative;
             width: 100%;
@@ -78,13 +76,12 @@
             background: transparent;
         }
 
-        /* Dikey çizgiler — wrapper'a göre konumlanır, kartların üstünde */
         .selector-line {
             position: absolute;
-            top: -32px; bottom: -32px;   /* kart kenarından 32px taşar */
+            top: -32px; bottom: -32px;
             width: 1px;
             background: linear-gradient(180deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
-            z-index: 150;                 /* kartların üstünde */
+            z-index: 150;
             pointer-events: none;
         }
         .selector-left  { left: 0; }
@@ -125,44 +122,6 @@
         }
         .nav-btn.active { background: #f2f2f5; }
         .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
-
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: flex-start; justify-content: center;
-            padding: 76px 24px 0;
-            z-index: 200;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            width: 100%; max-width: 340px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex; flex-direction: column;
-            align-items: center; gap: 12px;
-        }
-        .modal-title { font-size: 1.3rem; font-weight: 700; color: #000; }
-        .intent-input {
-            width: 100%; min-height: 90px;
-            border: 2px solid #e8e8ed; border-radius: 10px;
-            padding: 12px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1rem; color: #000;
-            resize: none;
-        }
-        .intent-input:focus { border-color: #000; outline: none; }
-        .char-counter { align-self: flex-end; font-size: 0.75rem; color: #999; margin-top: -6px; }
-        .send-btn {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: #000; border: none;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin-top: 4px;
-        }
-        .send-btn svg { width: 22px; height: 22px; fill: #fff; }
-        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
 
         .sidebar-overlay {
             position: fixed; inset: 0;
@@ -234,7 +193,6 @@
 
     <div class="wheel-container" id="wheelTouchArea">
         <div class="slot-wrapper" id="slotWrapper">
-            <!-- Çizgiler wrapper'da: overflow:hidden dışında, kartların üstünde -->
             <div class="selector-line selector-left"></div>
             <div class="selector-line selector-right"></div>
             <div class="slot-window" id="slotWindow"></div>
@@ -245,17 +203,6 @@
         <a href="dashboard.html" class="nav-btn" id="navHome" style="text-decoration: none; display: flex;" aria-label="">
             <img src="cardsinfo.png" alt="Ana Sayfa">
         </a>
-    </div>
-
-    <div class="modal-overlay" id="intentOverlay">
-        <div class="modal-box">
-            <div class="modal-title" id="intentTitle">Niyet</div>
-            <textarea class="intent-input" id="intentInput" maxlength="200" rows="3"></textarea>
-            <div class="char-counter" id="charCounter">0/200</div>
-            <button class="send-btn" id="sendIntentBtn" disabled>
-                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-            </button>
-        </div>
     </div>
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -282,13 +229,9 @@
 
     <script>
         const lang = typeof getLang === 'function' ? getLang() : 'tr';
-        document.getElementById('intentTitle').textContent       = typeof t === 'function' ? t('intentTitle')   : 'Niyet';
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
-        document.getElementById('intentInput').placeholder = lang === 'tr'
-            ? 'Sorunuzu veya niyetinizi buraya yazın...'
-            : 'Write your question or intention here...';
 
         const auth = typeof firebase !== 'undefined' ? firebase.auth() : { onAuthStateChanged: (cb) => cb({}), signOut: () => Promise.resolve() };
         auth.onAuthStateChanged(user => {
@@ -369,19 +312,17 @@
         const numCards  = 78;
         let cards = [];
         let isDragging = false, lastY = 0, isSnapping = false;
-        let snapDone = false, hasSpun = false, isIntentSet = false;
+        let snapDone = false, hasSpun = false;
 
         const slotWidth       = container.clientWidth;
         const cardGap         = 12;
         const cardWidthPx     = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
-        /* Slot penceresi yüksekliği = kart yüksekliği */
         container.style.height = actualCardHeight + 'px';
 
-        /* Dikey çizgileri wrapper içinde kartın kenarından boşluklu hizala */
         const wrapperWidth = document.getElementById('slotWrapper').clientWidth;
-        const lineGap      = 10;  // kart ile çizgi arası boşluk (px)
+        const lineGap      = 10;
         const lineOffset   = (wrapperWidth - cardWidthPx) / 2 - lineGap;
         document.querySelector('.selector-left').style.left   = lineOffset + 'px';
         document.querySelector('.selector-right').style.right = lineOffset + 'px';
@@ -478,12 +419,12 @@
         }
 
         function handleStart(y, x) {
-            if (!isIntentSet || !inSlotZone(x, y)) return;
+            if (!inSlotZone(x, y)) return;
             initAudio(); isDragging = true; velocity = 0; lastY = y;
             snapDone = false; lastCardIndex = -1;
         }
         function handleMove(y) {
-            if (!isDragging || !isIntentSet) return;
+            if (!isDragging) return;
             hasSpun = true;
             const dy = y - lastY; offsetY += dy; velocity = dy; lastY = y;
             if (Math.abs(velocity) > 5) startSpinSound();
@@ -505,27 +446,6 @@
         touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
         touchArea.addEventListener('mouseup',    handleEnd);
         touchArea.addEventListener('mouseleave', handleEnd);
-
-        /* ========== NİYET MODALI ========== */
-        const intentOverlay = document.getElementById('intentOverlay');
-        const intentInput   = document.getElementById('intentInput');
-        const charCounter   = document.getElementById('charCounter');
-        const sendBtn       = document.getElementById('sendIntentBtn');
-
-        window.addEventListener('load', () => {
-            setTimeout(() => { intentOverlay.classList.add('active'); intentInput.focus(); }, 500);
-        });
-        function closeIntentModal() { intentOverlay.classList.remove('active'); isIntentSet = true; }
-        intentInput.addEventListener('input', () => {
-            charCounter.textContent = intentInput.value.length + '/200';
-            sendBtn.disabled = intentInput.value.trim().length === 0;
-        });
-        sendBtn.addEventListener('click', () => {
-            const intentText = intentInput.value.trim();
-            if (!intentText) return;
-            sessionStorage.setItem('tarotIntent', intentText);
-            closeIntentModal();
-        });
     </script>
 </body>
 </html>
