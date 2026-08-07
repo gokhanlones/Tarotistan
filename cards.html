@@ -18,7 +18,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ---- Üst banner (dashboard ile aynı) ---- */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0;
             height: 60px;
@@ -46,15 +45,29 @@
             letter-spacing: 3px;
             color: #000;
         }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .turn-btn {
+            width: 32px; height: 32px;
+            background: none; border: none;
+            padding: 0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .turn-btn img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
         .topbar-counter {
-            min-width: 40px;
+            min-width: 28px;
             text-align: right;
             font-size: 1rem; font-weight: 700;
             color: #000;
-            flex-shrink: 0;
         }
 
-        /* ---- İçerik ---- */
         .content {
             padding: 76px 12px 88px;
             max-width: 600px;
@@ -88,13 +101,9 @@
         }
 
         @keyframes cardAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ---- Alt navigasyon (dashboard ile aynı) ---- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px;
@@ -127,9 +136,7 @@
             z-index: 9;
             pointer-events: none;
         }
-        .submit-bar .btn-continue {
-            pointer-events: auto;
-        }
+        .submit-bar .btn-continue { pointer-events: auto; }
         .btn-continue {
             width: 64px; height: 64px;
             padding: 0;
@@ -158,7 +165,12 @@
             <span></span><span></span><span></span>
         </button>
         <div class="topbar-title" id="topbarTitle"></div>
-        <div class="topbar-counter" id="topbarCounter"></div>
+        <div class="topbar-right">
+            <button class="turn-btn" id="turnBtn" aria-label="Çarka dön">
+                <img src="turn.png" alt="">
+            </button>
+            <div class="topbar-counter" id="topbarCounter"></div>
+        </div>
     </div>
 
     <div class="content">
@@ -197,6 +209,11 @@
         const topbarCounter = document.getElementById('topbarCounter');
         const continueBtn = document.getElementById('continueBtn');
 
+        // turn.png: readingType'a göre ilgili çark sayfasına git
+        document.getElementById('turnBtn').addEventListener('click', function () {
+            window.location.href = readingType === 'single' ? 'wheel.html' : 'threewheel.html';
+        });
+
         function updateInfo() {
             topbarCounter.textContent = maxSelect + '/' + selectedCount;
         }
@@ -205,7 +222,6 @@
             continueBtn.classList.toggle('visible', selectedCount === maxSelect);
         }
 
-        // Fisher-Yates karıştırma
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -214,7 +230,6 @@
             return array;
         }
 
-        // 78 kartı oluştur (hepsi arka yüz)
         const TOTAL_CARDS = 78;
         for (let i = 0; i < TOTAL_CARDS; i++) {
             const card = document.createElement('div');
@@ -246,23 +261,17 @@
 
         updateInfo();
 
-        // Devam butonu — RASTGELE ÇEKİM + TERS/DÜZ
         continueBtn.addEventListener('click', function() {
             if (selectedCount !== maxSelect) return;
 
-            // 1-78 arası tekrarsız rastgele kart ID'leri
-            const deck = Array.from({length: 78}, (_, i) => i); // [0, 1, ..., 77]
+            const deck = Array.from({length: 78}, (_, i) => i);
             const shuffled = shuffle(deck);
             const drawnIds = shuffled.slice(0, maxSelect);
 
-            // Her kart için %50 ters/düz belirle
             const drawnCards = drawnIds.map(id => ({
                 id: id,
-                reversed: Math.random() < 0.5  // true = ters, false = düz
+                reversed: Math.random() < 0.5
             }));
-
-            // Örnek çıktı (tek kart):  [{id: 34, reversed: false}]
-            // Örnek çıktı (üç kart):    [{id: 12, reversed: true}, {id: 67, reversed: false}, {id: 5, reversed: false}]
 
             sessionStorage.setItem('tarotDrawnCards', JSON.stringify(drawnCards));
             window.location.href = 'ad.html';
