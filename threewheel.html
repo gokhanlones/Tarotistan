@@ -120,9 +120,6 @@
             margin-bottom: auto;
         }
         .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
-        .turn-spin-btn.spinning img { animation: btnSpin 0.8s linear infinite; }
-
-        @keyframes btnSpin { to { transform: rotate(360deg); } }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -362,9 +359,14 @@
 
         let resultSent = false;
         let spinTimeoutId = null;
+        let isSpinning = false;
+        let btnAngle = 0;
         const turnSpinBtn = document.getElementById('turnSpinBtn');
+        const turnSpinImg = turnSpinBtn.querySelector('img');
 
         function animate() {
+            let totalVelocity = 0;
+
             for (let i = 0; i < 3; i++) {
                 const col = cols[i];
                 const containerH = containers[i].clientHeight;
@@ -382,13 +384,19 @@
                 }
 
                 if (!col.snapDone) renderColumn(i);
+                totalVelocity += Math.abs(col.velocity);
+            }
+
+            if (isSpinning && totalVelocity > 0) {
+                btnAngle += totalVelocity * 0.4;
+                turnSpinImg.style.transform = `rotate(${btnAngle}deg)`;
             }
 
             if (allStopped() && allSpun() && !resultSent) {
                 resultSent = true;
+                isSpinning = false;
                 stopSpinSound(); 
                 playStopSound();
-                turnSpinBtn.classList.remove('spinning');
                 if (navigator.vibrate) navigator.vibrate(50);
                 cols.forEach(c => { c.hasSpun = false; c.snapDone = false; });
 
@@ -412,6 +420,8 @@
 
         /* ========== TURN BUTONU ========== */
         turnSpinBtn.addEventListener('click', function () {
+            if (isSpinning) return;
+
             initAudio();
 
             if (spinTimeoutId) {
@@ -419,8 +429,8 @@
                 spinTimeoutId = null;
             }
 
+            isSpinning = true;
             resultSent = false;
-            turnSpinBtn.classList.add('spinning');
 
             cols.forEach(col => {
                 col.isSnapping = false;
