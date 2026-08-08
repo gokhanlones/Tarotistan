@@ -1,323 +1,320 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <title>TAROT'S</title>
-   <script src="lang.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-   <script src="firebase-config.js"></script>
-   <style>
-       * { margin: 0; padding: 0; box-sizing: border-box; }
-       html, body {
-           width: 100%; height: 100%;
-           background: #ffffff;
-           font-family: 'Times New Roman', Times, serif;
-           -webkit-tap-highlight-color: transparent;
-       }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAROT'S</title>
+    <script src="lang.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #ffffff;
+            font-family: 'Times New Roman', Times, serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-       .topbar {
-           position: fixed; top: 0; left: 0; right: 0;
-           height: 60px;
-           background: #ffffff;
-           display: flex; align-items: center;
-           padding: 0 16px;
-           z-index: 10;
-       }
-       .hamburger-btn {
-           width: 40px; height: 40px;
-           background: none; border: none;
-           display: flex; flex-direction: column;
-           justify-content: center; align-items: center;
-           gap: 5px; cursor: pointer;
-           flex-shrink: 0;
-       }
-       .hamburger-btn span {
-           display: block; width: 22px; height: 2px;
-           background: #000;
-       }
-       .topbar-title {
-           flex: 1;
-           text-align: center;
-           font-size: 1.25rem; font-weight: 700;
-           letter-spacing: 3px;
-           color: #000;
-       }
-       .topbar-right {
-           display: flex;
-           align-items: center;
-           gap: 6px;
-           flex-shrink: 0;
-       }
-       .turn-btn {
-           width: 32px; height: 32px;
-           background: none; border: none;
-           padding: 0; cursor: pointer;
-           display: flex; align-items: center; justify-content: center;
-       }
-       .turn-btn img { width: 100%; height: 100%; object-fit: contain; }
-       .topbar-counter {
-           min-width: 28px;
-           text-align: right;
-           font-size: 1rem; font-weight: 700;
-           color: #000;
-       }
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            display: flex; align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hamburger-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 5px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2px;
+            background: #000;
+        }
+        .topbar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem; font-weight: 700;
+            letter-spacing: 3px;
+            color: #000;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .turn-btn {
+            width: 32px; height: 32px;
+            background: none; border: none;
+            padding: 0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .turn-btn img { width: 100%; height: 100%; object-fit: contain; }
+        .topbar-counter {
+            min-width: 28px;
+            text-align: right;
+            font-size: 1rem; font-weight: 700;
+            color: #000;
+        }
 
-       .content {
-           padding: 76px 12px 88px;
-           max-width: 600px;
-           margin: 0 auto;
-       }
-       .cards-grid {
-           display: grid;
-           grid-template-columns: repeat(5, 1fr);
-           gap: 8px;
-       }
-       .card-item {
-           aspect-ratio: 9 / 16;
-           border-radius: 8px;
-           overflow: hidden;
-           cursor: pointer;
-           position: relative;
-           opacity: 0;
-           transform: translateY(20px);
-           animation: cardAppear 0.4s ease-out forwards;
-       }
-       .card-item .card-img {
-           width: 100%; height: 100%;
-           object-fit: cover;
-           display: block;
-       }
-       .card-item .icon-img {
-           width: 100%; height: 100%;
-           object-fit: cover;
-           display: none;
-           background: #fff;
-           border-radius: 8px;
-       }
-       @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
+        .content {
+            padding: 76px 12px 88px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .card-item {
+            aspect-ratio: 9 / 16;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.4s ease-out forwards;
+        }
+        .card-item .card-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-item .icon-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: none;
+            background: #fff;
+            border-radius: 6px;
+        }
+        @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
 
-       .bottom-nav {
-           position: fixed; bottom: 0; left: 0; right: 0;
-           height: 68px;
-           background: #ffffff;
-           z-index: 10;
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           gap: 56px;
-       }
-       .nav-btn {
-           background: none; border: none; padding: 0;
-           width: 44px; height: 44px;
-           border-radius: 10px;
-           display: flex; align-items: center; justify-content: center;
-           cursor: pointer;
-       }
-       .nav-btn.active { background: #f2f2f5; }
-       .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px;
+            background: #ffffff;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 56px;
+        }
+        .nav-btn {
+            background: none; border: none; padding: 0;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-btn.active { background: #f2f2f5; }
+        .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
 
-       .submit-bar {
-           position: fixed;
-           bottom: 68px; left: 0; right: 0;
-           display: flex;
-           justify-content: center;
-           padding: 12px 16px;
-           z-index: 9;
-           pointer-events: none;
-       }
-       .btn-continue {
-           pointer-events: auto;
-           width: 64px; height: 64px;
-           padding: 0;
-           background: transparent;
-           border: none;
-           border-radius: 50%;
-           display: none;
-           align-items: center;
-           justify-content: center;
-           cursor: pointer;
-           box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-       }
-       .btn-continue img { width: 100%; height: 100%; border-radius: 50%; display: block; }
-       .btn-continue.visible { display: flex; }
-   </style>
+        .submit-bar {
+            position: fixed;
+            bottom: 68px; left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 12px 16px;
+            z-index: 9;
+            pointer-events: none;
+        }
+        .btn-continue {
+            pointer-events: auto;
+            width: 64px; height: 64px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+        .btn-continue img { width: 100%; height: 100%; border-radius: 50%; display: block; }
+        .btn-continue.visible { display: flex; }
+    </style>
 </head>
 <body>
 
-   <div class="topbar">
-       <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
-           <span></span><span></span><span></span>
-       </button>
-       <div class="topbar-title" id="topbarTitle"></div>
-       <div class="topbar-right">
-           <button class="turn-btn" id="turnBtn" aria-label="Çarka dön">
-               <img src="turn.png" alt="">
-           </button>
-           <div class="topbar-counter" id="topbarCounter"></div>
-       </div>
-   </div>
+    <div class="topbar">
+        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="topbarTitle"></div>
+        <div class="topbar-right">
+            <button class="turn-btn" id="turnBtn" aria-label="Çarka dön">
+                <img src="turn.png" alt="">
+            </button>
+            <div class="topbar-counter" id="topbarCounter"></div>
+        </div>
+    </div>
 
-   <div class="content">
-       <div class="cards-grid" id="cardsGrid"></div>
-   </div>
+    <div class="content">
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
 
-   <div class="submit-bar">
-       <button class="btn-continue" id="continueBtn">
-           <img src="eye_result.png" alt="">
-       </button>
-   </div>
+    <div class="submit-bar">
+        <button class="btn-continue" id="continueBtn">
+            <img src="eye_result.png" alt="">
+        </button>
+    </div>
 
-   <div class="bottom-nav">
-       <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
-           <img src="cardsinfo.png" alt="">
-       </button>
-   </div>
+    <div class="bottom-nav">
+        <button class="nav-btn" id="navHome" onclick="window.location.href='dashboard.html'">
+            <img src="cardsinfo.png" alt="">
+        </button>
+    </div>
 
-   <script>
-       document.getElementById('topbarTitle').textContent = 'TAROT\'S';
-       document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
-       document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+    <script>
+        document.getElementById('topbarTitle').textContent = 'TAROT\'S';
+        document.getElementById('menuBtn').setAttribute('aria-label', t('menuLabel'));
+        document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
 
-       const readingType = sessionStorage.getItem('tarotReadingType');
-       const intent      = sessionStorage.getItem('tarotIntent');
+        const readingType = sessionStorage.getItem('tarotReadingType');
+        const intent      = sessionStorage.getItem('tarotIntent');
 
-       if (!readingType || !intent) { window.location.href = 'dashboard.html'; }
+        if (!readingType || !intent) { window.location.href = 'dashboard.html'; }
 
-       const maxSelect   = readingType === 'single' ? 1 : 3;
-       let selectedCount = 0;
+        const maxSelect   = readingType === 'single' ? 1 : 3;
+        let selectedCount = 0;
 
-       const grid          = document.getElementById('cardsGrid');
-       const topbarCounter = document.getElementById('topbarCounter');
-       const continueBtn   = document.getElementById('continueBtn');
-       const selectedCards = [];
-       const usedIcons     = new Set();
+        const grid          = document.getElementById('cardsGrid');
+        const topbarCounter = document.getElementById('topbarCounter');
+        const continueBtn   = document.getElementById('continueBtn');
+        const selectedCards = [];
+        const usedIcons     = new Set();
 
-       document.getElementById('turnBtn').addEventListener('click', function () {
-           window.location.href = readingType === 'single' ? 'wheel.html' : 'threewheel.html';
-       });
+        document.getElementById('turnBtn').addEventListener('click', function () {
+            window.location.href = readingType === 'single' ? 'wheel.html' : 'threewheel.html';
+        });
 
-       function getIconForIndex(index) {
-           const icons = ['history.png', 'now.png', 'coming.png'];
-           return icons[index] || icons[icons.length - 1];
-       }
+        function getIconForIndex(index) {
+            const icons = ['history.png', 'now.png', 'coming.png'];
+            return icons[index] || icons[icons.length - 1];
+        }
 
-       function getFirstUnusedIcon() {
-           for (let i = 0; i < maxSelect; i++) {
-               if (!usedIcons.has(i)) return i;
-           }
-           return -1;
-       }
+        function getFirstUnusedIcon() {
+            for (let i = 0; i < maxSelect; i++) {
+                if (!usedIcons.has(i)) return i;
+            }
+            return -1;
+        }
 
-       function updateInfo() {
-           topbarCounter.textContent = maxSelect + '/' + selectedCount;
-       }
+        function updateInfo() {
+            topbarCounter.textContent = maxSelect + '/' + selectedCount;
+        }
 
-       function updateContinueButton() {
-           continueBtn.classList.toggle('visible', selectedCount === maxSelect);
-       }
+        function updateContinueButton() {
+            continueBtn.classList.toggle('visible', selectedCount === maxSelect);
+        }
 
-       function shuffle(array) {
-           for (let i = array.length - 1; i > 0; i--) {
-               const j = Math.floor(Math.random() * (i + 1));
-               [array[i], array[j]] = [array[j], array[i]];
-           }
-           return array;
-       }
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-       const TOTAL_CARDS = 78;
-       for (let i = 0; i < TOTAL_CARDS; i++) {
-           const card = document.createElement('div');
-           card.className = 'card-item';
-           card.style.animationDelay = (i * 0.025) + 's';
+        const TOTAL_CARDS = 78;
+        for (let i = 0; i < TOTAL_CARDS; i++) {
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.style.animationDelay = (i * 0.025) + 's';
 
-           const cardImg = document.createElement('img');
-           cardImg.className = 'card-img';
-           cardImg.src = 'onecard.png';
-           cardImg.alt = t('cardAlt');
-           cardImg.loading = 'lazy';
+            const cardImg = document.createElement('img');
+            cardImg.className = 'card-img';
+            cardImg.src = 'onecard.png';
+            cardImg.alt = t('cardAlt');
+            cardImg.loading = 'lazy';
 
-           const iconImg = document.createElement('img');
-           iconImg.className = 'icon-img';
-           iconImg.alt = '';
-           iconImg.loading = 'lazy';
+            const iconImg = document.createElement('img');
+            iconImg.className = 'icon-img';
+            iconImg.alt = '';
+            iconImg.loading = 'lazy';
 
-           card.appendChild(cardImg);
-           card.appendChild(iconImg);
-           grid.appendChild(card);
+            card.appendChild(cardImg);
+            card.appendChild(iconImg);
+            grid.appendChild(card);
 
-           card.addEventListener('click', function () {
-               const isSelected = selectedCards.includes(card);
+            card.addEventListener('click', function () {
+                const isSelected = selectedCards.includes(card);
 
-               // İkon görünür durumdaysa → seçimi iptal et, kartı göster
-               if (iconImg.style.display === 'block') {
-                   const idx = selectedCards.indexOf(card);
-                   if (idx > -1) {
-                       selectedCards.splice(idx, 1);
-                       selectedCount--;
-                   }
-                   const iconIndex = parseInt(card.dataset.iconIndex);
-                   usedIcons.delete(iconIndex);
-                   delete card.dataset.iconIndex;
-                   iconImg.style.display = 'none';
-                   cardImg.style.display = 'block';
-                   updateInfo();
-                   updateContinueButton();
-                   return;
-               }
+                if (iconImg.style.display === 'block') {
+                    const idx = selectedCards.indexOf(card);
+                    if (idx > -1) {
+                        selectedCards.splice(idx, 1);
+                        selectedCount--;
+                    }
+                    const iconIndex = parseInt(card.dataset.iconIndex);
+                    usedIcons.delete(iconIndex);
+                    delete card.dataset.iconIndex;
+                    iconImg.style.display = 'none';
+                    cardImg.style.display = 'block';
+                    updateInfo();
+                    updateContinueButton();
+                    return;
+                }
 
-               // Kart görseli görünür ve seçiliyse → seçimi kaldır
-               if (isSelected) {
-                   const idx = selectedCards.indexOf(card);
-                   if (idx > -1) {
-                       selectedCards.splice(idx, 1);
-                       selectedCount--;
-                   }
-                   updateInfo();
-                   updateContinueButton();
-                   return;
-               }
+                if (isSelected) {
+                    const idx = selectedCards.indexOf(card);
+                    if (idx > -1) {
+                        selectedCards.splice(idx, 1);
+                        selectedCount--;
+                    }
+                    updateInfo();
+                    updateContinueButton();
+                    return;
+                }
 
-               // Yeni seçim
-               if (selectedCount < maxSelect) {
-                   const iconIndex = getFirstUnusedIcon();
-                   if (iconIndex !== -1) {
-                       selectedCards.push(card);
-                       selectedCount++;
-                       usedIcons.add(iconIndex);
-                       card.dataset.iconIndex = iconIndex;
-                       cardImg.style.display = 'none';
-                       iconImg.src = getIconForIndex(iconIndex);
-                       iconImg.style.display = 'block';
-                       updateInfo();
-                       updateContinueButton();
-                   }
-               }
-           });
-       }
+                if (selectedCount < maxSelect) {
+                    const iconIndex = getFirstUnusedIcon();
+                    if (iconIndex !== -1) {
+                        selectedCards.push(card);
+                        selectedCount++;
+                        usedIcons.add(iconIndex);
+                        card.dataset.iconIndex = iconIndex;
+                        cardImg.style.display = 'none';
+                        iconImg.src = getIconForIndex(iconIndex);
+                        iconImg.style.display = 'block';
+                        updateInfo();
+                        updateContinueButton();
+                    }
+                }
+            });
+        }
 
-       updateInfo();
+        updateInfo();
 
-       continueBtn.addEventListener('click', function () {
-           if (selectedCount !== maxSelect) return;
+        continueBtn.addEventListener('click', function () {
+            if (selectedCount !== maxSelect) return;
 
-           const deck      = Array.from({length: 78}, (_, i) => i);
-           const shuffled  = shuffle(deck);
-           const drawnIds  = shuffled.slice(0, maxSelect);
-           const drawnCards = drawnIds.map(id => ({
-               id: id,
-               reversed: Math.random() < 0.5
-           }));
+            const deck      = Array.from({length: 78}, (_, i) => i);
+            const shuffled  = shuffle(deck);
+            const drawnIds  = shuffled.slice(0, maxSelect);
+            const drawnCards = drawnIds.map(id => ({
+                id: id,
+                reversed: Math.random() < 0.5
+            }));
 
-           sessionStorage.setItem('tarotDrawnCards', JSON.stringify(drawnCards));
-           window.location.href = 'ad.html';
-       });
+            sessionStorage.setItem('tarotDrawnCards', JSON.stringify(drawnCards));
+            window.location.href = 'ad.html';
+        });
 
-       document.getElementById('menuBtn').addEventListener('click', function () {
-           console.log('Menü açılacak');
-       });
-   </script>
+        document.getElementById('menuBtn').addEventListener('click', function () {
+            console.log('Menü açılacak');
+        });
+    </script>
 </body>
 </html>
