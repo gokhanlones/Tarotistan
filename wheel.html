@@ -47,14 +47,20 @@
             letter-spacing: 3px;
             color: #000;
         }
-        .topbar-spacer { width: 40px; flex-shrink: 0; }
+        .hand-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; padding: 0;
+        }
+        .hand-btn img { width: 28px; height: 28px; object-fit: contain; }
 
         .wheel-container {
             position: absolute;
             top: 60px; bottom: 68px;
             left: 0; right: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             background-image: url('wheelbackplan.png');
             background-size: cover;
@@ -63,10 +69,19 @@
             isolation: isolate;
         }
 
-        .slot-wrapper {
-            position: relative;
+        .wheel-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 90%;
             max-width: 450px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .slot-wrapper {
+            position: relative;
+            width: 100%;
         }
 
         .slot-window {
@@ -102,6 +117,18 @@
             display: block;
             border-radius: 8px;
         }
+
+        .turn-spin-btn {
+            width: 56px; height: 56px;
+            background: none; border: none;
+            padding: 0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: opacity 0.4s;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -188,15 +215,23 @@
             <span></span><span></span><span></span>
         </button>
         <div class="topbar-title">TAROT'S</div>
-        <div class="topbar-spacer"></div>
+        <button class="hand-btn" id="handBtn" aria-label="Kart Seçimi">
+            <img src="hand.png" alt="Kart Seçimi">
+        </button>
     </div>
 
-    <div class="wheel-container" id="wheelTouchArea">
-        <div class="slot-wrapper" id="slotWrapper">
-            <div class="selector-line selector-left"></div>
-            <div class="selector-line selector-right"></div>
-            <div class="slot-window" id="slotWindow"></div>
+    <div class="wheel-container">
+        <div class="wheel-inner">
+            <div class="slot-wrapper" id="slotWrapper">
+                <div class="selector-line selector-left"></div>
+                <div class="selector-line selector-right"></div>
+                <div class="slot-window" id="slotWindow"></div>
+            </div>
         </div>
+
+        <button class="turn-spin-btn" id="turnSpinBtn">
+            <img src="turn.png" alt="Döndür">
+        </button>
     </div>
 
     <div class="bottom-nav">
@@ -250,6 +285,7 @@
         function logout() { auth.signOut().then(() => { window.location.href = 'auth.html'; }); }
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+        document.getElementById('handBtn').addEventListener('click', () => { window.location.href = 'cards.html#three'; });
 
         /* ========== SES ========== */
         let audioCtx = null, noiseNode = null, noiseGain = null;
@@ -307,11 +343,10 @@
         }
 
         /* ========== ÇARK ========== */
-        const touchArea = document.getElementById('wheelTouchArea');
         const container = document.getElementById('slotWindow');
         const numCards  = 78;
         let cards = [];
-        let isDragging = false, lastY = 0, isSnapping = false;
+        let isSnapping = false;
         let snapDone = false, hasSpun = false;
 
         const slotWidth       = container.clientWidth;
@@ -374,78 +409,63 @@
             return activeIndex;
         }
 
+        let isSpinning = false;
+        let btnAngle = 0;
+        const turnSpinBtn = document.getElementById('turnSpinBtn');
+        const turnSpinImg = turnSpinBtn.querySelector('img');
+
         function animate() {
             const containerH = container.clientHeight;
-            if (isDragging) {
-                isSnapping = false; snapDone = false;
+
+            if (!isSnapping) {
+                offsetY += velocity; velocity *= 0.985;
+                if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
             } else {
-                if (!isSnapping) {
-                    offsetY += velocity; velocity *= 0.985;
-                    if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
-                } else {
-                    const centerY    = containerH / 2 - actualCardHeight / 2;
-                    const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
-                    const diff       = targetOffY - offsetY;
-                    offsetY += diff * 0.15;
-                    if (Math.abs(diff) < 0.5 && !snapDone) {
-                        offsetY = targetOffY; snapDone = true;
-                        renderCards();
-                        stopSpinSound(); playStopSound();
-                        if (navigator.vibrate) navigator.vibrate(50);
-                        setTimeout(() => {
-                            const drawnCard = { id: Math.floor(Math.random() * 78), reversed: Math.random() < 0.5 };
-                            sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
-                            sessionStorage.setItem('tarotReadingType', 'single');
-                            window.location.href = 'ad.html';
-                        }, 1000);
-                    }
+                const centerY    = containerH / 2 - actualCardHeight / 2;
+                const targetOffY = centerY - Math.round((centerY - offsetY) / cardHeight) * cardHeight;
+                const diff       = targetOffY - offsetY;
+                offsetY += diff * 0.15;
+                if (Math.abs(diff) < 0.5 && !snapDone) {
+                    offsetY = targetOffY; snapDone = true;
+                    renderCards();
+                    isSpinning = false;
+                    stopSpinSound(); playStopSound();
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    setTimeout(() => {
+                        const drawnCard = { id: Math.floor(Math.random() * 78), reversed: Math.random() < 0.5 };
+                        sessionStorage.setItem('tarotDrawnCards', JSON.stringify([drawnCard]));
+                        sessionStorage.setItem('tarotReadingType', 'single');
+                        window.location.href = 'ad.html';
+                    }, 1000);
                 }
             }
-            if (!snapDone || isDragging) renderCards();
+
+            if (!snapDone) renderCards();
+
+            if (isSpinning && Math.abs(velocity) > 0) {
+                btnAngle += Math.abs(velocity) * 0.4;
+                turnSpinImg.style.transform = `rotate(${btnAngle}deg)`;
+            }
+
             requestAnimationFrame(animate);
         }
 
         renderCards();
         requestAnimationFrame(animate);
 
-        function inSlotZone(clientX, clientY) {
-            const rect = container.getBoundingClientRect();
-            return (
-                clientX >= rect.left  &&
-                clientX <= rect.right &&
-                clientY >= rect.top   &&
-                clientY <= rect.bottom
-            );
-        }
+        /* ========== TURN BUTONU ========== */
+        turnSpinBtn.addEventListener('click', function () {
+            if (isSpinning) return;
 
-        function handleStart(y, x) {
-            if (!inSlotZone(x, y)) return;
-            initAudio(); isDragging = true; velocity = 0; lastY = y;
-            snapDone = false; lastCardIndex = -1;
-        }
-        function handleMove(y) {
-            if (!isDragging) return;
+            initAudio();
+            isSpinning = true;
             hasSpun = true;
-            const dy = y - lastY; offsetY += dy; velocity = dy; lastY = y;
-            if (Math.abs(velocity) > 5) startSpinSound();
-        }
-        function handleEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            if (hasSpun) {
-                velocity = Math.abs(velocity) < 10 ? (velocity >= 0 ? 80 : -80) : velocity * 4;
-                if (velocity >  150) velocity =  150;
-                if (velocity < -150) velocity = -150;
-            }
-        }
-
-        touchArea.addEventListener('touchstart', e => handleStart(e.touches[0].clientY, e.touches[0].clientX), { passive: false });
-        touchArea.addEventListener('touchmove',  e => { if (!isDragging) return; e.preventDefault(); handleMove(e.touches[0].clientY); }, { passive: false });
-        touchArea.addEventListener('touchend',   handleEnd);
-        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
-        touchArea.addEventListener('mousemove',  e => { if (isDragging) { e.preventDefault(); handleMove(e.clientY); } });
-        touchArea.addEventListener('mouseup',    handleEnd);
-        touchArea.addEventListener('mouseleave', handleEnd);
+            snapDone = false;
+            isSnapping = false;
+            lastCardIndex = -1;
+            velocity = 120 + Math.random() * 30;
+            startSpinSound();
+        });
     </script>
 </body>
 </html>
