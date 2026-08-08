@@ -47,9 +47,7 @@
             left: 0; right: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            gap: 28px;
             background-image: url('wheelbackplan.png');
             background-size: cover;
             background-position: center;
@@ -61,9 +59,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 28px;
             width: 90%;
             max-width: 450px;
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         .slot-wrapper {
@@ -117,6 +116,8 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
             transition: opacity 0.4s;
+            margin-top: auto;
+            margin-bottom: auto;
         }
         .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
         .turn-spin-btn:disabled { opacity: 0.3; cursor: default; }
@@ -190,11 +191,11 @@
                     <div class="slot-window" id="slotWindow2"></div>
                 </div>
             </div>
-
-            <button class="turn-spin-btn" id="turnSpinBtn">
-                <img src="turn.png" alt="Döndür">
-            </button>
         </div>
+
+        <button class="turn-spin-btn" id="turnSpinBtn">
+            <img src="turn.png" alt="Döndür">
+        </button>
     </div>
 
     <div class="bottom-nav">
@@ -415,7 +416,6 @@
         turnSpinBtn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
 
         turnSpinBtn.addEventListener('click', function () {
-            // Tek kullanım
             turnSpinBtn.disabled = true;
 
             initAudio();
