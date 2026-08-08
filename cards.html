@@ -198,7 +198,7 @@
         });
 
         function getIconForIndex(index) {
-            const icons = ['coming.png', 'now.png', 'history.png'];
+            const icons = ['history.png', 'now.png', 'coming.png'];
             return icons[index] || icons[icons.length - 1];
         }
 
@@ -252,18 +252,28 @@
             card.addEventListener('click', function () {
                 const isSelected = selectedCards.includes(card);
 
-                // İkon görünür durumdaysa → kartı aç
+                // İkon görünür durumdaysa → seçimi iptal et, kartı göster
                 if (iconImg.style.display === 'block') {
+                    const idx = selectedCards.indexOf(card);
+                    if (idx > -1) {
+                        selectedCards.splice(idx, 1);
+                        selectedCount--;
+                    }
                     iconImg.style.display = 'none';
                     cardImg.style.display = 'block';
+                    reorderIcons();
+                    updateInfo();
+                    updateContinueButton();
                     return;
                 }
 
                 // Kart görseli görünür ve seçiliyse → seçimi kaldır
-                if (isSelected && cardImg.style.display !== 'none') {
+                if (isSelected) {
                     const idx = selectedCards.indexOf(card);
-                    if (idx > -1) selectedCards.splice(idx, 1);
-                    selectedCount--;
+                    if (idx > -1) {
+                        selectedCards.splice(idx, 1);
+                        selectedCount--;
+                    }
                     reorderIcons();
                     updateInfo();
                     updateContinueButton();
@@ -271,7 +281,7 @@
                 }
 
                 // Yeni seçim
-                if (!isSelected && selectedCount < maxSelect) {
+                if (selectedCount < maxSelect) {
                     selectedCards.push(card);
                     selectedCount++;
                     cardImg.style.display = 'none';
@@ -306,3 +316,4 @@
     </script>
 </body>
 </html>
+
