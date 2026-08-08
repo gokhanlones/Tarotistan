@@ -39,7 +39,13 @@
             font-size: 1.25rem; font-weight: 700;
             letter-spacing: 3px; color: #000;
         }
-        .topbar-spacer { width: 40px; flex-shrink: 0; }
+        .hand-btn {
+            width: 40px; height: 40px;
+            background: none; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; padding: 0;
+        }
+        .hand-btn img { width: 28px; height: 28px; object-fit: contain; }
 
         .wheel-container {
             position: absolute;
@@ -172,7 +178,9 @@
             <span></span><span></span><span></span>
         </button>
         <div class="topbar-title">TAROT'S</div>
-        <div class="topbar-spacer"></div>
+        <button class="hand-btn" id="handBtn" aria-label="Kart Seçimi">
+            <img src="hand.png" alt="Kart Seçimi">
+        </button>
     </div>
 
     <div class="wheel-container">
@@ -234,6 +242,7 @@
         function logout()       { auth.signOut().then(() => { window.location.href = 'auth.html'; }); }
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+        document.getElementById('handBtn').addEventListener('click', () => { window.location.href = 'cards.html#three'; });
 
         /* ========== SES ========== */
         let audioCtx = null, noiseNode = null, noiseGain = null, spinActive = false;
