@@ -176,7 +176,7 @@
         <div class="topbar-spacer"></div>
     </div>
 
-    <div class="wheel-container" id="wheelTouchArea">
+    <div class="wheel-container">
         <div class="wheel-inner">
             <div class="slot-wrapper" id="slotWrapper">
                 <div class="slot-column" data-col="0">
@@ -291,7 +291,6 @@
         }
 
         /* ========== 3'LÜ ÇARK ========== */
-        const touchArea  = document.getElementById('wheelTouchArea');
         const wrapper    = document.getElementById('slotWrapper');
         const containers = [
             document.getElementById('slotWindow0'),
@@ -366,23 +365,19 @@
                 const col = cols[i];
                 const containerH = containers[i].clientHeight;
 
-                if (col.isDragging) {
-                    col.isSnapping = false;
-                    col.snapDone   = false;
+                if (!col.isSnapping) {
+                    col.offsetY  += col.velocity;
+                    col.velocity *= 0.985;
+                    if (Math.abs(col.velocity) < 1.5 && col.hasSpun) { col.velocity = 0; col.isSnapping = true; }
                 } else {
-                    if (!col.isSnapping) {
-                        col.offsetY  += col.velocity;
-                        col.velocity *= 0.985;
-                        if (Math.abs(col.velocity) < 1.5 && col.hasSpun) { col.velocity = 0; col.isSnapping = true; }
-                    } else {
-                        const centerY    = containerH / 2 - actualCardHeight / 2;
-                        const targetOffY = centerY - Math.round((centerY - col.offsetY) / cardHeight) * cardHeight;
-                        const diff       = targetOffY - col.offsetY;
-                        col.offsetY += diff * 0.15;
-                        if (Math.abs(diff) < 0.5 && !col.snapDone) { col.offsetY = targetOffY; col.snapDone = true; }
-                    }
+                    const centerY    = containerH / 2 - actualCardHeight / 2;
+                    const targetOffY = centerY - Math.round((centerY - col.offsetY) / cardHeight) * cardHeight;
+                    const diff       = targetOffY - col.offsetY;
+                    col.offsetY += diff * 0.15;
+                    if (Math.abs(diff) < 0.5 && !col.snapDone) { col.offsetY = targetOffY; col.snapDone = true; }
                 }
-                if (!col.snapDone || col.isDragging) renderColumn(i);
+
+                if (!col.snapDone) renderColumn(i);
             }
 
             if (allStopped() && allSpun() && !resultSent) {
@@ -412,16 +407,12 @@
         /* ========== TURN BUTONU — TEK KULLANIM ========== */
         const turnSpinBtn = document.getElementById('turnSpinBtn');
 
-        turnSpinBtn.addEventListener('mousedown',  e => e.stopPropagation());
-        turnSpinBtn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
-
         turnSpinBtn.addEventListener('click', function () {
             turnSpinBtn.disabled = true;
 
             initAudio();
             resultSent = false;
             cols.forEach(col => {
-                col.isDragging = false;
                 col.isSnapping = false;
                 col.snapDone   = false;
                 col.lastIndex  = -1;
@@ -429,58 +420,6 @@
                 col.velocity   = 120 + Math.random() * 30;
             });
             startSpinSound();
-        });
-
-        /* ========== MANUEL SÜRÜKLEME ========== */
-        function getColIndex(clientX) {
-            const colWidth = wrapper.clientWidth / 3;
-            const relX = clientX - wrapper.getBoundingClientRect().left;
-            if (relX < colWidth) return 0;
-            if (relX < colWidth * 2) return 1;
-            return 2;
-        }
-
-        function handleStart(y, x) {
-            const col = cols[getColIndex(x)];
-            initAudio();
-            col.isDragging = true; col.velocity = 0; col.lastY = y;
-            col.snapDone = false; col.lastIndex = -1;
-        }
-        function handleMove(y, x) {
-            const col = cols[getColIndex(x)];
-            if (!col.isDragging) return;
-            col.hasSpun = true;
-            const dy = y - col.lastY;
-            col.offsetY += dy; col.velocity = dy; col.lastY = y;
-            if (Math.abs(dy) > 5) startSpinSound();
-        }
-        function handleEnd(x) {
-            const col = cols[getColIndex(x)];
-            if (!col.isDragging) return;
-            col.isDragging = false;
-            if (col.hasSpun) {
-                col.velocity = Math.abs(col.velocity) < 10 ? (col.velocity >= 0 ? 80 : -80) : col.velocity * 4;
-                if (col.velocity >  150) col.velocity =  150;
-                if (col.velocity < -150) col.velocity = -150;
-            }
-        }
-
-        touchArea.addEventListener('touchstart', e => handleStart(e.touches[0].clientY, e.touches[0].clientX), { passive: false });
-        touchArea.addEventListener('touchmove',  e => handleMove(e.touches[0].clientY, e.touches[0].clientX),  { passive: false });
-        touchArea.addEventListener('touchend',   e => handleEnd(e.changedTouches[0].clientX));
-        touchArea.addEventListener('mousedown',  e => handleStart(e.clientY, e.clientX));
-        touchArea.addEventListener('mousemove',  e => handleMove(e.clientY, e.clientX));
-        touchArea.addEventListener('mouseup',    e => handleEnd(e.clientX));
-        touchArea.addEventListener('mouseleave', () => {
-            cols.forEach(col => {
-                if (!col.isDragging) return;
-                col.isDragging = false;
-                if (col.hasSpun) {
-                    col.velocity = Math.abs(col.velocity) < 10 ? (col.velocity >= 0 ? 80 : -80) : col.velocity * 4;
-                    if (col.velocity >  150) col.velocity =  150;
-                    if (col.velocity < -150) col.velocity = -150;
-                }
-            });
         });
     </script>
 </body>
