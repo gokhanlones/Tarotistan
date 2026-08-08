@@ -120,7 +120,9 @@
             margin-bottom: auto;
         }
         .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
-        .turn-spin-btn:disabled { opacity: 0.3; cursor: default; }
+        .turn-spin-btn.spinning img { animation: btnSpin 0.8s linear infinite; }
+
+        @keyframes btnSpin { to { transform: rotate(360deg); } }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -300,9 +302,9 @@
         const numCards = 78;
 
         const cols = [
-            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
-            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 },
-            { cards: [], offsetY: 0, velocity: 0, isDragging: false, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1, lastY: 0 }
+            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 },
+            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 },
+            { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 }
         ];
 
         const wrapperWidth     = wrapper.clientWidth;
@@ -359,6 +361,8 @@
         function allSpun()    { return cols.every(c => c.hasSpun);  }
 
         let resultSent = false;
+        let spinTimeoutId = null;
+        const turnSpinBtn = document.getElementById('turnSpinBtn');
 
         function animate() {
             for (let i = 0; i < 3; i++) {
@@ -382,11 +386,13 @@
 
             if (allStopped() && allSpun() && !resultSent) {
                 resultSent = true;
-                stopSpinSound(); playStopSound();
+                stopSpinSound(); 
+                playStopSound();
+                turnSpinBtn.classList.remove('spinning');
                 if (navigator.vibrate) navigator.vibrate(50);
                 cols.forEach(c => { c.hasSpun = false; c.snapDone = false; });
 
-                setTimeout(() => {
+                spinTimeoutId = setTimeout(() => {
                     const drawnCards = [], usedIds = new Set();
                     while (drawnCards.length < 3) {
                         const id = Math.floor(Math.random() * 78);
@@ -404,14 +410,18 @@
         for (let i = 0; i < 3; i++) renderColumn(i);
         requestAnimationFrame(animate);
 
-        /* ========== TURN BUTONU — TEK KULLANIM ========== */
-        const turnSpinBtn = document.getElementById('turnSpinBtn');
-
+        /* ========== TURN BUTONU ========== */
         turnSpinBtn.addEventListener('click', function () {
-            turnSpinBtn.disabled = true;
-
             initAudio();
+
+            if (spinTimeoutId) {
+                clearTimeout(spinTimeoutId);
+                spinTimeoutId = null;
+            }
+
             resultSent = false;
+            turnSpinBtn.classList.add('spinning');
+
             cols.forEach(col => {
                 col.isSnapping = false;
                 col.snapDone   = false;
