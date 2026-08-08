@@ -84,13 +84,17 @@
             opacity: 0;
             transform: translateY(20px);
             animation: cardAppear 0.4s ease-out forwards;
-            transition: box-shadow 0.2s, transform 0.2s;
         }
-        .card-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .card-item.selected {
-            box-shadow: 0 0 14px 4px rgba(255, 141, 184, 0.75);
-            transform: scale(1.06);
-            z-index: 2;
+        .card-item .card-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-item .icon-img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            display: none;
+            background: #fff;
         }
         @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
 
@@ -114,7 +118,6 @@
         .nav-btn.active { background: #f2f2f5; }
         .nav-btn img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; }
 
-        /* Devam butonu — alt navın hemen üstünde */
         .submit-bar {
             position: fixed;
             bottom: 68px; left: 0; right: 0;
@@ -185,13 +188,29 @@
         const maxSelect   = readingType === 'single' ? 1 : 3;
         let selectedCount = 0;
 
-        const grid        = document.getElementById('cardsGrid');
+        const grid          = document.getElementById('cardsGrid');
         const topbarCounter = document.getElementById('topbarCounter');
-        const continueBtn = document.getElementById('continueBtn');
+        const continueBtn   = document.getElementById('continueBtn');
+        const selectedCards = [];
 
         document.getElementById('turnBtn').addEventListener('click', function () {
             window.location.href = readingType === 'single' ? 'wheel.html' : 'threewheel.html';
         });
+
+        function getIconForIndex(index) {
+            const icons = ['coming.png', 'now.png', 'history.png'];
+            return icons[index] || icons[icons.length - 1];
+        }
+
+        function reorderIcons() {
+            selectedCards.forEach((c, i) => {
+                const icon    = c.querySelector('.icon-img');
+                const cardImg = c.querySelector('.card-img');
+                if (cardImg.style.display === 'none') {
+                    icon.src = getIconForIndex(i);
+                }
+            });
+        }
 
         function updateInfo() {
             topbarCounter.textContent = maxSelect + '/' + selectedCount;
@@ -215,26 +234,52 @@
             card.className = 'card-item';
             card.style.animationDelay = (i * 0.025) + 's';
 
-            const img = document.createElement('img');
-            img.src = 'onecard.png';
-            img.alt = t('cardAlt');
-            img.loading = 'lazy';
+            const cardImg = document.createElement('img');
+            cardImg.className = 'card-img';
+            cardImg.src = 'onecard.png';
+            cardImg.alt = t('cardAlt');
+            cardImg.loading = 'lazy';
 
-            card.appendChild(img);
+            const iconImg = document.createElement('img');
+            iconImg.className = 'icon-img';
+            iconImg.alt = '';
+            iconImg.loading = 'lazy';
+
+            card.appendChild(cardImg);
+            card.appendChild(iconImg);
             grid.appendChild(card);
 
             card.addEventListener('click', function () {
-                if (card.classList.contains('selected')) {
-                    card.classList.remove('selected');
-                    selectedCount--;
-                } else {
-                    if (selectedCount < maxSelect) {
-                        card.classList.add('selected');
-                        selectedCount++;
-                    }
+                const isSelected = selectedCards.includes(card);
+
+                // İkon görünür durumdaysa → kartı aç
+                if (iconImg.style.display === 'block') {
+                    iconImg.style.display = 'none';
+                    cardImg.style.display = 'block';
+                    return;
                 }
-                updateInfo();
-                updateContinueButton();
+
+                // Kart görseli görünür ve seçiliyse → seçimi kaldır
+                if (isSelected && cardImg.style.display !== 'none') {
+                    const idx = selectedCards.indexOf(card);
+                    if (idx > -1) selectedCards.splice(idx, 1);
+                    selectedCount--;
+                    reorderIcons();
+                    updateInfo();
+                    updateContinueButton();
+                    return;
+                }
+
+                // Yeni seçim
+                if (!isSelected && selectedCount < maxSelect) {
+                    selectedCards.push(card);
+                    selectedCount++;
+                    cardImg.style.display = 'none';
+                    iconImg.src = getIconForIndex(selectedCards.length - 1);
+                    iconImg.style.display = 'block';
+                    updateInfo();
+                    updateContinueButton();
+                }
             });
         }
 
