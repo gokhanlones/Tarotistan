@@ -145,18 +145,19 @@
             isolation: isolate;
         }
 
+        /*
+         * Slot alanı ile turn butonu aynı şekilde
+         * dikey flex düzeninde ortalanır.
+         */
         .wheel-inner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
             display: flex;
             flex-direction: column;
             align-items: center;
-
             width: 90%;
             max-width: 450px;
+
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         /* ── Slot Wheel ──────────────────────────────────────── */
@@ -165,7 +166,6 @@
             position: relative;
             display: flex;
             justify-content: center;
-            align-items: center;
             gap: 12px;
             width: 100%;
         }
@@ -184,7 +184,7 @@
             background: transparent;
         }
 
-        /* Orta sütunun sol/sağ çizgileri */
+        /* Orta sütunun çizgileri */
 
         .slot-column:nth-child(2) .selector-line {
             position: absolute;
@@ -225,10 +225,8 @@
         }
 
         /*
-         * İkonlar cards.html'deki ikon alanıyla
-         * aynı ölçü mantığında.
-         *
-         * İkonların arkasında onecard.png yok.
+         * İkonlar sade.
+         * Arkalarında onecard.png yok.
          */
         .wheel-card-wrap.slot-icon {
             display: flex;
@@ -258,19 +256,11 @@
         /* ── Döndür Butonu ───────────────────────────────────── */
 
         /*
-         * turn.png artık slot alanının bir parçası değil.
-         *
-         * Slot alanı ile bottom-nav arasında kalan bölümün
-         * alt tarafında ortalanıyor.
+         * wheel.html'deki yapı ile aynı.
+         * turn.png, wheel-container içerisinde kalan
+         * dikey alanın ortasına yerleşir.
          */
         .turn-spin-btn {
-            position: absolute;
-
-            left: 50%;
-            bottom: 14px;
-
-            transform: translateX(-50%);
-
             width: 56px;
             height: 56px;
 
@@ -285,9 +275,11 @@
             justify-content: center;
 
             flex-shrink: 0;
-            z-index: 20;
 
             transition: opacity 0.4s;
+
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         .turn-spin-btn img {
@@ -303,6 +295,7 @@
             bottom: 0;
             left: 0;
             right: 0;
+
             height: 68px;
 
             background: #ffffff;
@@ -367,6 +360,7 @@
             bottom: 0;
 
             width: 260px;
+
             background: #ffffff;
 
             z-index: 151;
@@ -425,7 +419,7 @@
 
 <body>
 
-    <!-- Auth yüklenirken ekran -->
+    <!-- Auth -->
     <div class="auth-check" id="authCheck">
         <div class="spinner"></div>
     </div>
@@ -466,7 +460,6 @@
     <!-- Çark -->
     <div class="wheel-container">
 
-        <!-- Slot alanı -->
         <div class="wheel-inner">
 
             <div
@@ -521,13 +514,13 @@
         </div>
 
 
-        <!-- Slot ile bottom-nav arasındaki döndür butonu -->
+        <!-- wheel.html ile aynı konumlandırma mantığı -->
         <button
             class="turn-spin-btn"
             id="turnSpinBtn">
 
             <img
-                src="finger.png"
+                src="turn.png"
                 alt="Döndür">
 
         </button>
@@ -535,7 +528,7 @@
     </div>
 
 
-    <!-- Alt Navigasyon -->
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
 
         <a
@@ -645,884 +638,1182 @@
 
     <script>
 
-    /* ════════════════════════════════════════════════════════════
-       1. I18N
-    ════════════════════════════════════════════════════════════ */
+        /* ════════════════════════════════════════════════════════
+           1. I18N
+        ════════════════════════════════════════════════════════ */
 
-    document.getElementById('sidebarCardsText').textContent =
-        typeof t === 'function'
-            ? t('sidebarCards')
-            : 'Kartlar';
-
-
-    document.getElementById('sidebarLogoutText').textContent =
-        typeof t === 'function'
-            ? t('sidebarLogout')
-            : 'Çıkış';
+        document.getElementById(
+            'sidebarCardsText'
+        ).textContent =
+            typeof t === 'function'
+                ? t('sidebarCards')
+                : 'Kartlar';
 
 
-    document.getElementById('navHome').setAttribute(
-        'aria-label',
-        typeof t === 'function'
-            ? t('navHomeLabel')
-            : 'Anasayfa'
-    );
+        document.getElementById(
+            'sidebarLogoutText'
+        ).textContent =
+            typeof t === 'function'
+                ? t('sidebarLogout')
+                : 'Çıkış';
 
 
-    /* ════════════════════════════════════════════════════════════
-       2. AUTH
-    ════════════════════════════════════════════════════════════ */
-
-    const auth =
-        typeof firebase !== 'undefined'
-            ? firebase.auth()
-            : {
-                onAuthStateChanged: cb => cb({}),
-                signOut: () => Promise.resolve()
-            };
-
-
-    auth.onAuthStateChanged(user => {
-
-        if (!user) {
-
-            window.location.href =
-                'auth.html';
-
-            return;
-        }
-
-        document.getElementById('authCheck')
-            .classList.add('hidden');
-
-    });
-
-
-    function logout() {
-
-        auth.signOut()
-            .then(() => {
-
-                window.location.href =
-                    'auth.html';
-
-            });
-
-    }
-
-
-    /* ════════════════════════════════════════════════════════════
-       3. SIDEBAR
-    ════════════════════════════════════════════════════════════ */
-
-    function openSidebar() {
-
-        document
-            .getElementById('sidebarOverlay')
-            .classList.add('active');
-
-        document
-            .getElementById('sidebar')
-            .classList.add('active');
-
-    }
-
-
-    function closeSidebar() {
-
-        document
-            .getElementById('sidebarOverlay')
-            .classList.remove('active');
-
-        document
-            .getElementById('sidebar')
-            .classList.remove('active');
-
-    }
-
-
-    document
-        .getElementById('menuBtn')
-        .addEventListener(
-            'click',
-            openSidebar
+        document.getElementById(
+            'navHome'
+        ).setAttribute(
+            'aria-label',
+            typeof t === 'function'
+                ? t('navHomeLabel')
+                : 'Anasayfa'
         );
 
 
-    document
-        .getElementById('sidebarOverlay')
-        .addEventListener(
-            'click',
-            closeSidebar
-        );
+        /* ════════════════════════════════════════════════════════
+           2. AUTH
+        ════════════════════════════════════════════════════════ */
+
+        const auth =
+            typeof firebase !== 'undefined'
+                ? firebase.auth()
+                : {
+                    onAuthStateChanged: cb => cb({}),
+                    signOut: () => Promise.resolve()
+                };
 
 
-    document
-        .getElementById('handBtn')
-        .addEventListener(
-            'click',
-            () => {
+        auth.onAuthStateChanged(
+            user => {
 
-                window.location.href =
-                    'cards.html#three';
+                if (!user) {
+
+                    window.location.href =
+                        'auth.html';
+
+                    return;
+
+                }
+
+
+                document
+                    .getElementById('authCheck')
+                    .classList.add('hidden');
 
             }
         );
 
 
-    /* ════════════════════════════════════════════════════════════
-       4. SES MOTORU
-    ════════════════════════════════════════════════════════════ */
+        function logout() {
 
-    let audioCtx = null;
-    let noiseNode = null;
-    let noiseGain = null;
-    let spinActive = false;
+            auth.signOut()
+                .then(
+                    () => {
 
+                        window.location.href =
+                            'auth.html';
 
-    function initAudio() {
-
-        if (!audioCtx) {
-
-            audioCtx = new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-        }
-
-        if (
-            audioCtx.state === 'suspended'
-        ) {
-
-            audioCtx.resume();
-
-        }
-
-    }
-
-
-    function createSoftNoiseBuffer() {
-
-        const len =
-            audioCtx.sampleRate;
-
-
-        const buffer =
-            audioCtx.createBuffer(
-                1,
-                len,
-                audioCtx.sampleRate
-            );
-
-
-        const data =
-            buffer.getChannelData(0);
-
-
-        for (
-            let i = 0;
-            i < len;
-            i++
-        ) {
-
-            data[i] =
-                (Math.random() * 2 - 1) * 0.3;
-
-        }
-
-
-        return buffer;
-
-    }
-
-
-    function startSpinSound() {
-
-        if (
-            !audioCtx ||
-            spinActive
-        ) {
-
-            return;
-
-        }
-
-
-        spinActive = true;
-
-
-        noiseNode =
-            audioCtx.createBufferSource();
-
-
-        noiseNode.buffer =
-            createSoftNoiseBuffer();
-
-
-        noiseNode.loop = true;
-
-
-        const lf =
-            audioCtx.createBiquadFilter();
-
-
-        lf.type = 'lowpass';
-        lf.frequency.value = 300;
-        lf.Q.value = 0.5;
-
-
-        const bf =
-            audioCtx.createBiquadFilter();
-
-
-        bf.type = 'bandpass';
-        bf.frequency.value = 200;
-        bf.Q.value = 1;
-
-
-        noiseGain =
-            audioCtx.createGain();
-
-
-        noiseGain.gain.value =
-            0.04;
-
-
-        noiseNode.connect(lf);
-        lf.connect(bf);
-        bf.connect(noiseGain);
-        noiseGain.connect(
-            audioCtx.destination
-        );
-
-
-        noiseNode.start();
-
-    }
-
-
-    function stopSpinSound() {
-
-        spinActive = false;
-
-
-        if (noiseNode) {
-
-            try {
-
-                noiseNode.disconnect();
-
-                noiseNode.stop(
-                    audioCtx.currentTime + 0.1
+                    }
                 );
 
-            } catch (e) {}
+        }
 
-            noiseNode = null;
+
+        /* ════════════════════════════════════════════════════════
+           3. SIDEBAR
+        ════════════════════════════════════════════════════════ */
+
+        function openSidebar() {
+
+            document
+                .getElementById(
+                    'sidebarOverlay'
+                )
+                .classList.add('active');
+
+
+            document
+                .getElementById(
+                    'sidebar'
+                )
+                .classList.add('active');
 
         }
 
 
-        if (noiseGain) {
+        function closeSidebar() {
 
-            try {
+            document
+                .getElementById(
+                    'sidebarOverlay'
+                )
+                .classList.remove('active');
 
-                noiseGain.disconnect();
 
-            } catch (e) {}
-
-            noiseGain = null;
+            document
+                .getElementById(
+                    'sidebar'
+                )
+                .classList.remove('active');
 
         }
 
-    }
 
-
-    function playTickSound(intensity) {
-
-        if (!audioCtx)
-            return;
-
-
-        const osc =
-            audioCtx.createOscillator();
-
-
-        const gain =
-            audioCtx.createGain();
-
-
-        const filter =
-            audioCtx.createBiquadFilter();
-
-
-        osc.type = 'sine';
-
-
-        osc.frequency.value =
-            600 +
-            Math.random() * 200;
-
-
-        filter.type =
-            'lowpass';
-
-
-        filter.frequency.value =
-            1200;
-
-
-        const vol =
-            0.015 *
-            Math.min(
-                intensity,
-                1
+        document
+            .getElementById('menuBtn')
+            .addEventListener(
+                'click',
+                openSidebar
             );
 
 
-        gain.gain.setValueAtTime(
-            vol,
-            audioCtx.currentTime
-        );
+        document
+            .getElementById('sidebarOverlay')
+            .addEventListener(
+                'click',
+                closeSidebar
+            );
 
 
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioCtx.currentTime + 0.04
-        );
+        document
+            .getElementById('handBtn')
+            .addEventListener(
+                'click',
+                () => {
 
+                    window.location.href =
+                        'cards.html#three';
 
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(
-            audioCtx.destination
-        );
+                }
+            );
 
 
-        osc.start();
+        /* ════════════════════════════════════════════════════════
+           4. SES MOTORU
+        ════════════════════════════════════════════════════════ */
 
+        let audioCtx = null;
+        let noiseNode = null;
+        let noiseGain = null;
+        let spinActive = false;
 
-        osc.stop(
-            audioCtx.currentTime + 0.04
-        );
 
-    }
+        function initAudio() {
 
+            if (!audioCtx) {
 
-    function playStopSound() {
+                audioCtx =
+                    new (
+                        window.AudioContext ||
+                        window.webkitAudioContext
+                    )();
 
-        if (!audioCtx)
-            return;
+            }
 
 
-        const osc =
-            audioCtx.createOscillator();
+            if (
+                audioCtx.state ===
+                'suspended'
+            ) {
 
+                audioCtx.resume();
 
-        const gain =
-            audioCtx.createGain();
+            }
 
+        }
 
-        osc.type = 'sine';
 
+        function createSoftNoiseBuffer() {
 
-        osc.frequency.setValueAtTime(
-            350,
-            audioCtx.currentTime
-        );
+            const len =
+                audioCtx.sampleRate;
 
 
-        osc.frequency.exponentialRampToValueAtTime(
-            150,
-            audioCtx.currentTime + 0.25
-        );
+            const buffer =
+                audioCtx.createBuffer(
+                    1,
+                    len,
+                    audioCtx.sampleRate
+                );
 
 
-        gain.gain.setValueAtTime(
-            0.04,
-            audioCtx.currentTime
-        );
+            const data =
+                buffer.getChannelData(0);
 
 
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioCtx.currentTime + 0.25
-        );
+            for (
+                let i = 0;
+                i < len;
+                i++
+            ) {
 
+                data[i] =
+                    (Math.random() * 2 - 1) *
+                    0.3;
 
-        osc.connect(gain);
-        gain.connect(
-            audioCtx.destination
-        );
+            }
 
 
-        osc.start();
+            return buffer;
 
+        }
 
-        osc.stop(
-            audioCtx.currentTime + 0.25
-        );
 
-    }
+        function startSpinSound() {
 
+            if (
+                !audioCtx ||
+                spinActive
+            ) {
+                return;
+            }
 
-    /* ════════════════════════════════════════════════════════════
-       5. ÇARK — BOYUT HESAPLAMA
-    ════════════════════════════════════════════════════════════ */
 
-    const NUM_CARDS = 78;
+            spinActive = true;
 
 
-    const ICON_SRCS = [
-        'history.png',
-        'now.png',
-        'coming.png'
-    ];
+            noiseNode =
+                audioCtx.createBufferSource();
 
 
-    const GAP_PX = 12;
-    const COL_COUNT = 3;
+            noiseNode.buffer =
+                createSoftNoiseBuffer();
 
 
-    const wrapper =
-        document.getElementById(
-            'slotWrapper'
-        );
+            noiseNode.loop =
+                true;
 
 
-    const containers = [
+            const lf =
+                audioCtx.createBiquadFilter();
 
-        document.getElementById(
-            'slotWindow0'
-        ),
 
-        document.getElementById(
-            'slotWindow1'
-        ),
+            lf.type =
+                'lowpass';
 
-        document.getElementById(
-            'slotWindow2'
-        )
 
-    ];
+            lf.frequency.value =
+                300;
 
 
-    const cardWidthPx =
-        (
-            wrapper.clientWidth -
-            GAP_PX *
-            (COL_COUNT - 1)
-        ) /
-        COL_COUNT;
+            lf.Q.value =
+                0.5;
 
 
-    const actualCardHeight =
-        cardWidthPx *
-        (270 / 160);
+            const bf =
+                audioCtx.createBiquadFilter();
 
 
-    const cardHeight =
-        actualCardHeight + 15;
+            bf.type =
+                'bandpass';
 
 
-    const cardsTotalHeight =
-        NUM_CARDS *
-        cardHeight;
+            bf.frequency.value =
+                200;
 
 
-    containers.forEach(c => {
+            bf.Q.value =
+                1;
 
-        c.style.height =
-            actualCardHeight + 'px';
 
-    });
+            noiseGain =
+                audioCtx.createGain();
 
 
-    /* ════════════════════════════════════════════════════════════
-       6. ÇARK — KOLON DURUMU
-    ════════════════════════════════════════════════════════════ */
+            noiseGain.gain.value =
+                0.04;
 
-    function makeCol() {
 
-        return {
+            noiseNode.connect(lf);
+            lf.connect(bf);
+            bf.connect(noiseGain);
+            noiseGain.connect(
+                audioCtx.destination
+            );
 
-            iconEl: null,
-            cards: [],
-            offsetY: 0,
-            velocity: 0,
-            isSnapping: false,
-            snapDone: false,
-            hasSpun: false,
-            lastIndex: -1
 
-        };
+            noiseNode.start();
 
-    }
+        }
 
 
-    const cols = [
-        makeCol(),
-        makeCol(),
-        makeCol()
-    ];
+        function stopSpinSound() {
 
+            spinActive = false;
 
-    /* ════════════════════════════════════════════════════════════
-       7. DOM ELEMANLARI
-    ════════════════════════════════════════════════════════════ */
 
-    for (
-        let col = 0;
-        col < COL_COUNT;
-        col++
-    ) {
+            if (noiseNode) {
 
-        const containerH =
-            containers[col].clientHeight;
+                try {
 
+                    noiseNode.disconnect();
 
-        const centerY =
-            containerH / 2 -
-            actualCardHeight / 2;
+                    noiseNode.stop(
+                        audioCtx.currentTime +
+                        0.1
+                    );
 
+                } catch (e) {}
 
-        cols[col].offsetY = 0;
+                noiseNode = null;
 
+            }
 
-        /* ── İkon ───────────────────────────────────────────── */
 
-        const iconWrap =
-            document.createElement('div');
+            if (noiseGain) {
 
+                try {
 
-        iconWrap.className =
-            'wheel-card-wrap slot-icon';
+                    noiseGain.disconnect();
 
+                } catch (e) {}
 
-        iconWrap.style.width =
-            cardWidthPx + 'px';
+                noiseGain = null;
 
+            }
 
-        const iconImg =
-            document.createElement('img');
+        }
 
 
-        iconImg.className =
-            'wheel-card';
-
-
-        iconImg.src =
-            ICON_SRCS[col];
-
-
-        iconWrap.appendChild(
-            iconImg
-        );
-
-
-        containers[col].appendChild(
-            iconWrap
-        );
-
-
-        cols[col].iconEl =
-            iconWrap;
-
-
-        /* ── Kartlar ────────────────────────────────────────── */
-
-        for (
-            let i = 0;
-            i < NUM_CARDS;
-            i++
+        function playTickSound(
+            intensity
         ) {
 
-            const wrap =
+            if (!audioCtx)
+                return;
+
+
+            const osc =
+                audioCtx.createOscillator();
+
+
+            const gain =
+                audioCtx.createGain();
+
+
+            const filter =
+                audioCtx.createBiquadFilter();
+
+
+            osc.type =
+                'sine';
+
+
+            osc.frequency.value =
+                600 +
+                Math.random() * 200;
+
+
+            filter.type =
+                'lowpass';
+
+
+            filter.frequency.value =
+                1200;
+
+
+            const vol =
+                0.015 *
+                Math.min(
+                    intensity,
+                    1
+                );
+
+
+            gain.gain.setValueAtTime(
+                vol,
+                audioCtx.currentTime
+            );
+
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioCtx.currentTime +
+                0.04
+            );
+
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(
+                audioCtx.destination
+            );
+
+
+            osc.start();
+
+
+            osc.stop(
+                audioCtx.currentTime +
+                0.04
+            );
+
+        }
+
+
+        function playStopSound() {
+
+            if (!audioCtx)
+                return;
+
+
+            const osc =
+                audioCtx.createOscillator();
+
+
+            const gain =
+                audioCtx.createGain();
+
+
+            osc.type =
+                'sine';
+
+
+            osc.frequency.setValueAtTime(
+                350,
+                audioCtx.currentTime
+            );
+
+
+            osc.frequency.exponentialRampToValueAtTime(
+                150,
+                audioCtx.currentTime +
+                0.25
+            );
+
+
+            gain.gain.setValueAtTime(
+                0.04,
+                audioCtx.currentTime
+            );
+
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioCtx.currentTime +
+                0.25
+            );
+
+
+            osc.connect(gain);
+            gain.connect(
+                audioCtx.destination
+            );
+
+
+            osc.start();
+
+
+            osc.stop(
+                audioCtx.currentTime +
+                0.25
+            );
+
+        }
+
+
+        /* ════════════════════════════════════════════════════════
+           5. ÇARK — BOYUT
+        ════════════════════════════════════════════════════════ */
+
+        const NUM_CARDS =
+            78;
+
+
+        const ICON_SRCS = [
+            'history.png',
+            'now.png',
+            'coming.png'
+        ];
+
+
+        const GAP_PX =
+            12;
+
+
+        const COL_COUNT =
+            3;
+
+
+        const wrapper =
+            document.getElementById(
+                'slotWrapper'
+            );
+
+
+        const containers = [
+
+            document.getElementById(
+                'slotWindow0'
+            ),
+
+            document.getElementById(
+                'slotWindow1'
+            ),
+
+            document.getElementById(
+                'slotWindow2'
+            )
+
+        ];
+
+
+        const cardWidthPx =
+            (
+                wrapper.clientWidth -
+                GAP_PX *
+                (COL_COUNT - 1)
+            ) /
+            COL_COUNT;
+
+
+        const actualCardHeight =
+            cardWidthPx *
+            (270 / 160);
+
+
+        const cardHeight =
+            actualCardHeight +
+            15;
+
+
+        const cardsTotalHeight =
+            NUM_CARDS *
+            cardHeight;
+
+
+        containers.forEach(
+            c => {
+
+                c.style.height =
+                    actualCardHeight +
+                    'px';
+
+            }
+        );
+
+
+        /* ════════════════════════════════════════════════════════
+           6. KOLON DURUMU
+        ════════════════════════════════════════════════════════ */
+
+        function makeCol() {
+
+            return {
+
+                iconEl: null,
+                cards: [],
+                offsetY: 0,
+                velocity: 0,
+                isSnapping: false,
+                snapDone: false,
+                hasSpun: false,
+                lastIndex: -1
+
+            };
+
+        }
+
+
+        const cols = [
+            makeCol(),
+            makeCol(),
+            makeCol()
+        ];
+
+
+        /* ════════════════════════════════════════════════════════
+           7. DOM
+        ════════════════════════════════════════════════════════ */
+
+        for (
+            let col = 0;
+            col < COL_COUNT;
+            col++
+        ) {
+
+            const containerH =
+                containers[col]
+                    .clientHeight;
+
+
+            /* ── İkon ───────────────────────────────────────── */
+
+            const iconWrap =
                 document.createElement(
                     'div'
                 );
 
 
-            wrap.className =
-                'wheel-card-wrap';
+            iconWrap.className =
+                'wheel-card-wrap slot-icon';
 
 
-            wrap.style.width =
+            iconWrap.style.width =
                 cardWidthPx + 'px';
 
 
-            /*
-             * Kartlar başlangıçta gizli.
-             * Böylece ikonların arkasında
-             * onecard.png görünmez.
-             */
-            wrap.style.visibility =
-                'hidden';
-
-
-            const img =
+            const iconImg =
                 document.createElement(
                     'img'
                 );
 
 
-            img.className =
+            iconImg.className =
                 'wheel-card';
 
 
-            img.src =
-                'onecard.png';
+            iconImg.src =
+                ICON_SRCS[col];
 
 
-            wrap.appendChild(
-                img
+            iconWrap.appendChild(
+                iconImg
             );
 
 
             containers[col].appendChild(
-                wrap
+                iconWrap
             );
 
 
-            cols[col].cards.push(
-                wrap
-            );
-
-        }
-
-    }
+            cols[col].iconEl =
+                iconWrap;
 
 
-    /* ════════════════════════════════════════════════════════════
-       8. RENDER
-    ════════════════════════════════════════════════════════════ */
+            /* ── Kartlar ────────────────────────────────────── */
 
-    function renderColumn(colIdx) {
-
-        const col =
-            cols[colIdx];
-
-
-        const containerH =
-            containers[colIdx].clientHeight;
-
-
-        const centerY =
-            containerH / 2 -
-            actualCardHeight / 2;
-
-
-        /* ── İkon ───────────────────────────────────────────── */
-
-        const iconY =
-            centerY +
-            col.offsetY;
-
-
-        if (col.iconEl) {
-
-            if (
-                iconY >
-                containerH +
-                actualCardHeight
+            for (
+                let i = 0;
+                i < NUM_CARDS;
+                i++
             ) {
 
-                col.iconEl.style.display =
-                    'none';
-
-            } else {
-
-                col.iconEl.style.display =
-                    'flex';
+                const wrap =
+                    document.createElement(
+                        'div'
+                    );
 
 
-                col.iconEl.style.transform =
-                    `translate(-50%, ${iconY}px)`;
+                wrap.className =
+                    'wheel-card-wrap';
+
+
+                wrap.style.width =
+                    cardWidthPx + 'px';
+
+
+                wrap.style.visibility =
+                    'hidden';
+
+
+                const img =
+                    document.createElement(
+                        'img'
+                    );
+
+
+                img.className =
+                    'wheel-card';
+
+
+                img.src =
+                    'onecard.png';
+
+
+                wrap.appendChild(
+                    img
+                );
+
+
+                containers[col].appendChild(
+                    wrap
+                );
+
+
+                cols[col].cards.push(
+                    wrap
+                );
 
             }
 
         }
 
 
-        /* ── Kartlar ────────────────────────────────────────── */
+        /* ════════════════════════════════════════════════════════
+           8. RENDER
+        ════════════════════════════════════════════════════════ */
 
-        let minDist = Infinity;
-        let activeIndex = -1;
+        function renderColumn(
+            colIdx
+        ) {
+
+            const col =
+                cols[colIdx];
 
 
-        col.cards.forEach(
-            (wrap, i) => {
+            const containerH =
+                containers[colIdx]
+                    .clientHeight;
 
-                if (col.hasSpun) {
 
-                    wrap.style.visibility =
-                        'visible';
+            const centerY =
+                containerH / 2 -
+                actualCardHeight / 2;
+
+
+            /* ── İkon ───────────────────────────────────────── */
+
+            const iconY =
+                centerY +
+                col.offsetY;
+
+
+            if (col.iconEl) {
+
+                if (
+                    iconY >
+                    containerH +
+                    actualCardHeight
+                ) {
+
+                    col.iconEl.style.display =
+                        'none';
+
+                } else {
+
+                    col.iconEl.style.display =
+                        'flex';
+
+
+                    col.iconEl.style.transform =
+                        `translate(-50%, ${iconY}px)`;
 
                 }
 
-
-                let y =
-                    (
-                        i * cardHeight +
-                        col.offsetY
-                    ) %
-                    cardsTotalHeight;
+            }
 
 
-                if (y < 0) {
+            /* ── Kartlar ───────────────────────────────────── */
 
-                    y +=
+            let minDist =
+                Infinity;
+
+
+            let activeIndex =
+                -1;
+
+
+            col.cards.forEach(
+                (wrap, i) => {
+
+                    if (col.hasSpun) {
+
+                        wrap.style.visibility =
+                            'visible';
+
+                    }
+
+
+                    let y =
+                        (
+                            i *
+                            cardHeight +
+                            col.offsetY
+                        ) %
                         cardsTotalHeight;
 
+
+                    if (y < 0) {
+
+                        y +=
+                            cardsTotalHeight;
+
+                    }
+
+
+                    const d1 =
+                        Math.abs(
+                            y -
+                            centerY
+                        );
+
+
+                    const d2 =
+                        Math.abs(
+                            y -
+                            cardsTotalHeight -
+                            centerY
+                        );
+
+
+                    const d3 =
+                        Math.abs(
+                            y +
+                            cardsTotalHeight -
+                            centerY
+                        );
+
+
+                    const dist =
+                        Math.min(
+                            d1,
+                            d2,
+                            d3
+                        );
+
+
+                    let renderY =
+                        y;
+
+
+                    if (
+                        dist === d2
+                    ) {
+
+                        renderY =
+                            y -
+                            cardsTotalHeight;
+
+                    }
+
+
+                    if (
+                        dist === d3
+                    ) {
+
+                        renderY =
+                            y +
+                            cardsTotalHeight;
+
+                    }
+
+
+                    wrap.style.transform =
+                        `translate(-50%, ${renderY}px)`;
+
+
+                    wrap.style.zIndex =
+                        100 -
+                        Math.floor(
+                            dist / 10
+                        );
+
+
+                    if (
+                        dist <
+                        minDist
+                    ) {
+
+                        minDist =
+                            dist;
+
+                        activeIndex =
+                            i;
+
+                    }
+
                 }
+            );
 
 
-                const d1 =
-                    Math.abs(
-                        y - centerY
-                    );
+            /* ── Tik ────────────────────────────────────────── */
 
+            if (
+                activeIndex !==
+                    col.lastIndex &&
+                col.hasSpun &&
+                !col.snapDone &&
+                Math.abs(
+                    col.velocity
+                ) > 8
+            ) {
 
-                const d2 =
-                    Math.abs(
-                        y -
-                        cardsTotalHeight -
-                        centerY
-                    );
-
-
-                const d3 =
-                    Math.abs(
-                        y +
-                        cardsTotalHeight -
-                        centerY
-                    );
-
-
-                const dist =
+                playTickSound(
                     Math.min(
-                        d1,
-                        d2,
-                        d3
-                    );
+                        Math.abs(
+                            col.velocity
+                        ) / 60,
+                        1
+                    )
+                );
 
 
-                let renderY = y;
+                col.lastIndex =
+                    activeIndex;
+
+            }
 
 
-                if (dist === d2) {
+            return activeIndex;
 
-                    renderY =
-                        y -
-                        cardsTotalHeight;
-
-                }
+        }
 
 
-                if (dist === d3) {
+        /* ════════════════════════════════════════════════════════
+           9. ANİMASYON
+        ════════════════════════════════════════════════════════ */
 
-                    renderY =
-                        y +
-                        cardsTotalHeight;
-
-                }
-
-
-                wrap.style.transform =
-                    `translate(-50%, ${renderY}px)`;
+        let resultSent =
+            false;
 
 
-                wrap.style.zIndex =
-                    100 -
-                    Math.floor(
-                        dist / 10
-                    );
+        let spinTimeoutId =
+            null;
+
+
+        let isSpinning =
+            false;
+
+
+        const turnSpinBtn =
+            document.getElementById(
+                'turnSpinBtn'
+            );
+
+
+        function allStopped() {
+
+            return cols.every(
+                c => c.snapDone
+            );
+
+        }
+
+
+        function allSpun() {
+
+            return cols.every(
+                c => c.hasSpun
+            );
+
+        }
+
+
+        function animate() {
+
+            for (
+                let i = 0;
+                i < COL_COUNT;
+                i++
+            ) {
+
+                const col =
+                    cols[i];
+
+
+                const containerH =
+                    containers[i]
+                        .clientHeight;
 
 
                 if (
-                    dist < minDist
+                    !col.isSnapping
                 ) {
 
-                    minDist =
-                        dist;
+                    col.offsetY +=
+                        col.velocity;
 
-                    activeIndex =
-                        i;
+
+                    col.velocity *=
+                        0.985;
+
+
+                    if (
+                        Math.abs(
+                            col.velocity
+                        ) < 1.5 &&
+                        col.hasSpun
+                    ) {
+
+                        col.velocity =
+                            0;
+
+
+                        col.isSnapping =
+                            true;
+
+                    }
+
+                } else {
+
+                    const centerY =
+                        containerH / 2 -
+                        actualCardHeight / 2;
+
+
+                    const targetOffY =
+                        centerY -
+                        Math.round(
+                            (
+                                centerY -
+                                col.offsetY
+                            ) /
+                            cardHeight
+                        ) *
+                        cardHeight;
+
+
+                    const diff =
+                        targetOffY -
+                        col.offsetY;
+
+
+                    col.offsetY +=
+                        diff * 0.15;
+
+
+                    if (
+                        Math.abs(
+                            diff
+                        ) < 0.5 &&
+                        !col.snapDone
+                    ) {
+
+                        col.offsetY =
+                            targetOffY;
+
+
+                        col.snapDone =
+                            true;
+
+                    }
+
+                }
+
+
+                if (
+                    !col.snapDone
+                ) {
+
+                    renderColumn(i);
 
                 }
 
             }
-        );
 
 
-        /* ── Tik sesi ───────────────────────────────────────── */
+            if (
+                allStopped() &&
+                allSpun() &&
+                !resultSent
+            ) {
 
-        if (
-            activeIndex !==
-                col.lastIndex &&
-            col.hasSpun &&
-            !col.snapDone &&
-            Math.abs(
-                col.velocity
-            ) > 8
-        ) {
+                resultSent =
+                    true;
 
-            playTickSound(
-                Math.min(
-                    Math.abs(
-                        col.velocity
-                    ) / 60,
-                    1
-                )
+
+                isSpinning =
+                    false;
+
+
+                stopSpinSound();
+                playStopSound();
+
+
+                if (
+                    navigator.vibrate
+                ) {
+
+                    navigator.vibrate(
+                        50
+                    );
+
+                }
+
+
+                cols.forEach(
+                    c => {
+
+                        c.hasSpun =
+                            false;
+
+                        c.snapDone =
+                            false;
+
+                    }
+                );
+
+
+                spinTimeoutId =
+                    setTimeout(
+                        () => {
+
+                            const drawnCards =
+                                [];
+
+
+                            const usedIds =
+                                new Set();
+
+
+                            while (
+                                drawnCards.length <
+                                COL_COUNT
+                            ) {
+
+                                const id =
+                                    Math.floor(
+                                        Math.random() *
+                                        NUM_CARDS
+                                    );
+
+
+                                if (
+                                    !usedIds.has(
+                                        id
+                                    )
+                                ) {
+
+                                    usedIds.add(
+                                        id
+                                    );
+
+
+                                    drawnCards.push({
+                                        id: id,
+                                        reversed:
+                                            Math.random() <
+                                            0.5
+                                    });
+
+                                }
+
+                            }
+
+
+                            sessionStorage.setItem(
+                                'tarotDrawnCards',
+                                JSON.stringify(
+                                    drawnCards
+                                )
+                            );
+
+
+                            sessionStorage.setItem(
+                                'tarotReadingType',
+                                'three'
+                            );
+
+
+                            window.location.href =
+                                'ad.html';
+
+                        },
+                        1000
+                    );
+
+            }
+
+
+            requestAnimationFrame(
+                animate
             );
-
-
-            col.lastIndex =
-                activeIndex;
 
         }
 
 
-        return activeIndex;
-
-    }
-
-
-    /* ════════════════════════════════════════════════════════════
-       9. ANİMASYON
-    ════════════════════════════════════════════════════════════ */
-
-    let resultSent = false;
-    let spinTimeoutId = null;
-    let isSpinning = false;
-
-
-    const turnSpinBtn =
-        document.getElementById(
-            'turnSpinBtn'
-        );
-
-
-    function allStopped() {
-
-        return cols.every(
-            c => c.snapDone
-        );
-
-    }
-
-
-    function allSpun() {
-
-        return cols.every(
-            c => c.hasSpun
-        );
-
-    }
-
-
-    function animate() {
+        /* ════════════════════════════════════════════════════════
+           10. BAŞLAT
+        ════════════════════════════════════════════════════════ */
 
         for (
             let i = 0;
@@ -1530,196 +1821,7 @@
             i++
         ) {
 
-            const col =
-                cols[i];
-
-
-            const containerH =
-                containers[i]
-                    .clientHeight;
-
-
-            if (
-                !col.isSnapping
-            ) {
-
-                col.offsetY +=
-                    col.velocity;
-
-
-                col.velocity *=
-                    0.985;
-
-
-                if (
-                    Math.abs(
-                        col.velocity
-                    ) < 1.5 &&
-                    col.hasSpun
-                ) {
-
-                    col.velocity = 0;
-
-                    col.isSnapping =
-                        true;
-
-                }
-
-            } else {
-
-                const centerY =
-                    containerH / 2 -
-                    actualCardHeight / 2;
-
-
-                const targetOffY =
-                    centerY -
-                    Math.round(
-                        (
-                            centerY -
-                            col.offsetY
-                        ) /
-                        cardHeight
-                    ) *
-                    cardHeight;
-
-
-                const diff =
-                    targetOffY -
-                    col.offsetY;
-
-
-                col.offsetY +=
-                    diff * 0.15;
-
-
-                if (
-                    Math.abs(
-                        diff
-                    ) < 0.5 &&
-                    !col.snapDone
-                ) {
-
-                    col.offsetY =
-                        targetOffY;
-
-
-                    col.snapDone =
-                        true;
-
-                }
-
-            }
-
-
-            if (
-                !col.snapDone
-            ) {
-
-                renderColumn(i);
-
-            }
-
-        }
-
-
-        if (
-            allStopped() &&
-            allSpun() &&
-            !resultSent
-        ) {
-
-            resultSent = true;
-            isSpinning = false;
-
-
-            stopSpinSound();
-            playStopSound();
-
-
-            if (
-                navigator.vibrate
-            ) {
-
-                navigator.vibrate(
-                    50
-                );
-
-            }
-
-
-            cols.forEach(c => {
-
-                c.hasSpun = false;
-                c.snapDone = false;
-
-            });
-
-
-            spinTimeoutId =
-                setTimeout(
-                    () => {
-
-                        const drawnCards = [];
-                        const usedIds =
-                            new Set();
-
-
-                        while (
-                            drawnCards.length <
-                            COL_COUNT
-                        ) {
-
-                            const id =
-                                Math.floor(
-                                    Math.random() *
-                                    NUM_CARDS
-                                );
-
-
-                            if (
-                                !usedIds.has(
-                                    id
-                                )
-                            ) {
-
-                                usedIds.add(
-                                    id
-                                );
-
-
-                                drawnCards.push({
-                                    id: id,
-                                    reversed:
-                                        Math.random() <
-                                        0.5
-                                });
-
-                            }
-
-                        }
-
-
-                        sessionStorage.setItem(
-                            'tarotDrawnCards',
-                            JSON.stringify(
-                                drawnCards
-                            )
-                        );
-
-
-                        sessionStorage.setItem(
-                            'tarotReadingType',
-                            'three'
-                        );
-
-
-                        window.location.href =
-                            'ad.html';
-
-                    },
-                    1000
-                );
+            renderColumn(i);
 
         }
 
@@ -1728,106 +1830,92 @@
             animate
         );
 
-    }
+
+        /* ════════════════════════════════════════════════════════
+           11. DÖNDÜR
+        ════════════════════════════════════════════════════════ */
+
+        turnSpinBtn.addEventListener(
+            'click',
+            () => {
+
+                if (
+                    isSpinning
+                ) {
+
+                    return;
+
+                }
 
 
-    /* ════════════════════════════════════════════════════════════
-       10. BAŞLAT
-    ════════════════════════════════════════════════════════════ */
-
-    for (
-        let i = 0;
-        i < COL_COUNT;
-        i++
-    ) {
-
-        renderColumn(i);
-
-    }
+                initAudio();
 
 
-    requestAnimationFrame(
-        animate
-    );
-
-
-    /* ════════════════════════════════════════════════════════════
-       11. DÖNDÜR
-    ════════════════════════════════════════════════════════════ */
-
-    turnSpinBtn.addEventListener(
-        'click',
-        () => {
-
-            if (
-                isSpinning
-            ) {
-
-                return;
-
-            }
-
-
-            initAudio();
-
-
-            if (
-                spinTimeoutId
-            ) {
-
-                clearTimeout(
+                if (
                     spinTimeoutId
-                );
+                ) {
 
-                spinTimeoutId =
-                    null;
-
-            }
-
-
-            isSpinning = true;
-            resultSent = false;
-
-
-            cols.forEach(
-                col => {
-
-                    col.cards.forEach(
-                        card => {
-
-                            card.style.visibility =
-                                'visible';
-
-                        }
+                    clearTimeout(
+                        spinTimeoutId
                     );
 
 
-                    col.isSnapping =
-                        false;
-
-                    col.snapDone =
-                        false;
-
-                    col.lastIndex =
-                        -1;
-
-                    col.hasSpun =
-                        true;
-
-
-                    col.velocity =
-                        120 +
-                        Math.random() *
-                        40;
+                    spinTimeoutId =
+                        null;
 
                 }
-            );
 
 
-            startSpinSound();
+                isSpinning =
+                    true;
 
-        }
-    );
+
+                resultSent =
+                    false;
+
+
+                cols.forEach(
+                    col => {
+
+                        col.cards.forEach(
+                            card => {
+
+                                card.style.visibility =
+                                    'visible';
+
+                            }
+                        );
+
+
+                        col.isSnapping =
+                            false;
+
+
+                        col.snapDone =
+                            false;
+
+
+                        col.lastIndex =
+                            -1;
+
+
+                        col.hasSpun =
+                            true;
+
+
+                        col.velocity =
+                            120 +
+                            Math.random() *
+                            40;
+
+                    }
+                );
+
+
+                startSpinSound();
+
+            }
+        );
 
     </script>
 
