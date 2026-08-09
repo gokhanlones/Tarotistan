@@ -45,30 +45,6 @@
         .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; display: flex; flex-direction: column; align-items: center; }
         .cards-area.single { justify-content: center; }
 
-        /* ---- Pozisyon Etiketi ---- */
-        .card-position {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 7px;
-            width: 100%;
-        }
-        .card-position img {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-        .card-position span {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #444;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
         .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
         .card-slot.reversed { transform: rotate(180deg); }
         .card-bg { position: absolute; inset: 0; }
@@ -158,12 +134,34 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Pozisyon meta verileri: ikon + dil bazlı etiket
-        const POSITIONS = [
-            { icon: 'history.png', tr: 'Geçmiş', en: 'Past'    },
-            { icon: 'now.png',     tr: 'Şimdi',  en: 'Present' },
-            { icon: 'coming.png',  tr: 'Gelecek', en: 'Future'  },
+        // AI yorum metnindeki başlıkların yanına eklenecek ikonlar
+        const POSITION_ICONS = [
+            { keywords: ['Geçmiş', 'Past'],    icon: 'history.png' },
+            { keywords: ['Şimdi', 'Present'],  icon: 'now.png'     },
+            { keywords: ['Gelecek', 'Future'], icon: 'coming.png'  },
         ];
+
+        // AI metnindeki başlıkların yanına ikon enjekte eder
+        function renderAiText(text) {
+            // XSS'e karşı HTML karakterlerini kaçır
+            let html = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Her başlık kelimesinin başına ilgili ikonu ekle
+            POSITION_ICONS.forEach(({ keywords, icon }) => {
+                keywords.forEach(kw => {
+                    // Kelime sınırı kontrolü ile eşleşir (büyük/küçük harf duyarsız)
+                    const re = new RegExp(`(${kw})`, 'g');
+                    html = html.replace(re,
+                        `<img src="${icon}" style="width:15px;height:15px;object-fit:contain;vertical-align:middle;margin-right:4px;margin-bottom:2px;">$1`
+                    );
+                });
+            });
+
+            return html;
+        }
 
         function toggleSidebar() {
             const open = sidebar.classList.contains('active');
@@ -277,8 +275,8 @@
 
                 const aiDescText = document.getElementById('aiDescText');
                 if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-                    aiDescText.textContent = aiText;
-                    aiDescText.className   = 'ai-text';
+                    aiDescText.innerHTML = renderAiText(aiText);
+                    aiDescText.className = 'ai-text';
                 } else {
                     aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
                     aiDescText.className   = 'ai-empty';
@@ -292,30 +290,18 @@
         }
 
         function renderCards(cards, type, tarotData) {
-            const area    = document.getElementById('cardsArea');
-            const isThree = type === 'three';
-            const lang    = typeof getLang === 'function' ? getLang() : 'tr';
+            const area = document.getElementById('cardsArea');
+            const lang = typeof getLang === 'function' ? getLang() : 'tr';
 
-            area.className = 'cards-area ' + (isThree ? 'three' : 'single');
+            area.className = 'cards-area ' + (type === 'single' ? 'single' : 'three');
 
-            cards.forEach((drawn, idx) => {
+            cards.forEach(drawn => {
                 const info = tarotData.cards.find(c => c.id === drawn.id);
                 if (!info) return;
 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'card-wrapper';
 
-                // --- Pozisyon etiketi: sadece 3'lü okumada ---
-                if (isThree && POSITIONS[idx]) {
-                    const pos  = POSITIONS[idx];
-                    const label = lang === 'tr' ? pos.tr : pos.en;
-                    const posEl = document.createElement('div');
-                    posEl.className = 'card-position';
-                    posEl.innerHTML = `<img src="${pos.icon}" alt="${label}"><span>${label}</span>`;
-                    wrapper.appendChild(posEl);
-                }
-
-                // --- Kart ---
                 const reversedBadge = drawn.reversed
                     ? `<div class="card-badge">${typeof t === 'function' ? t('resultReversedBadge') : 'Ters'}</div>`
                     : '';
