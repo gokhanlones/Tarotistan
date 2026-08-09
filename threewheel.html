@@ -201,7 +201,7 @@
         </div>
 
         <button class="turn-spin-btn" id="turnSpinBtn">
-            <img src="turn.png" alt="Döndür">
+            <img src="finger.png" alt="Döndür">
         </button>
     </div>
 
@@ -369,13 +369,9 @@
         let resultSent = false;
         let spinTimeoutId = null;
         let isSpinning = false;
-        let btnAngle = 0;
         const turnSpinBtn = document.getElementById('turnSpinBtn');
-        const turnSpinImg = turnSpinBtn.querySelector('img');
 
         function animate() {
-            let totalVelocity = 0;
-
             for (let i = 0; i < 3; i++) {
                 const col = cols[i];
                 const containerH = containers[i].clientHeight;
@@ -393,12 +389,6 @@
                 }
 
                 if (!col.snapDone) renderColumn(i);
-                totalVelocity += Math.abs(col.velocity);
-            }
-
-            if (isSpinning && totalVelocity > 0) {
-                btnAngle += totalVelocity * 0.4;
-                turnSpinImg.style.transform = `rotate(${btnAngle}deg)`;
             }
 
             if (allStopped() && allSpun() && !resultSent) {
