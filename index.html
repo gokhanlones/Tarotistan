@@ -33,14 +33,22 @@
         }
 
         .logo-container {
+            width: 220px;
             animation: fadeInScale 1s ease-out forwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .logo {
-            width: 220px;
-            height: 220px;
-            object-fit: contain;
-            display: block;
+        .logo-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #000;
+            text-align: center;
+            width: 100%;
+            line-height: 1;
         }
 
         @keyframes fadeInScale {
@@ -96,7 +104,7 @@
 <body>
     <div class="splash-wrapper">
         <div class="logo-container" id="logoContainer">
-            <img src="logo.png" alt="Tarotistan" class="logo" id="splashLogo">
+            <div class="logo-text">TAROT'S</div>
         </div>
         <div class="loader" id="loader">
             <div class="loader-dot"></div>
@@ -113,22 +121,14 @@
             const CHECK_INTERVAL = 3000;
             const MIN_DISPLAY_TIME = 2500;
 
-            let logoLoaded = false;
+            let logoLoaded = true;
             let connectionOk = false;
             let minTimePassed = false;
             let firestoreChecked = false;
             let lastReadingTime = null;
 
-            const logo = document.getElementById('splashLogo');
-            logo.onload = function() {
-                logoLoaded = true;
-                document.getElementById('logoContainer').classList.add('loaded');
-                tryNavigate();
-            };
-            logo.onerror = function() {
-                logoLoaded = true;
-                tryNavigate();
-            };
+            const logoContainer = document.getElementById('logoContainer');
+            logoContainer.classList.add('loaded');
 
             setTimeout(() => {
                 minTimePassed = true;
@@ -159,7 +159,6 @@
                 }
             }
 
-            // Firestore'dan son çekim tarihini kontrol et
             async function checkFirestoreAndNavigate() {
                 if (firestoreChecked) return;
                 
@@ -179,12 +178,10 @@
                                 const lastData = lastQuery.docs[0].data();
                                 if (lastData.createdAt) {
                                     lastReadingTime = lastData.createdAt.toDate ? lastData.createdAt.toDate().getTime() : new Date(lastData.createdAt).getTime();
-                                    // SessionStorage'a kaydet
                                     sessionStorage.setItem('tarotLastReadingTime', lastReadingTime.toString());
                                 }
                             }
 
-                            // Kullanıcı zaten giriş yapmış: doğrulama ve terms durumuna göre yönlendir
                             if (!user.emailVerified) {
                                 TARGET_PAGE = 'auth.html';
                             } else {
@@ -201,7 +198,6 @@
                     tryNavigate();
                 });
                 
-                // Auth kontrolü için timeout (kullanıcı giriş yapmamışsa da devam et)
                 setTimeout(() => {
                     if (!firestoreChecked) {
                         firestoreChecked = true;
