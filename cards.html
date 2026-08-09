@@ -204,6 +204,9 @@
         });
 
         function getIconForIndex(index) {
+            if (readingType === 'single') {
+                return 'question.png';
+            }
             const icons = ['history.png', 'now.png', 'coming.png'];
             return icons[index] || icons[icons.length - 1];
         }
