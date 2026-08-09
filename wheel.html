@@ -275,7 +275,6 @@
     </div>
 
     <script>
-        const lang = typeof getLang === 'function' ? getLang() : 'tr';
         document.getElementById('sidebarCardsText').textContent  = typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
         document.getElementById('sidebarLogoutText').textContent = typeof t === 'function' ? t('sidebarLogout') : 'Çıkış';
         document.getElementById('navHome').setAttribute('aria-label', typeof t === 'function' ? t('navHomeLabel') : 'Anasayfa');
@@ -361,9 +360,9 @@
         let isSnapping = false;
         let snapDone = false, hasSpun = false;
 
-        const slotWidth       = container.clientWidth;
-        const cardGap         = 12;
-        const cardWidthPx     = (slotWidth - 2 * cardGap) / 3;
+        const slotWidth        = container.clientWidth;
+        const cardGap          = 12;
+        const cardWidthPx      = (slotWidth - 2 * cardGap) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
 
         container.style.height = actualCardHeight + 'px';
@@ -375,10 +374,14 @@
         document.querySelector('.selector-right').style.right = lineOffset + 'px';
 
         const cardHeight  = actualCardHeight + 15;
-        const totalItems  = numCards + 1;
+        const totalItems  = numCards + 1;   // 78 kart + 1 question ikonu
         const totalHeight = totalItems * cardHeight;
 
-        let offsetY = 0, velocity = 0;
+        // FIX: question.png (index 78) başlangıçta merkeze gelsin
+        // centerY = containerH/2 - actualCardHeight/2 = 0 (containerH === actualCardHeight)
+        // icon y = (78 * cardHeight) + offsetY → 0 olması için offsetY = -(78 * cardHeight)
+        let offsetY  = -(numCards * cardHeight);
+        let velocity = 0;
 
         for (let i = 0; i < totalItems; i++) {
             const wrap = document.createElement('div');
@@ -432,7 +435,8 @@
             const containerH = container.clientHeight;
 
             if (!isSnapping) {
-                offsetY += velocity; velocity *= 0.985;
+                offsetY  += velocity;
+                velocity *= 0.985;
                 if (Math.abs(velocity) < 1.5 && hasSpun) { velocity = 0; isSnapping = true; }
             } else {
                 const centerY    = containerH / 2 - actualCardHeight / 2;
@@ -440,10 +444,12 @@
                 const diff       = targetOffY - offsetY;
                 offsetY += diff * 0.15;
                 if (Math.abs(diff) < 0.5 && !snapDone) {
-                    offsetY = targetOffY; snapDone = true;
+                    offsetY  = targetOffY;
+                    snapDone = true;
                     renderCards();
                     isSpinning = false;
-                    stopSpinSound(); playStopSound();
+                    stopSpinSound();
+                    playStopSound();
                     if (navigator.vibrate) navigator.vibrate(50);
                     setTimeout(() => {
                         const drawnCard = { id: Math.floor(Math.random() * 78), reversed: Math.random() < 0.5 };
@@ -467,12 +473,12 @@
             if (isSpinning) return;
 
             initAudio();
-            isSpinning = true;
-            hasSpun = true;
-            snapDone = false;
-            isSnapping = false;
+            isSpinning  = true;
+            hasSpun     = true;
+            snapDone    = false;
+            isSnapping  = false;
             lastCardIndex = -1;
-            velocity = 120 + Math.random() * 30;
+            velocity    = 120 + Math.random() * 30;
             startSpinSound();
         });
     </script>
