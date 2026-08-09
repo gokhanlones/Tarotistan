@@ -42,8 +42,32 @@
         .intent-text { font-size: 1rem; color: #000; font-style: italic; line-height: 1.4; }
 
         .cards-area { width: 100%; display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
-        .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; }
+        .card-wrapper { width: calc((100% - 32px) / 3); max-width: 200px; display: flex; flex-direction: column; align-items: center; }
         .cards-area.single { justify-content: center; }
+
+        /* ---- Pozisyon Etiketi ---- */
+        .card-position {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 7px;
+            width: 100%;
+        }
+        .card-position img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .card-position span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #444;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
 
         .card-slot { width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e8e8ed; background: #ffffff; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
         .card-slot.reversed { transform: rotate(180deg); }
@@ -129,24 +153,24 @@
 
     <script>
         const auth = firebase.auth();
-        const db = firebase.firestore();
+        const db   = firebase.firestore();
         const menuBtn = document.getElementById('menuBtn');
-
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        function toggleSidebar() {
-            if (sidebar.classList.contains('active')) {
-                sidebarOverlay.classList.remove('active');
-                sidebar.classList.remove('active');
-                menuBtn.classList.remove('active');
-            } else {
-                sidebarOverlay.classList.add('active');
-                sidebar.classList.add('active');
-                menuBtn.classList.add('active');
-            }
-        }
+        // Pozisyon meta verileri: ikon + dil bazlı etiket
+        const POSITIONS = [
+            { icon: 'history.png', tr: 'Geçmiş', en: 'Past'    },
+            { icon: 'now.png',     tr: 'Şimdi',  en: 'Present' },
+            { icon: 'coming.png',  tr: 'Gelecek', en: 'Future'  },
+        ];
 
+        function toggleSidebar() {
+            const open = sidebar.classList.contains('active');
+            sidebarOverlay.classList.toggle('active', !open);
+            sidebar.classList.toggle('active', !open);
+            menuBtn.classList.toggle('active', !open);
+        }
         menuBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
@@ -159,10 +183,10 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof t === 'function') {
-                document.getElementById('topbarTitle').textContent = t('dashboardTitle');
-                document.getElementById('intentLabel').textContent = t('resultIntentLabel');
-                document.getElementById('detailCloseBtn').textContent = t('closeBtn');
-                document.getElementById('sidebarCardsText').textContent = t('sidebarCards');
+                document.getElementById('topbarTitle').textContent     = t('dashboardTitle');
+                document.getElementById('intentLabel').textContent     = t('resultIntentLabel');
+                document.getElementById('detailCloseBtn').textContent  = t('closeBtn');
+                document.getElementById('sidebarCardsText').textContent  = t('sidebarCards');
                 document.getElementById('sidebarLogoutText').textContent = t('sidebarLogout');
             }
         });
@@ -185,105 +209,139 @@
 
         function showEmptyState() {
             document.getElementById('intentDisplay').textContent = (typeof t === 'function' ? t('resultNotSpecified') : 'Henüz okuma yapılmamış');
-            document.getElementById('aiDescText').textContent = (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
+            document.getElementById('aiDescText').textContent    = (typeof t === 'function' ? t('aiFallback') : 'Ana sayfaya giderek ilk tarot okumanızı yapabilirsiniz.');
             document.getElementById('cardsArea').innerHTML = '';
             showContent();
         }
+
         async function initResult(uid) {
-    try {
-        const response = await fetch('tarot_cards.json');
-        if (!response.ok) throw new Error("tarot_cards.json dosyasına erişilemedi.");
-        const tarotData = await response.json();
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const readingId = urlParams.get('id');
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const readingId = urlParams.get('id');
+                // JSON ve Firestore çağrısını paralel başlat
+                const jsonFetch = fetch('tarot_cards.json');
+                const firestoreFetch = readingId
+                    ? withTimeout(db.collection('users').doc(uid).collection('readings').doc(readingId).get(), 10000)
+                    : null;
 
-        let cards = [];
-        let intent = '';
-        let type = 'single';
-        let aiText = '';
-        let readingTimestamp = null;
+                const response = await jsonFetch;
+                if (!response.ok) throw new Error('tarot_cards.json dosyasına erişilemedi.');
+                const tarotData = await response.json();
 
-        // readingId varsa HER ZAMAN Firestore'dan oku
-        if (readingId) {
-            const snap = await withTimeout(
-                db.collection('users').doc(uid).collection('readings').doc(readingId).get(),
-                10000
-            );
-            if (snap.exists) {
-                const data = snap.data();
-                cards = data.cards || [];
-                intent = data.intent || '';
-                type = data.type || 'single';
-                aiText = data.aiInterpretation || '';
-                readingTimestamp = data.createdAt || null;
-            }
-        }
+                let cards = [], intent = '', type = 'single', aiText = '', readingTimestamp = null;
 
-        // Firestore'dan kart gelmediyse sessionStorage'a bak
-        if (cards.length === 0) {
-            cards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-            intent = sessionStorage.getItem('tarotIntent') || '';
-            type = sessionStorage.getItem('tarotReadingType') || 'single';
-
-            // readingId de yoksa son kaydı çek
-            if (!readingId) {
-                const last = await withTimeout(
-                    db.collection('users').doc(uid).collection('readings')
-                        .orderBy('createdAt', 'desc').limit(1).get(),
-                    10000
-                );
-                if (!last.empty) {
-                    const data = last.docs[0].data();
-                    cards = data.cards || [];
-                    intent = data.intent || '';
-                    type = data.type || 'single';
-                    aiText = data.aiInterpretation || '';
-                    readingTimestamp = data.createdAt || null;
+                if (firestoreFetch) {
+                    const snap = await firestoreFetch;
+                    if (snap.exists) {
+                        const data = snap.data();
+                        cards            = data.cards            || [];
+                        intent           = data.intent           || '';
+                        type             = data.type             || 'single';
+                        aiText           = data.aiInterpretation || '';
+                        readingTimestamp = data.createdAt        || null;
+                    }
                 }
+
+                if (cards.length === 0) {
+                    cards  = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
+                    intent = sessionStorage.getItem('tarotIntent')      || '';
+                    type   = sessionStorage.getItem('tarotReadingType') || 'single';
+
+                    if (!readingId) {
+                        const last = await withTimeout(
+                            db.collection('users').doc(uid).collection('readings')
+                              .orderBy('createdAt', 'desc').limit(1).get(),
+                            10000
+                        );
+                        if (!last.empty) {
+                            const data = last.docs[0].data();
+                            // sessionStorage'da veri yoksa Firestore'daki son kaydı kullan
+                            if (cards.length === 0) {
+                                cards            = data.cards            || [];
+                                intent           = data.intent           || '';
+                                type             = data.type             || 'single';
+                            }
+                            aiText           = data.aiInterpretation || '';
+                            readingTimestamp = data.createdAt        || null;
+                        }
+                    }
+                }
+
+                if (cards.length === 0) { showEmptyState(); return; }
+
+                document.getElementById('intentDisplay').textContent =
+                    intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
+
+                renderCards(cards, type, tarotData);
+
+                const aiDescText = document.getElementById('aiDescText');
+                if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
+                    aiDescText.textContent = aiText;
+                    aiDescText.className   = 'ai-text';
+                } else {
+                    aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
+                    aiDescText.className   = 'ai-empty';
+                }
+
+                showContent();
+            } catch (e) {
+                console.error('HATA:', e);
+                showContent();
             }
-        }
-
-        if (cards.length === 0) { showEmptyState(); return; }
-
-        document.getElementById('intentDisplay').textContent = intent || (typeof t === 'function' ? t('resultNotSpecified') : 'Niyet belirtilmemiş');
-        renderCards(cards, type, tarotData);
-
-        const aiDescText = document.getElementById('aiDescText');
-        if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-            aiDescText.textContent = aiText;
-            aiDescText.className = 'ai-text';
-        } else {
-            aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
-            aiDescText.className = 'ai-empty';
-        }
-        showContent();
-    } catch (e) { console.error("HATA:", e); showContent(); }
         }
 
         function renderCards(cards, type, tarotData) {
-            const area = document.getElementById('cardsArea');
-            area.className = 'cards-area ' + (type === 'single' ? 'single' : 'three');
-            cards.forEach(drawn => {
+            const area    = document.getElementById('cardsArea');
+            const isThree = type === 'three';
+            const lang    = typeof getLang === 'function' ? getLang() : 'tr';
+
+            area.className = 'cards-area ' + (isThree ? 'three' : 'single');
+
+            cards.forEach((drawn, idx) => {
                 const info = tarotData.cards.find(c => c.id === drawn.id);
                 if (!info) return;
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'card-wrapper';
-                wrapper.innerHTML = `<div class="card-slot ${drawn.reversed ? 'reversed' : ''}"><div class="card-bg"><img src="onecard.png" alt=""></div>${drawn.reversed ? `<div class="card-badge">${(typeof t === 'function' ? t('resultReversedBadge') : 'Ters')}</div>` : ''}<div class="card-name">${(typeof getLang === 'function' && getLang() === 'tr') ? info.name_tr : info.name_en}</div></div>`;
-                wrapper.querySelector('.card-slot').onclick = () => showDetail(info, drawn);
+
+                // --- Pozisyon etiketi: sadece 3'lü okumada ---
+                if (isThree && POSITIONS[idx]) {
+                    const pos  = POSITIONS[idx];
+                    const label = lang === 'tr' ? pos.tr : pos.en;
+                    const posEl = document.createElement('div');
+                    posEl.className = 'card-position';
+                    posEl.innerHTML = `<img src="${pos.icon}" alt="${label}"><span>${label}</span>`;
+                    wrapper.appendChild(posEl);
+                }
+
+                // --- Kart ---
+                const reversedBadge = drawn.reversed
+                    ? `<div class="card-badge">${typeof t === 'function' ? t('resultReversedBadge') : 'Ters'}</div>`
+                    : '';
+                const cardName = lang === 'tr' ? info.name_tr : info.name_en;
+
+                const slot = document.createElement('div');
+                slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
+                slot.innerHTML = `<div class="card-bg"><img src="onecard.png" alt=""></div>${reversedBadge}<div class="card-name">${cardName}</div>`;
+                slot.onclick = () => showDetail(info, drawn);
+
+                wrapper.appendChild(slot);
                 area.appendChild(wrapper);
             });
         }
 
         function showDetail(card, drawn) {
-            document.getElementById('detailTitle').textContent = (typeof getLang === 'function' && getLang() === 'tr') ? card.name_tr : card.name_en;
+            const lang = typeof getLang === 'function' ? getLang() : 'tr';
+            document.getElementById('detailTitle').textContent   = lang === 'tr' ? card.name_tr : card.name_en;
             document.getElementById('detailMeaning').textContent = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
             document.getElementById('detailOverlay').classList.add('active');
         }
 
         function closeDetail() { document.getElementById('detailOverlay').classList.remove('active'); }
         document.getElementById('detailCloseBtn').onclick = closeDetail;
-        document.getElementById('detailOverlay').onclick = (e) => { if(e.target.id === 'detailOverlay') closeDetail(); };
+        document.getElementById('detailOverlay').onclick = (e) => { if (e.target.id === 'detailOverlay') closeDetail(); };
+
         function logout() { auth.signOut().then(() => window.location.href = 'auth.html'); }
     </script>
 </body>
