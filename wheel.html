@@ -110,6 +110,18 @@
             border-radius: 8px;
             z-index: 10;
         }
+        .wheel-card-wrap.slot-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        .wheel-card-wrap.slot-icon img {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+        }
         .wheel-card {
             width: 100%;
             height: 100%;
@@ -230,7 +242,7 @@
         </div>
 
         <button class="turn-spin-btn" id="turnSpinBtn">
-            <img src="turn.png" alt="Döndür">
+            <img src="finger.png" alt="Döndür">
         </button>
     </div>
 
@@ -285,7 +297,7 @@
         function logout() { auth.signOut().then(() => { window.location.href = 'auth.html'; }); }
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-        document.getElementById('handBtn').addEventListener('click', () => { window.location.href = 'cards.html#three'; });
+        document.getElementById('handBtn').addEventListener('click', () => { window.location.href = 'cards.html#single'; });
 
         /* ========== SES ========== */
         let audioCtx = null, noiseNode = null, noiseGain = null;
@@ -363,19 +375,23 @@
         document.querySelector('.selector-right').style.right = lineOffset + 'px';
 
         const cardHeight  = actualCardHeight + 15;
-        const totalHeight = numCards * cardHeight;
+        const totalItems  = numCards + 1;
+        const totalHeight = totalItems * cardHeight;
 
-        let offsetY = Math.random() * totalHeight, velocity = 0;
+        let offsetY = 0, velocity = 0;
 
-        for (let i = 0; i < numCards; i++) {
+        for (let i = 0; i < totalItems; i++) {
             const wrap = document.createElement('div');
             wrap.className = 'wheel-card-wrap';
-            wrap.dataset.index = i;
+            const isIcon = i === (totalItems - 1);
+            if (isIcon) wrap.classList.add('slot-icon');
             wrap.style.width = cardWidthPx + 'px';
+
             const img = document.createElement('img');
-            img.src = 'onecard.png';
+            img.src = isIcon ? 'question.png' : 'onecard.png';
             img.className = 'wheel-card';
             wrap.appendChild(img);
+
             container.appendChild(wrap);
             cards.push(wrap);
         }
@@ -410,9 +426,7 @@
         }
 
         let isSpinning = false;
-        let btnAngle = 0;
         const turnSpinBtn = document.getElementById('turnSpinBtn');
-        const turnSpinImg = turnSpinBtn.querySelector('img');
 
         function animate() {
             const containerH = container.clientHeight;
@@ -441,11 +455,6 @@
             }
 
             if (!snapDone) renderCards();
-
-            if (isSpinning && Math.abs(velocity) > 0) {
-                btnAngle += Math.abs(velocity) * 0.4;
-                turnSpinImg.style.transform = `rotate(${btnAngle}deg)`;
-            }
 
             requestAnimationFrame(animate);
         }
