@@ -134,34 +134,7 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // AI yorum metnindeki başlıkların yanına eklenecek ikonlar
-        const POSITION_ICONS = [
-            { keywords: ['Geçmiş', 'Past'],    icon: 'history.png' },
-            { keywords: ['Şimdi', 'Present'],  icon: 'now.png'     },
-            { keywords: ['Gelecek', 'Future'], icon: 'coming.png'  },
-        ];
 
-        // AI metnindeki başlıkların yanına ikon enjekte eder
-        function renderAiText(text) {
-            // XSS'e karşı HTML karakterlerini kaçır
-            let html = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            // Her başlık kelimesinin başına ilgili ikonu ekle
-            POSITION_ICONS.forEach(({ keywords, icon }) => {
-                keywords.forEach(kw => {
-                    // Kelime sınırı kontrolü ile eşleşir (büyük/küçük harf duyarsız)
-                    const re = new RegExp(`(${kw})`, 'g');
-                    html = html.replace(re,
-                        `<img src="${icon}" style="width:15px;height:15px;object-fit:contain;vertical-align:middle;margin-right:4px;margin-bottom:2px;">$1`
-                    );
-                });
-            });
-
-            return html;
-        }
 
         function toggleSidebar() {
             const open = sidebar.classList.contains('active');
@@ -275,8 +248,8 @@
 
                 const aiDescText = document.getElementById('aiDescText');
                 if (aiText && aiText.trim() !== '' && readingTimestamp && isWithin24h(readingTimestamp)) {
-                    aiDescText.innerHTML = renderAiText(aiText);
-                    aiDescText.className = 'ai-text';
+                    aiDescText.textContent = aiText;
+                    aiDescText.className   = 'ai-text';
                 } else {
                     aiDescText.textContent = typeof t === 'function' ? t('aiFallback') : 'Yorum bulunamadı.';
                     aiDescText.className   = 'ai-empty';
