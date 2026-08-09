@@ -145,6 +145,7 @@
             align-items: center;
             justify-content: center;
             background: transparent;
+            z-index: 150;
         }
         .wheel-card-wrap.slot-icon img {
             width: 50%;
@@ -170,7 +171,7 @@
         }
         .turn-spin-btn img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* ── Bottom Nav ──────────────────────────────────────── */
+        /* ── Bottom Nav ────────────────────────────────        */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: 68px; background: #ffffff;
@@ -296,7 +297,7 @@
 
     <script>
     /* ════════════════════════════════════════════════════════════
-       1. I18N — çeviri metnleri
+       1. I18N — çeviri metinleri
     ════════════════════════════════════════════════════════════ */
     document.getElementById('sidebarCardsText').textContent  =
         typeof t === 'function' ? t('sidebarCards')  : 'Kartlar';
@@ -441,7 +442,6 @@
     ════════════════════════════════════════════════════════════ */
     const NUM_CARDS    = 78;
     const ICON_SRCS    = ['history.png', 'now.png', 'coming.png'];
-    const TOTAL_ITEMS  = NUM_CARDS + 1;   // 0. slot ikon, 1-78 kartlar
     const GAP_PX       = 12;
     const COL_COUNT    = 3;
 
@@ -455,7 +455,7 @@
     const cardWidthPx      = (wrapper.clientWidth - GAP_PX * (COL_COUNT - 1)) / COL_COUNT;
     const actualCardHeight = cardWidthPx * (270 / 160);
     const cardHeight       = actualCardHeight + 15;   // slot adımı (boşluk dahil)
-    const totalHeight      = TOTAL_ITEMS * cardHeight;
+    const cardsTotalHeight = NUM_CARDS * cardHeight;
 
     containers.forEach(c => { c.style.height = actualCardHeight + 'px'; });
 
@@ -463,41 +463,50 @@
        6. ÇARK — kolon durumu
     ════════════════════════════════════════════════════════════ */
     function makeCol() {
-        return { cards: [], offsetY: 0, velocity: 0,
-                 isSnapping: false, snapDone: false,
-                 hasSpun: false, lastIndex: -1 };
+        return {
+            iconEl: null,
+            cards: [],
+            offsetY: 0,
+            velocity: 0,
+            isSnapping: false,
+            snapDone: false,
+            hasSpun: false,
+            lastIndex: -1
+        };
     }
     const cols = [makeCol(), makeCol(), makeCol()];
 
     /* ════════════════════════════════════════════════════════════
-       7. ÇARK — DOM elemanları oluştur
-         FIX: offsetY, centerY - cardHeight olarak başlıyor.
-              Böylece başlangıçta i=1 (ilk kart) ortada durur,
-              i=0 (ikon) bir slot yukarıda gizli kalır.
-              Çark döndüğünde ikon tıpkı kartlar gibi yukarıdan
-              aşağı akar, ekrandan "sökülme" görüntüsü oluşmaz.
+       7. ÇARK — DOM elemanları oluştur (İkon ve Kartlar Ayrık)
     ════════════════════════════════════════════════════════════ */
     for (let col = 0; col < COL_COUNT; col++) {
         const containerH = containers[col].clientHeight;
         const centerY    = containerH / 2 - actualCardHeight / 2;
 
-        // ↓ Düzeltme: ikon başlangıçta bir slot yukarıda, kart ortada
-        cols[col].offsetY = centerY - cardHeight;
+        // Başlangıç offset 0 (İkon tam ortada görünür)
+        cols[col].offsetY = 0;
 
-        for (let i = 0; i < TOTAL_ITEMS; i++) {
+        // İkon Elemanı
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'wheel-card-wrap slot-icon';
+        iconWrap.style.width = cardWidthPx + 'px';
+
+        const iconImg = document.createElement('img');
+        iconImg.className = 'wheel-card';
+        iconImg.src = ICON_SRCS[col];
+        iconWrap.appendChild(iconImg);
+        containers[col].appendChild(iconWrap);
+        cols[col].iconEl = iconWrap;
+
+        // Kart Elemanları (78 Adet)
+        for (let i = 0; i < NUM_CARDS; i++) {
             const wrap = document.createElement('div');
             wrap.className = 'wheel-card-wrap';
             wrap.style.width = cardWidthPx + 'px';
 
             const img = document.createElement('img');
             img.className = 'wheel-card';
-
-            if (i === 0) {
-                wrap.classList.add('slot-icon');
-                img.src = ICON_SRCS[col];
-            } else {
-                img.src = 'onecard.png';
-            }
+            img.src = 'onecard.png';
 
             wrap.appendChild(img);
             containers[col].appendChild(wrap);
@@ -513,21 +522,33 @@
         const containerH = containers[colIdx].clientHeight;
         const centerY    = containerH / 2 - actualCardHeight / 2;
 
-        let minDist    = Infinity;
+        // 1. İkon Konumu (Döndürme başladığında aşağı akar ve ekrandan çıkar)
+        const iconY = centerY + col.offsetY;
+        if (col.iconEl) {
+            if (iconY > containerH + actualCardHeight) {
+                col.iconEl.style.display = 'none';
+            } else {
+                col.iconEl.style.display = 'flex';
+                col.iconEl.style.transform = `translate(-50%, ${iconY}px)`;
+            }
+        }
+
+        // 2. Kartların Akışı ve Konumlandırılması
+        let minDist     = Infinity;
         let activeIndex = -1;
 
         col.cards.forEach((wrap, i) => {
-            let y = (i * cardHeight + col.offsetY) % totalHeight;
-            if (y < 0) y += totalHeight;
+            let y = (i * cardHeight + col.offsetY) % cardsTotalHeight;
+            if (y < 0) y += cardsTotalHeight;
 
             const d1 = Math.abs(y - centerY);
-            const d2 = Math.abs(y - totalHeight - centerY);
-            const d3 = Math.abs(y + totalHeight - centerY);
+            const d2 = Math.abs(y - cardsTotalHeight - centerY);
+            const d3 = Math.abs(y + cardsTotalHeight - centerY);
             const dist = Math.min(d1, d2, d3);
 
             let renderY = y;
-            if (dist === d2) renderY = y - totalHeight;
-            if (dist === d3) renderY = y + totalHeight;
+            if (dist === d2) renderY = y - cardsTotalHeight;
+            if (dist === d3) renderY = y + cardsTotalHeight;
 
             wrap.style.transform = `translate(-50%, ${renderY}px)`;
             wrap.style.zIndex    = 100 - Math.floor(dist / 10);
@@ -535,7 +556,7 @@
             if (dist < minDist) { minDist = dist; activeIndex = i; }
         });
 
-        // Tik sesi: aktif kart değiştiyse ve çark hızla dönüyorsa
+        // Tik sesi
         if (activeIndex !== col.lastIndex &&
             col.hasSpun && !col.snapDone &&
             Math.abs(col.velocity) > 8) {
@@ -593,10 +614,8 @@
             playStopSound();
             if (navigator.vibrate) navigator.vibrate(50);
 
-            // Durumu sıfırla (bir sonraki spin için)
             cols.forEach(c => { c.hasSpun = false; c.snapDone = false; });
 
-            // Kart çekimi & yönlendirme
             spinTimeoutId = setTimeout(() => {
                 const drawnCards = [];
                 const usedIds    = new Set();
@@ -638,7 +657,8 @@
             col.snapDone   = false;
             col.lastIndex  = -1;
             col.hasSpun    = true;
-            col.velocity   = 120 + Math.random() * 30;
+            // Her kolon bağımsız hız alıyor
+            col.velocity   = 120 + Math.random() * 40;
         });
 
         startSpinSound();
