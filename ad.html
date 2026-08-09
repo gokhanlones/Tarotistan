@@ -19,18 +19,9 @@
             align-items: center; justify-content: center;
             padding: 24px;
         }
-        .ad-box {
-            width: 100%; max-width: 320px;
-            text-align: center;
-        }
-        .ad-title {
-            font-size: 1.2rem; font-weight: 700;
-            margin-bottom: 12px;
-        }
-        .ad-desc {
-            font-size: 0.95rem; color: #555;
-            margin-bottom: 32px; line-height: 1.5;
-        }
+        .ad-box { width: 100%; max-width: 320px; text-align: center; }
+        .ad-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+        .ad-desc { font-size: 0.95rem; color: #555; margin-bottom: 32px; line-height: 1.5; }
         .btn-watch {
             width: 100%; padding: 16px;
             background: #000; color: #fff;
@@ -39,57 +30,36 @@
             font-size: 1rem; font-weight: 600;
             cursor: pointer;
         }
-        .btn-watch:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .ad-status {
-            font-size: 0.85rem;
-            color: #888;
-            margin-top: 16px;
-            min-height: 20px;
-        }
+        .btn-watch:disabled { background: #ccc; cursor: not-allowed; }
+        .ad-status { font-size: 0.85rem; color: #888; margin-top: 16px; min-height: 20px; }
         .test-badge {
-            position: fixed;
-            top: 8px; right: 8px;
+            position: fixed; top: 8px; right: 8px;
             background: #ff3b30; color: #fff;
             font-size: 0.7rem; font-weight: 700;
             padding: 4px 10px; border-radius: 4px;
             letter-spacing: 1px;
         }
         .ai-loader {
-            display: none;
-            margin-top: 24px;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            display: none; margin-top: 24px;
+            flex-direction: column; align-items: center; gap: 12px;
         }
         .ai-loader.active { display: flex; }
         .spinner {
             width: 36px; height: 36px;
-            border: 3px solid #e8e8ed;
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            border: 3px solid #e8e8ed; border-top-color: #000;
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .ai-loader-text {
-            font-size: 0.9rem; color: #555;
-        }
+        .ai-loader-text { font-size: 0.9rem; color: #555; }
         .debug-box {
             display: none;
             width: 100%; max-width: 340px;
-            margin-top: 16px;
-            padding: 12px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            color: #00ff00;
+            margin-top: 16px; padding: 12px;
+            background: #1a1a1a; border-radius: 8px;
+            font-size: 0.7rem; color: #00ff00;
             font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
+            max-height: 200px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-all;
         }
         .debug-box.active { display: block; }
     </style>
@@ -98,7 +68,7 @@
 </head>
 <body>
     <div class="test-badge">TEST REKLAM</div>
-    
+
     <div class="ad-box" id="adBox">
         <div class="ad-title">Reklam</div>
         <div class="ad-desc" id="adText"></div>
@@ -114,95 +84,80 @@
     <div class="debug-box" id="debugBox"></div>
 
     <script>
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const auth         = firebase.auth();
+        const db           = firebase.firestore();
         const remoteConfig = firebase.remoteConfig();
 
-        remoteConfig.settings = {
-            minimumFetchIntervalMillis: 0
-        };
+        remoteConfig.settings = { minimumFetchIntervalMillis: 0 };
 
-        const type = sessionStorage.getItem('tarotReadingType');
+        const type   = sessionStorage.getItem('tarotReadingType');
         const intent = sessionStorage.getItem('tarotIntent');
 
-        if (!type || !intent) {
-            window.location.href = 'dashboard.html';
-        }
+        if (!type) { window.location.href = 'dashboard.html'; }
 
-        if (type === 'single') {
-            document.getElementById('adText').textContent =
-                'Tek kart çekimi için kısa bir reklam izliyorsunuz.';
-        } else if (type === 'three') {
-            document.getElementById('adText').textContent =
-                'Üç kart çekimi için reklam izliyorsunuz.';
-        }
+        document.getElementById('adText').textContent = type === 'single'
+            ? 'Tek kart çekimi için kısa bir reklam izliyorsunuz.'
+            : 'Üç kart çekimi için reklam izliyorsunuz.';
 
-        const watchBtn = document.getElementById('watchBtn');
-        const adStatus = document.getElementById('adStatus');
-        const adBox = document.getElementById('adBox');
-        const aiLoader = document.getElementById('aiLoader');
+        const watchBtn    = document.getElementById('watchBtn');
+        const adStatus    = document.getElementById('adStatus');
+        const adBox       = document.getElementById('adBox');
+        const aiLoader    = document.getElementById('aiLoader');
         const aiLoaderText = document.getElementById('aiLoaderText');
-        const debugBox = document.getElementById('debugBox');
+        const debugBox    = document.getElementById('debugBox');
 
         function log(msg) {
             console.log(msg);
-            debugBox.innerHTML += msg + '\n';
-            debugBox.classList.add('active');
+            // Debug box sadece geliştirme ortamında açılır
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                debugBox.innerHTML += msg + '\n';
+                debugBox.classList.add('active');
+            }
         }
 
         function loadRewardedAd() {
-            adStatus.textContent = 'Reklam yükleniyor...';
-            watchBtn.disabled = true;
+            adStatus.textContent  = 'Reklam yükleniyor...';
+            watchBtn.disabled     = true;
             setTimeout(() => {
-                adStatus.textContent = 'Reklam hazır!';
-                watchBtn.disabled = false;
-                watchBtn.textContent = type === 'single' ? 'Reklamı İzle ve Kartı Gör' : 'Reklamı İzle ve Kartları Gör';
+                adStatus.textContent  = 'Reklam hazır!';
+                watchBtn.disabled     = false;
+                watchBtn.textContent  = type === 'single' ? 'Reklamı İzle ve Kartı Gör' : 'Reklamı İzle ve Kartları Gör';
             }, 1500);
         }
 
         function showRewardedAd() {
-            watchBtn.disabled = true;
+            watchBtn.disabled    = true;
             adStatus.textContent = 'Reklam oynatılıyor...';
-            const testAdDuration = 3000;
-            let remaining = testAdDuration / 1000;
+            let remaining = 3;
             const countdown = setInterval(() => {
                 adStatus.textContent = `Reklam: ${remaining} saniye...`;
                 remaining--;
-                if (remaining < 0) {
-                    clearInterval(countdown);
-                    onRewardEarned();
-                }
+                if (remaining < 0) { clearInterval(countdown); onRewardEarned(); }
             }, 1000);
         }
 
         async function onRewardEarned() {
             sessionStorage.setItem('adWatched', 'true');
             sessionStorage.setItem('adWatchedAt', Date.now().toString());
-
             adBox.style.display = 'none';
             aiLoader.classList.add('active');
             adStatus.textContent = '';
-
             await generateAiReadingAndSave();
         }
 
-        // 24 saat kontrolü
         function isOlderThan24h(timestamp) {
             if (!timestamp) return true;
-            const now = Date.now();
             const recordTime = timestamp.toDate ? timestamp.toDate().getTime() : new Date(timestamp).getTime();
-            return (now - recordTime) > (24 * 60 * 60 * 1000);
+            return (Date.now() - recordTime) > (24 * 60 * 60 * 1000);
         }
 
         async function generateAiReadingAndSave() {
-            const drawnCards = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-            const intentText = sessionStorage.getItem('tarotIntent') || '';
+            const drawnCards  = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
+            const intentText  = sessionStorage.getItem('tarotIntent') || '';
             const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
+            const isThree     = readingType === 'three';
 
-            if (!drawnCards.length) {
-                window.location.href = 'dashboard.html';
-                return;
-            }
+            if (!drawnCards.length) { window.location.href = 'dashboard.html'; return; }
 
             try {
                 log('=== BAŞLADI ===');
@@ -223,7 +178,8 @@
                 log('   API Key uzunluk: ' + geminiApiKey.length);
 
                 // 3. Prompt oluştur
-                const positions = readingType === 'single' ? ['Cevap'] : ['Geçmiş', 'Şimdi', 'Gelecek'];
+                const positions = isThree ? ['Geçmiş', 'Şimdi', 'Gelecek'] : ['Cevap'];
+
                 let prompt = `Sen deneyimli, sezgisel ve şifahi bir tarot yorumcususun. Aşağıdaki çekime göre derinlemesine, kişiselleştirilmiş ve profesyonel bir yorum yap.\n\n`;
                 prompt += `Kullanıcının Niyeti: "${intentText}"\n\n`;
                 prompt += `Çekilen Kartlar:\n`;
@@ -232,18 +188,36 @@
                     const card = tarotData.cards.find(c => c.id === drawn.id);
                     if (!card) return;
                     const position = positions[index] || '';
-                    const status = drawn.reversed ? 'Ters' : 'Düz';
-                    const meaning = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
+                    const status   = drawn.reversed ? 'Ters' : 'Düz';
+                    const meaning  = drawn.reversed ? card.reversed_meaning : card.upright_meaning;
                     prompt += `${index + 1}. ${position ? position + ' - ' : ''}${card.name_tr} (${status})\n`;
                     prompt += `   Anlam: ${meaning}\n\n`;
                 });
 
+                // ── Format talimatları ──────────────────────────────────────────
                 prompt += `\nYanıtını TAM OLARAK şu formatta ver:\n\n`;
-                prompt += `Genel Enerji\n\n(Tüm kartların birlikte oluşturduğu temel tema, 2-3 cümle)\n\n`;
-                prompt += `Kart Yorumları\n\n(Her kartı kullanıcının niyetiyle bağlantılı olarak yorumla, her biri 3-4 cümle)\n\n`;
-                prompt += `Sonuç ve Tavsiye\n\n(Kullanıcıya pratik, olumlu ve yapıcı bir öneri, 2-3 cümle)\n\n`;
+                prompt += `Genel Enerji\n\n`;
+                prompt += `(Tüm kartların birlikte oluşturduğu temel tema, 2-3 cümle)\n\n`;
+
+                if (isThree) {
+                    // Üç kart: her pozisyon kendi başlığıyla ayrı bölüm
+                    prompt += `Geçmiş\n\n`;
+                    prompt += `(Geçmiş kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
+                    prompt += `Şimdi\n\n`;
+                    prompt += `(Şimdi kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
+                    prompt += `Gelecek\n\n`;
+                    prompt += `(Gelecek kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
+                } else {
+                    // Tek kart
+                    prompt += `Kart Yorumu\n\n`;
+                    prompt += `(Kartın kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
+                }
+
+                prompt += `Sonuç ve Tavsiye\n\n`;
+                prompt += `(Kullanıcıya pratik, olumlu ve yapıcı bir öneri, 2-3 cümle)\n\n`;
+
                 prompt += `Kurallar:\n`;
-                prompt += `- Başlıkları (Genel Enerji, Kart Yorumları, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
+                prompt += `- Başlıkları (Genel Enerji, Geçmiş, Şimdi, Gelecek, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
                 prompt += `- Başlıkların başına numara (1. 2. 3.) veya herhangi bir işaret koyma.\n`;
                 prompt += `- Başlıkların sonuna iki nokta (:) koyma.\n`;
                 prompt += `- Yıldız (*), kare işaret (#) veya başka hiçbir markdown biçimlendirmesi kullanma, düz metin yaz.\n`;
@@ -252,7 +226,7 @@
 
                 log('3. Prompt oluşturuldu, uzunluk: ' + prompt.length);
 
-                // 4. Gemini API'ye istek at
+                // 4. Gemini API isteği
                 let aiText = '';
                 if (geminiApiKey) {
                     aiLoaderText.textContent = 'Yapay zeka yorumu hazırlanıyor...';
@@ -267,9 +241,7 @@
                         generationConfig: {
                             temperature: 0.7,
                             maxOutputTokens: 2048,
-                            thinkingConfig: {
-                                thinkingBudget: 0
-                            }
+                            thinkingConfig: { thinkingBudget: 0 }
                         }
                     };
 
@@ -283,14 +255,13 @@
                     });
 
                     log('   Gemini Response status: ' + geminiRes.status);
-
                     const geminiData = await geminiRes.json();
                     log('   Gemini Response data: ' + JSON.stringify(geminiData).substring(0, 800));
 
-                    const candidate = geminiData.candidates && geminiData.candidates[0];
-                    const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
+                    const candidate = geminiData.candidates?.[0];
+                    const part      = candidate?.content?.parts?.[0];
 
-                    if (part && part.text) {
+                    if (part?.text) {
                         aiText = part.text.trim();
                         log('   AI text alındı, uzunluk: ' + aiText.length);
                     } else if (geminiData.error) {
@@ -298,58 +269,44 @@
                         throw new Error('Gemini API: ' + JSON.stringify(geminiData.error));
                     } else {
                         log('   Beklenmeyen yanıt yapısı');
-                        aiText = '';
                     }
                 } else {
                     log('   API Key bulunamadı!');
-                    aiText = '';
                 }
 
-                // 5. Firestore'a kaydet veya güncelle (24 saat kuralı)
+                // 5. Firestore'a kaydet veya güncelle
                 log('5. Firestore kaydı/güncellemesi yapılıyor...');
                 const user = auth.currentUser;
                 if (!user) throw new Error('Kullanıcı oturumu bulunamadı');
                 log('   Kullanıcı: ' + user.uid);
 
                 const readingsRef = db.collection('users').doc(user.uid).collection('readings');
-
-                // Son kaydı bul
-                const lastQuery = await readingsRef
-                    .orderBy('createdAt', 'desc')
-                    .limit(1)
-                    .get();
+                const lastQuery   = await readingsRef.orderBy('createdAt', 'desc').limit(1).get();
 
                 let docRef;
 
                 if (!lastQuery.empty) {
-                    const lastDoc = lastQuery.docs[0];
+                    const lastDoc  = lastQuery.docs[0];
                     const lastData = lastDoc.data();
                     const canUpdate = isOlderThan24h(lastData.createdAt);
-                    
+
                     log('   Son kayıt tarihi: ' + (lastData.createdAt ? lastData.createdAt.toDate().toLocaleString() : 'yok'));
                     log('   24 saat geçmiş mi: ' + canUpdate);
 
                     if (canUpdate) {
-                        // 24 saat geçmiş → yeni kayıt
                         log('   24 saat geçmiş, YENİ kayıt oluşturuluyor...');
-                        const readingData = {
-                            type: readingType,
-                            intent: intentText,
-                            cards: drawnCards,
+                        docRef = await readingsRef.add({
+                            type: readingType, intent: intentText, cards: drawnCards,
                             aiInterpretation: aiText,
                             aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                             status: aiText ? 'completed' : 'pending'
-                        };
-                        docRef = await readingsRef.add(readingData);
+                        });
                         log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
                     } else {
-                        // 24 saat geçmemiş → mevcut kaydı güncelle
                         log('   24 saat geçmemiş, mevcut kayıt GÜNCELLENİYOR...');
                         await lastDoc.ref.update({
-                            type: readingType,
-                            intent: intentText,
-                            cards: drawnCards,
+                            type: readingType, intent: intentText, cards: drawnCards,
                             aiInterpretation: aiText,
                             aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -359,22 +316,18 @@
                         log('   Güncelleme başarılı, doc ID: ' + docRef.id);
                     }
                 } else {
-                    // Hiç kayıt yok → yeni kayıt
                     log('   Hiç kayıt yok, YENİ kayıt oluşturuluyor...');
-                    const readingData = {
-                        type: readingType,
-                        intent: intentText,
-                        cards: drawnCards,
+                    docRef = await readingsRef.add({
+                        type: readingType, intent: intentText, cards: drawnCards,
                         aiInterpretation: aiText,
                         aiGeneratedAt: aiText ? firebase.firestore.FieldValue.serverTimestamp() : null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         status: aiText ? 'completed' : 'pending'
-                    };
-                    docRef = await readingsRef.add(readingData);
+                    });
                     log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
                 }
 
-                // 6. Result sayfasına yönlendir
+                // 6. Yönlendir
                 log('6. Yönlendirme: result.html?id=' + docRef.id);
                 window.location.href = 'result.html?id=' + docRef.id;
 
@@ -383,42 +336,31 @@
                 log('Hata adı: ' + err.name);
                 log('Hata mesajı: ' + err.message);
                 log('Hata stack: ' + (err.stack || 'yok'));
-                
+
                 aiLoaderText.textContent = 'Hata: ' + err.message;
                 aiLoaderText.style.color = '#ff3b30';
 
                 const user = auth.currentUser;
                 if (user) {
                     log('Fallback Firestore kaydı yapılıyor...');
-                    const fallbackData = {
-                        type: readingType,
-                        intent: intentText,
-                        cards: drawnCards,
-                        aiInterpretation: '',
-                        aiGeneratedAt: null,
+                    const docRef = await db.collection('users').doc(user.uid).collection('readings').add({
+                        type: readingType, intent: intentText, cards: drawnCards,
+                        aiInterpretation: '', aiGeneratedAt: null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'error',
-                        error: err.message
-                    };
-                    const docRef = await db.collection('users').doc(user.uid).collection('readings').add(fallbackData);
+                        status: 'error', error: err.message
+                    });
                     log('Fallback kayıt başarılı: ' + docRef.id);
-                    setTimeout(() => {
-                        window.location.href = 'result.html?id=' + docRef.id;
-                    }, 3000);
+                    setTimeout(() => { window.location.href = 'result.html?id=' + docRef.id; }, 3000);
                 } else {
                     log('Kullanıcı yok, dashboarda yönlendiriliyor');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 3000);
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
                 }
             }
         }
 
         auth.onAuthStateChanged(function(user) {
             log('Auth state: ' + (user ? user.email : 'null'));
-            if (!user) {
-                window.location.href = 'auth.html';
-            }
+            if (!user) { window.location.href = 'auth.html'; }
         });
 
         loadRewardedAd();
