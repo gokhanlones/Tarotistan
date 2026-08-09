@@ -127,7 +127,6 @@
             text-shadow: 0 1px 3px rgba(255,255,255,0.8);
         }
 
-        /* Burç alanı: çark kaldırıldığı için margin-top artırıldı */
         .horoscope-area {
             display: flex;
             flex-direction: column;
@@ -138,13 +137,7 @@
             border-radius: 14px;
             padding: 14px 16px;
             background: #cfebff;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
             margin-top: 16px;
-        }
-        .horoscope-area:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .horoscope-header {
             display: flex;
@@ -451,6 +444,10 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" id="sidebarHeader">TAROT'S</div>
         <div class="sidebar-menu">
+            <div class="sidebar-item" id="sidebarBirthItem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span id="sidebarBirthText">Doğum Tarihi</span>
+            </div>
             <div class="sidebar-item" onclick="window.location.href='cardsinfo.html'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01"/></svg>
                 <span id="sidebarCardsText">Kartlar</span>
@@ -620,6 +617,7 @@
         }
 
         function openBirthModal() {
+            closeSidebar();
             document.getElementById('birthModalMsg').textContent = '';
             if (userBirthInfo) {
                 document.getElementById('birthModalDay').value   = userBirthInfo.day   || '';
@@ -698,6 +696,7 @@
             document.getElementById('premiumCtaBtn').textContent        = t('premiumCtaBtn');
             document.getElementById('cooldownCloseBtn').textContent     = t('cooldownCloseBtn');
             document.getElementById('navHome').setAttribute('aria-label', t('navHomeLabel'));
+            document.getElementById('sidebarBirthText').textContent     = t('sidebarBirth') || 'Doğum Tarihi';
             document.getElementById('sidebarCardsText').textContent     = t('sidebarCards');
             document.getElementById('sidebarLogoutText').textContent    = t('sidebarLogout');
 
@@ -756,8 +755,8 @@
 
         document.getElementById('menuBtn').addEventListener('click', openSidebar);
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+        document.getElementById('sidebarBirthItem').addEventListener('click', openBirthModal);
         document.getElementById('topbarIcon').addEventListener('click', () => { window.location.href = 'result.html'; });
-        document.getElementById('horoscopeOption').addEventListener('click', openBirthModal);
 
         let currentReadingType = null;
         const intentOverlay = document.getElementById('intentOverlay');
