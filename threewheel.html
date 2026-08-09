@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TAROT'S</title>
+
     <script src="lang.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -17,7 +18,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             background: #ffffff;
@@ -130,10 +132,10 @@
             bottom: 68px;
             left: 0;
             right: 0;
+
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
 
             background-image: url('wheelbackplan.png');
             background-size: cover;
@@ -143,24 +145,18 @@
             isolation: isolate;
         }
 
-        /*
-         * SLOT ALANI EKRANIN TAM ORTASINDA
-         *
-         * Üst bar: 60px
-         * Alt bar: 68px
-         *
-         * wheel-container zaten bu iki alan arasında.
-         * wheel-inner artık kendi içinde margin:auto
-         * kullanmak yerine doğrudan merkeze oturuyor.
-         */
         .wheel-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+
             width: 90%;
             max-width: 450px;
-            margin: 0;
         }
 
         /* ── Slot Wheel ──────────────────────────────────────── */
@@ -229,14 +225,10 @@
         }
 
         /*
-         * İKONLAR
+         * İkonlar cards.html'deki ikon alanıyla
+         * aynı ölçü mantığında.
          *
-         * cards.html'deki .icon-img:
-         *
-         * width  = card genişliği - 4px
-         * height = card yüksekliği - 4px
-         *
-         * Burada da aynı mantık uygulanıyor.
+         * İkonların arkasında onecard.png yok.
          */
         .wheel-card-wrap.slot-icon {
             display: flex;
@@ -247,19 +239,11 @@
         }
 
         .wheel-card-wrap.slot-icon img {
-            width: 100%;
-            height: 100%;
-            max-width: none;
-            max-height: none;
-            object-fit: cover;
-
-            /*
-             * cards.html'deki:
-             * calc(100% - 4px)
-             */
             width: calc(100% - 4px);
             height: calc(100% - 4px);
-
+            object-fit: cover;
+            display: block;
+            background: #fff;
             border-radius: 6px;
         }
 
@@ -273,23 +257,37 @@
 
         /* ── Döndür Butonu ───────────────────────────────────── */
 
+        /*
+         * turn.png artık slot alanının bir parçası değil.
+         *
+         * Slot alanı ile bottom-nav arasında kalan bölümün
+         * alt tarafında ortalanıyor.
+         */
         .turn-spin-btn {
+            position: absolute;
+
+            left: 50%;
+            bottom: 14px;
+
+            transform: translateX(-50%);
+
             width: 56px;
             height: 56px;
+
             background: none;
             border: none;
             padding: 0;
+
             cursor: pointer;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            transition: opacity 0.4s;
 
-            /*
-             * Buton slot alanının merkezini etkilemesin.
-             */
-            margin-top: 18px;
+            flex-shrink: 0;
+            z-index: 20;
+
+            transition: opacity 0.4s;
         }
 
         .turn-spin-btn img {
@@ -306,8 +304,11 @@
             left: 0;
             right: 0;
             height: 68px;
+
             background: #ffffff;
+
             z-index: 110;
+
             display: flex;
             align-items: center;
             justify-content: center;
@@ -318,12 +319,16 @@
             background: none;
             border: none;
             padding: 0;
+
             width: 44px;
             height: 44px;
+
             border-radius: 10px;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             cursor: pointer;
         }
 
@@ -339,10 +344,14 @@
         .sidebar-overlay {
             position: fixed;
             inset: 0;
+
             background: rgba(0,0,0,0.45);
+
             z-index: 150;
+
             display: none;
             opacity: 0;
+
             transition: opacity 0.3s;
         }
 
@@ -356,13 +365,18 @@
             top: 0;
             left: 0;
             bottom: 0;
+
             width: 260px;
             background: #ffffff;
+
             z-index: 151;
+
             transform: translateX(-100%);
             transition: transform 0.3s ease;
+
             display: flex;
             flex-direction: column;
+
             box-shadow: 4px 0 20px rgba(0,0,0,0.12);
         }
 
@@ -372,9 +386,12 @@
 
         .sidebar-header {
             padding: 24px 20px;
+
             border-bottom: 1px solid #e8e8ed;
+
             font-size: 1.1rem;
             font-weight: 700;
+
             letter-spacing: 2px;
             color: #000;
         }
@@ -386,11 +403,15 @@
 
         .sidebar-item {
             padding: 18px 20px;
+
             font-size: 1rem;
             color: #000;
+
             border-bottom: 1px solid #f0f0f0;
+
             cursor: pointer;
             transition: background 0.15s;
+
             display: flex;
             align-items: center;
             gap: 12px;
@@ -409,76 +430,140 @@
         <div class="spinner"></div>
     </div>
 
+
     <!-- Topbar -->
     <div class="topbar">
 
-        <button class="hamburger-btn" id="menuBtn" aria-label="Menü">
+        <button
+            class="hamburger-btn"
+            id="menuBtn"
+            aria-label="Menü">
+
             <span></span>
             <span></span>
             <span></span>
+
         </button>
 
-        <div class="topbar-title">TAROT'S</div>
+        <div class="topbar-title">
+            TAROT'S
+        </div>
 
-        <button class="hand-btn" id="handBtn" aria-label="Kart Seçimi">
-            <img src="hand.png" alt="Kart Seçimi">
+        <button
+            class="hand-btn"
+            id="handBtn"
+            aria-label="Kart Seçimi">
+
+            <img
+                src="hand.png"
+                alt="Kart Seçimi">
+
         </button>
 
     </div>
+
 
     <!-- Çark -->
     <div class="wheel-container">
 
+        <!-- Slot alanı -->
         <div class="wheel-inner">
 
-            <div class="slot-wrapper" id="slotWrapper">
+            <div
+                class="slot-wrapper"
+                id="slotWrapper">
 
-                <div class="slot-column" data-col="0">
-                    <div class="slot-window" id="slotWindow0"></div>
+                <div
+                    class="slot-column"
+                    data-col="0">
+
+                    <div
+                        class="slot-window"
+                        id="slotWindow0">
+                    </div>
+
                 </div>
 
-                <div class="slot-column" data-col="1">
 
-                    <div class="selector-line selector-left"></div>
-                    <div class="selector-line selector-right"></div>
+                <div
+                    class="slot-column"
+                    data-col="1">
 
-                    <div class="slot-window" id="slotWindow1"></div>
+                    <div
+                        class="selector-line selector-left">
+                    </div>
+
+                    <div
+                        class="selector-line selector-right">
+                    </div>
+
+                    <div
+                        class="slot-window"
+                        id="slotWindow1">
+                    </div>
 
                 </div>
 
-                <div class="slot-column" data-col="2">
-                    <div class="slot-window" id="slotWindow2"></div>
+
+                <div
+                    class="slot-column"
+                    data-col="2">
+
+                    <div
+                        class="slot-window"
+                        id="slotWindow2">
+                    </div>
+
                 </div>
 
             </div>
 
-            <button class="turn-spin-btn" id="turnSpinBtn">
-                <img src="finger.png" alt="Döndür">
-            </button>
-
         </div>
 
+
+        <!-- Slot ile bottom-nav arasındaki döndür butonu -->
+        <button
+            class="turn-spin-btn"
+            id="turnSpinBtn">
+
+            <img
+                src="turn.png"
+                alt="Döndür">
+
+        </button>
+
     </div>
+
 
     <!-- Alt Navigasyon -->
     <div class="bottom-nav">
 
-        <a href="dashboard.html"
-           class="nav-btn"
-           id="navHome"
-           style="text-decoration:none;display:flex;"
-           aria-label="Anasayfa">
+        <a
+            href="dashboard.html"
+            class="nav-btn"
+            id="navHome"
+            style="text-decoration:none;display:flex;"
+            aria-label="Anasayfa">
 
-            <img src="cardsinfo.png" alt="Ana Sayfa">
+            <img
+                src="cardsinfo.png"
+                alt="Ana Sayfa">
 
         </a>
 
     </div>
 
-    <!-- Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <div class="sidebar" id="sidebar">
+    <!-- Sidebar -->
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <div
+        class="sidebar"
+        id="sidebar">
 
         <div class="sidebar-header">
             TAROT'S
@@ -486,50 +571,75 @@
 
         <div class="sidebar-menu">
 
-            <div class="sidebar-item"
-                 onclick="window.location.href='cardsinfo.html'">
+            <div
+                class="sidebar-item"
+                onclick="window.location.href='cardsinfo.html'">
 
-                <svg width="20"
-                     height="20"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="#000"
-                     stroke-width="2"
-                     stroke-linecap="round"
-                     stroke-linejoin="round">
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#000"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
 
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <path d="M6 8h.01M6 12h.01M6 16h.01"/>
+                    <rect
+                        x="2"
+                        y="4"
+                        width="20"
+                        height="16"
+                        rx="2"/>
+
+                    <path
+                        d="M6 8h.01M6 12h.01M6 16h.01"/>
 
                 </svg>
 
-                <span id="sidebarCardsText">Kartlar</span>
+                <span id="sidebarCardsText">
+                    Kartlar
+                </span>
 
             </div>
 
-            <div class="sidebar-item"
-                 onclick="logout()">
 
-                <svg width="20"
-                     height="20"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="#000"
-                     stroke-width="2"
-                     stroke-linecap="round"
-                     stroke-linejoin="round">
+            <div
+                class="sidebar-item"
+                onclick="logout()">
 
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#000"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path
+                        d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+
+                    <polyline
+                        points="16 17 21 12 16 7"/>
+
+                    <line
+                        x1="21"
+                        y1="12"
+                        x2="9"
+                        y2="12"/>
 
                 </svg>
 
-                <span id="sidebarLogoutText">Çıkış</span>
+                <span id="sidebarLogoutText">
+                    Çıkış
+                </span>
 
             </div>
 
         </div>
+
     </div>
 
 
@@ -544,10 +654,12 @@
             ? t('sidebarCards')
             : 'Kartlar';
 
+
     document.getElementById('sidebarLogoutText').textContent =
         typeof t === 'function'
             ? t('sidebarLogout')
             : 'Çıkış';
+
 
     document.getElementById('navHome').setAttribute(
         'aria-label',
@@ -561,30 +673,40 @@
        2. AUTH
     ════════════════════════════════════════════════════════════ */
 
-    const auth = typeof firebase !== 'undefined'
-        ? firebase.auth()
-        : {
-            onAuthStateChanged: cb => cb({}),
-            signOut: () => Promise.resolve()
-        };
+    const auth =
+        typeof firebase !== 'undefined'
+            ? firebase.auth()
+            : {
+                onAuthStateChanged: cb => cb({}),
+                signOut: () => Promise.resolve()
+            };
+
 
     auth.onAuthStateChanged(user => {
 
         if (!user) {
-            window.location.href = 'auth.html';
+
+            window.location.href =
+                'auth.html';
+
             return;
         }
 
         document.getElementById('authCheck')
             .classList.add('hidden');
+
     });
 
 
     function logout() {
 
-        auth.signOut().then(() => {
-            window.location.href = 'auth.html';
-        });
+        auth.signOut()
+            .then(() => {
+
+                window.location.href =
+                    'auth.html';
+
+            });
 
     }
 
@@ -595,39 +717,57 @@
 
     function openSidebar() {
 
-        document.getElementById('sidebarOverlay')
+        document
+            .getElementById('sidebarOverlay')
             .classList.add('active');
 
-        document.getElementById('sidebar')
+        document
+            .getElementById('sidebar')
             .classList.add('active');
+
     }
 
 
     function closeSidebar() {
 
-        document.getElementById('sidebarOverlay')
+        document
+            .getElementById('sidebarOverlay')
             .classList.remove('active');
 
-        document.getElementById('sidebar')
+        document
+            .getElementById('sidebar')
             .classList.remove('active');
+
     }
 
 
-    document.getElementById('menuBtn')
-        .addEventListener('click', openSidebar);
+    document
+        .getElementById('menuBtn')
+        .addEventListener(
+            'click',
+            openSidebar
+        );
 
 
-    document.getElementById('sidebarOverlay')
-        .addEventListener('click', closeSidebar);
+    document
+        .getElementById('sidebarOverlay')
+        .addEventListener(
+            'click',
+            closeSidebar
+        );
 
 
-    document.getElementById('handBtn')
-        .addEventListener('click', () => {
+    document
+        .getElementById('handBtn')
+        .addEventListener(
+            'click',
+            () => {
 
-            window.location.href =
-                'cards.html#three';
+                window.location.href =
+                    'cards.html#three';
 
-        });
+            }
+        );
 
 
     /* ════════════════════════════════════════════════════════════
@@ -651,15 +791,22 @@
 
         }
 
-        if (audioCtx.state === 'suspended')
+        if (
+            audioCtx.state === 'suspended'
+        ) {
+
             audioCtx.resume();
+
+        }
 
     }
 
 
     function createSoftNoiseBuffer() {
 
-        const len = audioCtx.sampleRate;
+        const len =
+            audioCtx.sampleRate;
+
 
         const buffer =
             audioCtx.createBuffer(
@@ -668,38 +815,57 @@
                 audioCtx.sampleRate
             );
 
+
         const data =
             buffer.getChannelData(0);
 
-        for (let i = 0; i < len; i++) {
+
+        for (
+            let i = 0;
+            i < len;
+            i++
+        ) {
 
             data[i] =
                 (Math.random() * 2 - 1) * 0.3;
 
         }
 
+
         return buffer;
+
     }
 
 
     function startSpinSound() {
 
-        if (!audioCtx || spinActive)
+        if (
+            !audioCtx ||
+            spinActive
+        ) {
+
             return;
 
+        }
+
+
         spinActive = true;
+
 
         noiseNode =
             audioCtx.createBufferSource();
 
+
         noiseNode.buffer =
             createSoftNoiseBuffer();
+
 
         noiseNode.loop = true;
 
 
         const lf =
             audioCtx.createBiquadFilter();
+
 
         lf.type = 'lowpass';
         lf.frequency.value = 300;
@@ -709,6 +875,7 @@
         const bf =
             audioCtx.createBiquadFilter();
 
+
         bf.type = 'bandpass';
         bf.frequency.value = 200;
         bf.Q.value = 1;
@@ -717,7 +884,9 @@
         noiseGain =
             audioCtx.createGain();
 
-        noiseGain.gain.value = 0.04;
+
+        noiseGain.gain.value =
+            0.04;
 
 
         noiseNode.connect(lf);
@@ -727,13 +896,16 @@
             audioCtx.destination
         );
 
+
         noiseNode.start();
+
     }
 
 
     function stopSpinSound() {
 
         spinActive = false;
+
 
         if (noiseNode) {
 
@@ -748,17 +920,22 @@
             } catch (e) {}
 
             noiseNode = null;
+
         }
 
 
         if (noiseGain) {
 
             try {
+
                 noiseGain.disconnect();
+
             } catch (e) {}
 
             noiseGain = null;
+
         }
+
     }
 
 
@@ -767,11 +944,14 @@
         if (!audioCtx)
             return;
 
+
         const osc =
             audioCtx.createOscillator();
 
+
         const gain =
             audioCtx.createGain();
+
 
         const filter =
             audioCtx.createBiquadFilter();
@@ -779,17 +959,26 @@
 
         osc.type = 'sine';
 
+
         osc.frequency.value =
-            600 + Math.random() * 200;
+            600 +
+            Math.random() * 200;
 
 
-        filter.type = 'lowpass';
-        filter.frequency.value = 1200;
+        filter.type =
+            'lowpass';
+
+
+        filter.frequency.value =
+            1200;
 
 
         const vol =
             0.015 *
-            Math.min(intensity, 1);
+            Math.min(
+                intensity,
+                1
+            );
 
 
         gain.gain.setValueAtTime(
@@ -813,9 +1002,11 @@
 
         osc.start();
 
+
         osc.stop(
             audioCtx.currentTime + 0.04
         );
+
     }
 
 
@@ -824,8 +1015,10 @@
         if (!audioCtx)
             return;
 
+
         const osc =
             audioCtx.createOscillator();
+
 
         const gain =
             audioCtx.createGain();
@@ -859,7 +1052,6 @@
 
 
         osc.connect(gain);
-
         gain.connect(
             audioCtx.destination
         );
@@ -867,9 +1059,11 @@
 
         osc.start();
 
+
         osc.stop(
             audioCtx.currentTime + 0.25
         );
+
     }
 
 
@@ -879,11 +1073,13 @@
 
     const NUM_CARDS = 78;
 
+
     const ICON_SRCS = [
         'history.png',
         'now.png',
         'coming.png'
     ];
+
 
     const GAP_PX = 12;
     const COL_COUNT = 3;
@@ -896,21 +1092,34 @@
 
 
     const containers = [
-        document.getElementById('slotWindow0'),
-        document.getElementById('slotWindow1'),
-        document.getElementById('slotWindow2')
+
+        document.getElementById(
+            'slotWindow0'
+        ),
+
+        document.getElementById(
+            'slotWindow1'
+        ),
+
+        document.getElementById(
+            'slotWindow2'
+        )
+
     ];
 
 
     const cardWidthPx =
         (
             wrapper.clientWidth -
-            GAP_PX * (COL_COUNT - 1)
-        ) / COL_COUNT;
+            GAP_PX *
+            (COL_COUNT - 1)
+        ) /
+        COL_COUNT;
 
 
     const actualCardHeight =
-        cardWidthPx * (270 / 160);
+        cardWidthPx *
+        (270 / 160);
 
 
     const cardHeight =
@@ -918,7 +1127,8 @@
 
 
     const cardsTotalHeight =
-        NUM_CARDS * cardHeight;
+        NUM_CARDS *
+        cardHeight;
 
 
     containers.forEach(c => {
@@ -947,6 +1157,7 @@
             lastIndex: -1
 
         };
+
     }
 
 
@@ -984,8 +1195,10 @@
         const iconWrap =
             document.createElement('div');
 
+
         iconWrap.className =
             'wheel-card-wrap slot-icon';
+
 
         iconWrap.style.width =
             cardWidthPx + 'px';
@@ -994,18 +1207,24 @@
         const iconImg =
             document.createElement('img');
 
+
         iconImg.className =
             'wheel-card';
+
 
         iconImg.src =
             ICON_SRCS[col];
 
 
-        iconWrap.appendChild(iconImg);
+        iconWrap.appendChild(
+            iconImg
+        );
+
 
         containers[col].appendChild(
             iconWrap
         );
+
 
         cols[col].iconEl =
             iconWrap;
@@ -1020,17 +1239,21 @@
         ) {
 
             const wrap =
-                document.createElement('div');
+                document.createElement(
+                    'div'
+                );
+
 
             wrap.className =
                 'wheel-card-wrap';
+
 
             wrap.style.width =
                 cardWidthPx + 'px';
 
 
             /*
-             * Başlangıçta kartlar görünmez.
+             * Kartlar başlangıçta gizli.
              * Böylece ikonların arkasında
              * onecard.png görünmez.
              */
@@ -1039,25 +1262,35 @@
 
 
             const img =
-                document.createElement('img');
+                document.createElement(
+                    'img'
+                );
+
 
             img.className =
                 'wheel-card';
+
 
             img.src =
                 'onecard.png';
 
 
-            wrap.appendChild(img);
+            wrap.appendChild(
+                img
+            );
+
 
             containers[col].appendChild(
                 wrap
             );
 
+
             cols[col].cards.push(
                 wrap
             );
+
         }
+
     }
 
 
@@ -1067,7 +1300,8 @@
 
     function renderColumn(colIdx) {
 
-        const col = cols[colIdx];
+        const col =
+            cols[colIdx];
 
 
         const containerH =
@@ -1082,14 +1316,16 @@
         /* ── İkon ───────────────────────────────────────────── */
 
         const iconY =
-            centerY + col.offsetY;
+            centerY +
+            col.offsetY;
 
 
         if (col.iconEl) {
 
             if (
                 iconY >
-                containerH + actualCardHeight
+                containerH +
+                actualCardHeight
             ) {
 
                 col.iconEl.style.display =
@@ -1100,9 +1336,12 @@
                 col.iconEl.style.display =
                     'flex';
 
+
                 col.iconEl.style.transform =
                     `translate(-50%, ${iconY}px)`;
+
             }
+
         }
 
 
@@ -1112,113 +1351,141 @@
         let activeIndex = -1;
 
 
-        col.cards.forEach((wrap, i) => {
+        col.cards.forEach(
+            (wrap, i) => {
 
-            if (col.hasSpun) {
+                if (col.hasSpun) {
 
-                wrap.style.visibility =
-                    'visible';
+                    wrap.style.visibility =
+                        'visible';
 
-            }
-
-
-            let y =
-                (
-                    i * cardHeight +
-                    col.offsetY
-                ) % cardsTotalHeight;
+                }
 
 
-            if (y < 0)
-                y += cardsTotalHeight;
-
-
-            const d1 =
-                Math.abs(
-                    y - centerY
-                );
-
-
-            const d2 =
-                Math.abs(
-                    y -
-                    cardsTotalHeight -
-                    centerY
-                );
-
-
-            const d3 =
-                Math.abs(
-                    y +
-                    cardsTotalHeight -
-                    centerY
-                );
-
-
-            const dist =
-                Math.min(
-                    d1,
-                    d2,
-                    d3
-                );
-
-
-            let renderY = y;
-
-
-            if (dist === d2)
-                renderY =
-                    y -
+                let y =
+                    (
+                        i * cardHeight +
+                        col.offsetY
+                    ) %
                     cardsTotalHeight;
 
 
-            if (dist === d3)
-                renderY =
-                    y +
-                    cardsTotalHeight;
+                if (y < 0) {
+
+                    y +=
+                        cardsTotalHeight;
+
+                }
 
 
-            wrap.style.transform =
-                `translate(-50%, ${renderY}px)`;
+                const d1 =
+                    Math.abs(
+                        y - centerY
+                    );
 
 
-            wrap.style.zIndex =
-                100 -
-                Math.floor(dist / 10);
+                const d2 =
+                    Math.abs(
+                        y -
+                        cardsTotalHeight -
+                        centerY
+                    );
 
 
-            if (dist < minDist) {
+                const d3 =
+                    Math.abs(
+                        y +
+                        cardsTotalHeight -
+                        centerY
+                    );
 
-                minDist = dist;
-                activeIndex = i;
+
+                const dist =
+                    Math.min(
+                        d1,
+                        d2,
+                        d3
+                    );
+
+
+                let renderY = y;
+
+
+                if (dist === d2) {
+
+                    renderY =
+                        y -
+                        cardsTotalHeight;
+
+                }
+
+
+                if (dist === d3) {
+
+                    renderY =
+                        y +
+                        cardsTotalHeight;
+
+                }
+
+
+                wrap.style.transform =
+                    `translate(-50%, ${renderY}px)`;
+
+
+                wrap.style.zIndex =
+                    100 -
+                    Math.floor(
+                        dist / 10
+                    );
+
+
+                if (
+                    dist < minDist
+                ) {
+
+                    minDist =
+                        dist;
+
+                    activeIndex =
+                        i;
+
+                }
 
             }
+        );
 
-        });
 
-
-        /* ── Tik ────────────────────────────────────────────── */
+        /* ── Tik sesi ───────────────────────────────────────── */
 
         if (
-            activeIndex !== col.lastIndex &&
+            activeIndex !==
+                col.lastIndex &&
             col.hasSpun &&
             !col.snapDone &&
-            Math.abs(col.velocity) > 8
+            Math.abs(
+                col.velocity
+            ) > 8
         ) {
 
             playTickSound(
                 Math.min(
-                    Math.abs(col.velocity) / 60,
+                    Math.abs(
+                        col.velocity
+                    ) / 60,
                     1
                 )
             );
 
+
             col.lastIndex =
                 activeIndex;
+
         }
 
 
         return activeIndex;
+
     }
 
 
@@ -1263,30 +1530,39 @@
             i++
         ) {
 
-            const col = cols[i];
+            const col =
+                cols[i];
 
 
             const containerH =
-                containers[i].clientHeight;
+                containers[i]
+                    .clientHeight;
 
 
-            if (!col.isSnapping) {
+            if (
+                !col.isSnapping
+            ) {
 
                 col.offsetY +=
                     col.velocity;
+
 
                 col.velocity *=
                     0.985;
 
 
                 if (
-                    Math.abs(col.velocity) < 1.5 &&
+                    Math.abs(
+                        col.velocity
+                    ) < 1.5 &&
                     col.hasSpun
                 ) {
 
                     col.velocity = 0;
 
-                    col.isSnapping = true;
+                    col.isSnapping =
+                        true;
+
                 }
 
             } else {
@@ -1302,8 +1578,10 @@
                         (
                             centerY -
                             col.offsetY
-                        ) / cardHeight
-                    ) * cardHeight;
+                        ) /
+                        cardHeight
+                    ) *
+                    cardHeight;
 
 
                 const diff =
@@ -1316,25 +1594,34 @@
 
 
                 if (
-                    Math.abs(diff) < 0.5 &&
+                    Math.abs(
+                        diff
+                    ) < 0.5 &&
                     !col.snapDone
                 ) {
 
                     col.offsetY =
                         targetOffY;
 
+
                     col.snapDone =
                         true;
+
                 }
+
             }
 
 
-            if (!col.snapDone)
+            if (
+                !col.snapDone
+            ) {
+
                 renderColumn(i);
+
+            }
+
         }
 
-
-        /* ── Sonuç ─────────────────────────────────────────── */
 
         if (
             allStopped() &&
@@ -1350,8 +1637,15 @@
             playStopSound();
 
 
-            if (navigator.vibrate)
-                navigator.vibrate(50);
+            if (
+                navigator.vibrate
+            ) {
+
+                navigator.vibrate(
+                    50
+                );
+
+            }
 
 
             cols.forEach(c => {
@@ -1363,62 +1657,77 @@
 
 
             spinTimeoutId =
-                setTimeout(() => {
+                setTimeout(
+                    () => {
 
-                    const drawnCards = [];
-                    const usedIds = new Set();
-
-
-                    while (
-                        drawnCards.length <
-                        COL_COUNT
-                    ) {
-
-                        const id =
-                            Math.floor(
-                                Math.random() *
-                                NUM_CARDS
-                            );
+                        const drawnCards = [];
+                        const usedIds =
+                            new Set();
 
 
-                        if (!usedIds.has(id)) {
+                        while (
+                            drawnCards.length <
+                            COL_COUNT
+                        ) {
 
-                            usedIds.add(id);
+                            const id =
+                                Math.floor(
+                                    Math.random() *
+                                    NUM_CARDS
+                                );
 
 
-                            drawnCards.push({
-                                id: id,
-                                reversed:
-                                    Math.random() < 0.5
-                            });
+                            if (
+                                !usedIds.has(
+                                    id
+                                )
+                            ) {
+
+                                usedIds.add(
+                                    id
+                                );
+
+
+                                drawnCards.push({
+                                    id: id,
+                                    reversed:
+                                        Math.random() <
+                                        0.5
+                                });
+
+                            }
+
                         }
-                    }
 
 
-                    sessionStorage.setItem(
-                        'tarotDrawnCards',
-                        JSON.stringify(
-                            drawnCards
-                        )
-                    );
+                        sessionStorage.setItem(
+                            'tarotDrawnCards',
+                            JSON.stringify(
+                                drawnCards
+                            )
+                        );
 
 
-                    sessionStorage.setItem(
-                        'tarotReadingType',
-                        'three'
-                    );
+                        sessionStorage.setItem(
+                            'tarotReadingType',
+                            'three'
+                        );
 
 
-                    window.location.href =
-                        'ad.html';
+                        window.location.href =
+                            'ad.html';
 
-                }, 1000);
+                    },
+                    1000
+                );
+
         }
 
 
         requestAnimationFrame(
             animate
         );
+
     }
 
 
@@ -1450,20 +1759,28 @@
         'click',
         () => {
 
-            if (isSpinning)
+            if (
+                isSpinning
+            ) {
+
                 return;
+
+            }
 
 
             initAudio();
 
 
-            if (spinTimeoutId) {
+            if (
+                spinTimeoutId
+            ) {
 
                 clearTimeout(
                     spinTimeoutId
                 );
 
-                spinTimeoutId = null;
+                spinTimeoutId =
+                    null;
 
             }
 
@@ -1472,27 +1789,39 @@
             resultSent = false;
 
 
-            cols.forEach(col => {
+            cols.forEach(
+                col => {
 
-                col.cards.forEach(card => {
+                    col.cards.forEach(
+                        card => {
 
-                    card.style.visibility =
-                        'visible';
+                            card.style.visibility =
+                                'visible';
 
-                });
-
-
-                col.isSnapping = false;
-                col.snapDone = false;
-                col.lastIndex = -1;
-                col.hasSpun = true;
+                        }
+                    );
 
 
-                col.velocity =
-                    120 +
-                    Math.random() * 40;
+                    col.isSnapping =
+                        false;
 
-            });
+                    col.snapDone =
+                        false;
+
+                    col.lastIndex =
+                        -1;
+
+                    col.hasSpun =
+                        true;
+
+
+                    col.velocity =
+                        120 +
+                        Math.random() *
+                        40;
+
+                }
+            );
 
 
             startSpinSound();
