@@ -69,33 +69,6 @@
             max-width: 450px;
             margin-top: auto;
             margin-bottom: auto;
-            gap: 4px;
-        }
-
-        .slot-labels {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 4px;
-        }
-        .slot-label {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .slot-label img {
-            height: 30px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .slot-divider {
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 5%, #000000 20%, #000000 80%, transparent 95%);
-            margin-bottom: 10px;
         }
 
         .slot-wrapper {
@@ -139,6 +112,18 @@
             will-change: transform;
             border-radius: 8px;
             z-index: 10;
+        }
+        .wheel-card-wrap.slot-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        .wheel-card-wrap.slot-icon img {
+            width: 50%;
+            height: auto;
+            max-height: 50%;
+            object-fit: contain;
         }
         .wheel-card { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px; }
 
@@ -212,14 +197,6 @@
 
     <div class="wheel-container">
         <div class="wheel-inner">
-            <div class="slot-labels">
-                <div class="slot-label"><img src="history.png" alt=""></div>
-                <div class="slot-label"><img src="now.png" alt=""></div>
-                <div class="slot-label"><img src="coming.png" alt=""></div>
-            </div>
-
-            <div class="slot-divider"></div>
-
             <div class="slot-wrapper" id="slotWrapper">
                 <div class="slot-column" data-col="0">
                     <div class="slot-window" id="slotWindow0"></div>
@@ -341,6 +318,7 @@
             document.getElementById('slotWindow2')
         ];
         const numCards = 78;
+        const iconSrcs = ['history.png', 'now.png', 'coming.png'];
 
         const cols = [
             { cards: [], offsetY: 0, velocity: 0, isSnapping: false, snapDone: false, hasSpun: false, lastIndex: -1 },
@@ -352,19 +330,27 @@
         const cardWidthPx      = (wrapperWidth - 24) / 3;
         const actualCardHeight = cardWidthPx * (270 / 160);
         const cardHeight       = actualCardHeight + 15;
-        const totalHeight      = numCards * cardHeight;
+        const totalItems       = numCards + 1;
+        const totalHeight      = totalItems * cardHeight;
 
         containers.forEach(c => c.style.height = actualCardHeight + 'px');
 
         for (let col = 0; col < 3; col++) {
-            cols[col].offsetY = Math.random() * totalHeight;
-            for (let i = 0; i < numCards; i++) {
+            const containerH = containers[col].clientHeight;
+            const centerY    = containerH / 2 - actualCardHeight / 2;
+            cols[col].offsetY = centerY;
+
+            for (let i = 0; i < totalItems; i++) {
                 const wrap = document.createElement('div');
                 wrap.className = 'wheel-card-wrap';
+                if (i === 0) wrap.classList.add('slot-icon');
                 wrap.style.width = cardWidthPx + 'px';
+
                 const img = document.createElement('img');
-                img.src = 'onecard.png'; img.className = 'wheel-card';
+                img.src = i === 0 ? iconSrcs[col] : 'onecard.png';
+                img.className = 'wheel-card';
                 wrap.appendChild(img);
+
                 containers[col].appendChild(wrap);
                 cols[col].cards.push(wrap);
             }
