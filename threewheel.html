@@ -29,7 +29,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ── Auth Splash ─────────────────────────────────────── */
+        /* AUTH */
 
         .auth-check {
             position: fixed;
@@ -60,7 +60,7 @@
             }
         }
 
-        /* ── Topbar ──────────────────────────────────────────── */
+        /* TOPBAR */
 
         .topbar {
             position: fixed;
@@ -124,7 +124,7 @@
             object-fit: contain;
         }
 
-        /* ── Wheel Container ─────────────────────────────────── */
+        /* WHEEL */
 
         .wheel-container {
             position: absolute;
@@ -145,10 +145,6 @@
             isolation: isolate;
         }
 
-        /*
-         * Slot alanı ile turn butonu aynı şekilde
-         * dikey flex düzeninde ortalanır.
-         */
         .wheel-inner {
             display: flex;
             flex-direction: column;
@@ -160,7 +156,7 @@
             margin-bottom: auto;
         }
 
-        /* ── Slot Wheel ──────────────────────────────────────── */
+        /* SLOT */
 
         .slot-wrapper {
             position: relative;
@@ -184,7 +180,7 @@
             background: transparent;
         }
 
-        /* Orta sütunun çizgileri */
+        /* SELECTION LINES */
 
         .slot-column:nth-child(2) .selector-line {
             position: absolute;
@@ -212,7 +208,7 @@
             right: -6px;
         }
 
-        /* ── Kart / İkon Sarmalayıcı ─────────────────────────── */
+        /* CARD / ICON */
 
         .wheel-card-wrap {
             position: absolute;
@@ -224,10 +220,6 @@
             z-index: 10;
         }
 
-        /*
-         * İkonlar sade.
-         * Arkalarında onecard.png yok.
-         */
         .wheel-card-wrap.slot-icon {
             display: flex;
             align-items: center;
@@ -253,13 +245,8 @@
             border-radius: 8px;
         }
 
-        /* ── Döndür Butonu ───────────────────────────────────── */
+        /* TURN BUTTON */
 
-        /*
-         * wheel.html'deki yapı ile aynı.
-         * turn.png, wheel-container içerisinde kalan
-         * dikey alanın ortasına yerleşir.
-         */
         .turn-spin-btn {
             width: 56px;
             height: 56px;
@@ -288,7 +275,7 @@
             object-fit: contain;
         }
 
-        /* ── Bottom Nav ─────────────────────────────────────── */
+        /* BOTTOM NAV */
 
         .bottom-nav {
             position: fixed;
@@ -332,7 +319,7 @@
             border-radius: 6px;
         }
 
-        /* ── Sidebar ─────────────────────────────────────────── */
+        /* SIDEBAR */
 
         .sidebar-overlay {
             position: fixed;
@@ -419,13 +406,15 @@
 
 <body>
 
-    <!-- Auth -->
+    <!-- AUTH -->
+
     <div class="auth-check" id="authCheck">
         <div class="spinner"></div>
     </div>
 
 
-    <!-- Topbar -->
+    <!-- TOPBAR -->
+
     <div class="topbar">
 
         <button
@@ -457,7 +446,8 @@
     </div>
 
 
-    <!-- Çark -->
+    <!-- WHEEL -->
+
     <div class="wheel-container">
 
         <div class="wheel-inner">
@@ -514,7 +504,6 @@
         </div>
 
 
-        <!-- wheel.html ile aynı konumlandırma mantığı -->
         <button
             class="turn-spin-btn"
             id="turnSpinBtn">
@@ -528,7 +517,8 @@
     </div>
 
 
-    <!-- Bottom Navigation -->
+    <!-- BOTTOM NAV -->
+
     <div class="bottom-nav">
 
         <a
@@ -547,7 +537,8 @@
     </div>
 
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
+
     <div
         class="sidebar-overlay"
         id="sidebarOverlay">
@@ -638,9 +629,9 @@
 
     <script>
 
-        /* ════════════════════════════════════════════════════════
+        /* ========================================================
            1. I18N
-        ════════════════════════════════════════════════════════ */
+        ======================================================== */
 
         document.getElementById(
             'sidebarCardsText'
@@ -668,9 +659,9 @@
         );
 
 
-        /* ════════════════════════════════════════════════════════
+        /* ========================================================
            2. AUTH
-        ════════════════════════════════════════════════════════ */
+        ======================================================== */
 
         const auth =
             typeof firebase !== 'undefined'
@@ -717,9 +708,9 @@
         }
 
 
-        /* ════════════════════════════════════════════════════════
+        /* ========================================================
            3. SIDEBAR
-        ════════════════════════════════════════════════════════ */
+        ======================================================== */
 
         function openSidebar() {
 
@@ -786,13 +777,15 @@
             );
 
 
-        /* ════════════════════════════════════════════════════════
+        /* ========================================================
            4. SES MOTORU
-        ════════════════════════════════════════════════════════ */
+        ======================================================== */
 
         let audioCtx = null;
+
         let noiseNode = null;
         let noiseGain = null;
+
         let spinActive = false;
 
 
@@ -863,7 +856,9 @@
                 !audioCtx ||
                 spinActive
             ) {
+
                 return;
+
             }
 
 
@@ -919,7 +914,7 @@
 
 
             noiseGain.gain.value =
-                0.04;
+                0.035;
 
 
             noiseNode.connect(lf);
@@ -973,6 +968,17 @@
         }
 
 
+        /*
+         * Kart geçiş sesi.
+         *
+         * Hız yükseldikçe:
+         * - frekans biraz yükselir
+         * - ses biraz belirginleşir
+         * - tick daha kısa olur
+         *
+         * Böylece görsel hız ile ses hissi birlikte değişir.
+         */
+
         function playTickSound(
             intensity
         ) {
@@ -998,8 +1004,8 @@
 
 
             osc.frequency.value =
-                600 +
-                Math.random() * 200;
+                520 +
+                intensity * 380;
 
 
             filter.type =
@@ -1007,19 +1013,22 @@
 
 
             filter.frequency.value =
-                1200;
+                1000 +
+                intensity * 500;
 
 
-            const vol =
-                0.015 *
-                Math.min(
-                    intensity,
-                    1
-                );
+            const volume =
+                0.008 +
+                intensity * 0.025;
+
+
+            const duration =
+                0.025 +
+                (1 - intensity) * 0.035;
 
 
             gain.gain.setValueAtTime(
-                vol,
+                volume,
                 audioCtx.currentTime
             );
 
@@ -1027,7 +1036,7 @@
             gain.gain.exponentialRampToValueAtTime(
                 0.001,
                 audioCtx.currentTime +
-                0.04
+                duration
             );
 
 
@@ -1043,7 +1052,7 @@
 
             osc.stop(
                 audioCtx.currentTime +
-                0.04
+                duration
             );
 
         }
@@ -1110,9 +1119,9 @@
         }
 
 
-        /* ════════════════════════════════════════════════════════
-           5. ÇARK — BOYUT
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           5. ÇARK BOYUTLARI
+        ======================================================== */
 
         const NUM_CARDS =
             78;
@@ -1191,22 +1200,33 @@
         );
 
 
-        /* ════════════════════════════════════════════════════════
+        /* ========================================================
            6. KOLON DURUMU
-        ════════════════════════════════════════════════════════ */
+        ======================================================== */
 
         function makeCol() {
 
             return {
 
                 iconEl: null,
+
                 cards: [],
+
                 offsetY: 0,
+
                 velocity: 0,
+
+                previousVelocity: 0,
+
                 isSnapping: false,
+
                 snapDone: false,
+
                 hasSpun: false,
-                lastIndex: -1
+
+                lastIndex: -1,
+
+                lastTickTime: 0
 
             };
 
@@ -1220,9 +1240,173 @@
         ];
 
 
-        /* ════════════════════════════════════════════════════════
-           7. DOM
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           7. SPIN ZAMANLAMASI
+        ======================================================== */
+
+        let spinStartTime =
+            0;
+
+
+        let spinElapsed =
+            0;
+
+
+        let globalSpinActive =
+            false;
+
+
+        /*
+         * Toplam süre yaklaşık 5.6 saniye.
+         *
+         * 0 - 900 ms:
+         * yavaşça hızlan
+         *
+         * 900 - 2500 ms:
+         * yüksek hıza çık
+         *
+         * 2500 - 3900 ms:
+         * maksimum / yüksek hız
+         *
+         * 3900 - 5200 ms:
+         * kontrollü yavaşlama
+         *
+         * 5200+:
+         * son yavaşlama ve snap
+         */
+
+        const ACCELERATION_TIME =
+            900;
+
+
+        const CRUISE_START =
+            900;
+
+
+        const CRUISE_END =
+            3900;
+
+
+        const DECELERATION_END =
+            5200;
+
+
+        const MAX_VELOCITY =
+            150;
+
+
+        const START_VELOCITY =
+            4;
+
+
+        /*
+         * Smoothstep.
+         *
+         * Başlangıç ve bitişlerde
+         * ani hız değişimini önler.
+         */
+
+        function smoothStep(t) {
+
+            t =
+                Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        t
+                    )
+                );
+
+
+            return (
+                t *
+                t *
+                (3 - 2 * t)
+            );
+
+        }
+
+
+        function getTargetVelocity(
+            elapsed
+        ) {
+
+            /* YAVAŞ → HIZLI */
+
+            if (
+                elapsed <
+                ACCELERATION_TIME
+            ) {
+
+                const t =
+                    smoothStep(
+                        elapsed /
+                        ACCELERATION_TIME
+                    );
+
+
+                return (
+                    START_VELOCITY +
+                    (
+                        MAX_VELOCITY -
+                        START_VELOCITY
+                    ) *
+                    t
+                );
+
+            }
+
+
+            /* SABİT YÜKSEK HIZ */
+
+            if (
+                elapsed <
+                CRUISE_END
+            ) {
+
+                return MAX_VELOCITY;
+
+            }
+
+
+            /* HIZLI → YAVAŞ */
+
+            if (
+                elapsed <
+                DECELERATION_END
+            ) {
+
+                const t =
+                    smoothStep(
+                        (
+                            elapsed -
+                            CRUISE_END
+                        ) /
+                        (
+                            DECELERATION_END -
+                            CRUISE_END
+                        )
+                    );
+
+
+                return (
+                    MAX_VELOCITY *
+                    (1 - t)
+                );
+
+            }
+
+
+            /* SON YAVAŞLAMA */
+
+            return 0;
+
+        }
+
+
+        /* ========================================================
+           8. DOM
+        ======================================================== */
 
         for (
             let col = 0;
@@ -1230,12 +1414,7 @@
             col++
         ) {
 
-            const containerH =
-                containers[col]
-                    .clientHeight;
-
-
-            /* ── İkon ───────────────────────────────────────── */
+            /* İKON */
 
             const iconWrap =
                 document.createElement(
@@ -1248,7 +1427,8 @@
 
 
             iconWrap.style.width =
-                cardWidthPx + 'px';
+                cardWidthPx +
+                'px';
 
 
             const iconImg =
@@ -1279,7 +1459,7 @@
                 iconWrap;
 
 
-            /* ── Kartlar ────────────────────────────────────── */
+            /* KARTLAR */
 
             for (
                 let i = 0;
@@ -1298,7 +1478,8 @@
 
 
                 wrap.style.width =
-                    cardWidthPx + 'px';
+                    cardWidthPx +
+                    'px';
 
 
                 wrap.style.visibility =
@@ -1338,9 +1519,9 @@
         }
 
 
-        /* ════════════════════════════════════════════════════════
-           8. RENDER
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           9. RENDER
+        ======================================================== */
 
         function renderColumn(
             colIdx
@@ -1360,7 +1541,7 @@
                 actualCardHeight / 2;
 
 
-            /* ── İkon ───────────────────────────────────────── */
+            /* İKON */
 
             const iconY =
                 centerY +
@@ -1371,8 +1552,10 @@
 
                 if (
                     iconY >
-                    containerH +
-                    actualCardHeight
+                        containerH +
+                        actualCardHeight ||
+                    iconY <
+                        -actualCardHeight * 2
                 ) {
 
                     col.iconEl.style.display =
@@ -1392,7 +1575,7 @@
             }
 
 
-            /* ── Kartlar ───────────────────────────────────── */
+            /* KARTLAR */
 
             let minDist =
                 Infinity;
@@ -1515,26 +1698,62 @@
             );
 
 
-            /* ── Tik ────────────────────────────────────────── */
+            /*
+             * SES SENKRONU
+             *
+             * Sadece aktif kart değiştiğinde
+             * bir tick çalıyor.
+             *
+             * Böylece ses doğrudan slot
+             * geçişlerine bağlı kalıyor.
+             */
 
             if (
                 activeIndex !==
                     col.lastIndex &&
                 col.hasSpun &&
-                !col.snapDone &&
-                Math.abs(
-                    col.velocity
-                ) > 8
+                !col.snapDone
             ) {
 
-                playTickSound(
-                    Math.min(
+                const now =
+                    performance.now();
+
+
+                const minTickInterval =
+                    Math.max(
+                        35,
+                        150 -
                         Math.abs(
                             col.velocity
-                        ) / 60,
-                        1
-                    )
-                );
+                        )
+                    );
+
+
+                if (
+                    now -
+                    col.lastTickTime >=
+                    minTickInterval
+                ) {
+
+                    const intensity =
+                        Math.min(
+                            Math.abs(
+                                col.velocity
+                            ) /
+                            MAX_VELOCITY,
+                            1
+                        );
+
+
+                    playTickSound(
+                        intensity
+                    );
+
+
+                    col.lastTickTime =
+                        now;
+
+                }
 
 
                 col.lastIndex =
@@ -1548,9 +1767,9 @@
         }
 
 
-        /* ════════════════════════════════════════════════════════
-           9. ANİMASYON
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           10. SPIN DURUMU
+        ======================================================== */
 
         let resultSent =
             false;
@@ -1573,7 +1792,8 @@
         function allStopped() {
 
             return cols.every(
-                c => c.snapDone
+                c =>
+                    c.snapDone
             );
 
         }
@@ -1582,13 +1802,111 @@
         function allSpun() {
 
             return cols.every(
-                c => c.hasSpun
+                c =>
+                    c.hasSpun
             );
 
         }
 
 
+        /* ========================================================
+           11. ANİMASYON
+        ======================================================== */
+
         function animate() {
+
+            /*
+             * SPIN AKTİFSE
+             * global zaman üzerinden
+             * gerçek hız eğrisi oluşturulur.
+             */
+
+            if (
+                globalSpinActive
+            ) {
+
+                spinElapsed =
+                    performance.now() -
+                    spinStartTime;
+
+
+                const targetVelocity =
+                    getTargetVelocity(
+                        spinElapsed
+                    );
+
+
+                cols.forEach(
+                    (col, index) => {
+
+                        if (
+                            col.isSnapping ||
+                            col.snapDone
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * Hız değişimi yumuşatılıyor.
+                         *
+                         * Böylece frame'den frame'e
+                         * ani sıçrama olmaz.
+                         */
+
+                        const response =
+                            targetVelocity >
+                            col.velocity
+                                ? 0.055
+                                : 0.035;
+
+
+                        col.velocity +=
+                            (
+                                targetVelocity -
+                                col.velocity
+                            ) *
+                            response;
+
+
+                        /*
+                         * Son bölümde hedef hız
+                         * neredeyse sıfır.
+                         *
+                         * Burada snap aşamasına
+                         * kontrollü geçiyoruz.
+                         */
+
+                        if (
+                            spinElapsed >=
+                                DECELERATION_END &&
+                            Math.abs(
+                                col.velocity
+                            ) < 1.2
+                        ) {
+
+                            col.velocity =
+                                0;
+
+                            col.isSnapping =
+                                true;
+
+                        }
+
+
+                        col.offsetY +=
+                            col.velocity;
+
+                    });
+
+            }
+
+
+            /*
+             * KOLONLARI RENDER ET
+             */
 
             for (
                 let i = 0;
@@ -1605,35 +1923,17 @@
                         .clientHeight;
 
 
+                /*
+                 * SNAP
+                 *
+                 * Son kart tam merkeze
+                 * yumuşak şekilde oturur.
+                 */
+
                 if (
-                    !col.isSnapping
+                    col.isSnapping &&
+                    !col.snapDone
                 ) {
-
-                    col.offsetY +=
-                        col.velocity;
-
-
-                    col.velocity *=
-                        0.985;
-
-
-                    if (
-                        Math.abs(
-                            col.velocity
-                        ) < 1.5 &&
-                        col.hasSpun
-                    ) {
-
-                        col.velocity =
-                            0;
-
-
-                        col.isSnapping =
-                            true;
-
-                    }
-
-                } else {
 
                     const centerY =
                         containerH / 2 -
@@ -1657,15 +1957,25 @@
                         col.offsetY;
 
 
-                    col.offsetY +=
-                        diff * 0.15;
+                    /*
+                     * Snap hızını biraz daha
+                     * yumuşak tutuyoruz.
+                     */
 
+                    col.offsetY +=
+                        diff *
+                        0.12;
+
+
+                    /*
+                     * Çok yaklaşınca kesin
+                     * olarak merkeze oturt.
+                     */
 
                     if (
                         Math.abs(
                             diff
-                        ) < 0.5 &&
-                        !col.snapDone
+                        ) < 0.35
                     ) {
 
                         col.offsetY =
@@ -1675,21 +1985,23 @@
                         col.snapDone =
                             true;
 
+
+                        col.velocity =
+                            0;
+
                     }
 
                 }
 
 
-                if (
-                    !col.snapDone
-                ) {
-
-                    renderColumn(i);
-
-                }
+                renderColumn(i);
 
             }
 
+
+            /*
+             * ÜÇ KOLON DA DURDU
+             */
 
             if (
                 allStopped() &&
@@ -1705,7 +2017,13 @@
                     false;
 
 
+                globalSpinActive =
+                    false;
+
+
                 stopSpinSound();
+
+
                 playStopSound();
 
 
@@ -1720,18 +2038,30 @@
                 }
 
 
+                /*
+                 * Sonuçtan önce ikonlar
+                 * gizleniyor.
+                 */
+
                 cols.forEach(
-                    c => {
+                    col => {
 
-                        c.hasSpun =
-                            false;
+                        if (
+                            col.iconEl
+                        ) {
 
-                        c.snapDone =
-                            false;
+                            col.iconEl.style.display =
+                                'none';
+
+                        }
 
                     }
                 );
 
+
+                /*
+                 * Sonuç gönderimi.
+                 */
 
                 spinTimeoutId =
                     setTimeout(
@@ -1769,10 +2099,13 @@
 
 
                                     drawnCards.push({
+
                                         id: id,
+
                                         reversed:
                                             Math.random() <
                                             0.5
+
                                     });
 
                                 }
@@ -1811,9 +2144,9 @@
         }
 
 
-        /* ════════════════════════════════════════════════════════
-           10. BAŞLAT
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           12. İLK GÖRÜNTÜ
+        ======================================================== */
 
         for (
             let i = 0;
@@ -1831,9 +2164,9 @@
         );
 
 
-        /* ════════════════════════════════════════════════════════
-           11. DÖNDÜR
-        ════════════════════════════════════════════════════════ */
+        /* ========================================================
+           13. DÖNDÜR BUTONU
+        ======================================================== */
 
         turnSpinBtn.addEventListener(
             'click',
@@ -1874,6 +2207,18 @@
                     false;
 
 
+                globalSpinActive =
+                    true;
+
+
+                spinStartTime =
+                    performance.now();
+
+
+                spinElapsed =
+                    0;
+
+
                 cols.forEach(
                     col => {
 
@@ -1899,14 +2244,21 @@
                             -1;
 
 
+                        col.lastTickTime =
+                            0;
+
+
                         col.hasSpun =
                             true;
 
 
+                        /*
+                         * Her kolon aynı hız
+                         * eğrisini takip ediyor.
+                         */
+
                         col.velocity =
-                            120 +
-                            Math.random() *
-                            40;
+                            START_VELOCITY;
 
                     }
                 );
