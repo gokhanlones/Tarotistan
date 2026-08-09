@@ -201,11 +201,11 @@
 
                 if (isThree) {
                     // Üç kart: her pozisyon kendi başlığıyla ayrı bölüm
-                    prompt += `Geçmiş\n\n`;
+                    prompt += `Geçmiş <img src="history.png" alt="Geçmiş">\n\n`;
                     prompt += `(Geçmiş kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
-                    prompt += `Şimdi\n\n`;
+                    prompt += `Şimdi <img src="now.png" alt="Şimdi">\n\n`;
                     prompt += `(Şimdi kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
-                    prompt += `Gelecek\n\n`;
+                    prompt += `Gelecek <img src="coming.png" alt="Gelecek">\n\n`;
                     prompt += `(Gelecek kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
                 } else {
                     // Tek kart
@@ -217,7 +217,7 @@
                 prompt += `(Kullanıcıya pratik, olumlu ve yapıcı bir öneri, 2-3 cümle)\n\n`;
 
                 prompt += `Kurallar:\n`;
-                prompt += `- Başlıkları (Genel Enerji, Geçmiş, Şimdi, Gelecek, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
+                prompt += `- Başlıkları (Genel Enerji, Geçmiş <img src="history.png" alt="Geçmiş">, Şimdi <img src="now.png" alt="Şimdi">, Gelecek <img src="coming.png" alt="Gelecek">, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
                 prompt += `- Başlıkların başına numara (1. 2. 3.) veya herhangi bir işaret koyma.\n`;
                 prompt += `- Başlıkların sonuna iki nokta (:) koyma.\n`;
                 prompt += `- Yıldız (*), kare işaret (#) veya başka hiçbir markdown biçimlendirmesi kullanma, düz metin yaz.\n`;
