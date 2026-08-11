@@ -181,6 +181,9 @@
                                 }
                             }
 
+                            // 24 saat geçtiyse bildirimi göster
+                            await maybeShowNotification(user.uid);
+
                             if (!user.emailVerified) {
                                 TARGET_PAGE = 'auth.html';
                             } else {
@@ -215,6 +218,56 @@
                     window.location.replace(TARGET_PAGE);
                 }
             }
+
+            // ── 24 Saat Bildirim Kontrolü ──────────────────────────────────────
+            // Uygulama her açıldığında çalışır.
+            // localStorage'da kayıtlı notifyAt zamanı geçmişse bildirimi gösterir.
+            async function maybeShowNotification(uid) {
+                try {
+                    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                    if (!('serviceWorker' in navigator)) return;
+
+                    const notifyAt  = localStorage.getItem('tarotNextNotify');
+                    const notifyUid = localStorage.getItem('tarotNotifyUid');
+
+                    if (!notifyAt) return;
+                    if (notifyUid && notifyUid !== uid) return;   // başka kullanıcının zamanı
+                    if (Date.now() < parseInt(notifyAt)) return;  // henüz 24 saat geçmedi
+
+                    const messages = [
+                        'Bugün seni neler bekliyor? Günlük okuman hazır. 🔮',
+                        'Kartlar seni çağırıyor... Bugünkü enerji nasıl? 🃏',
+                        'Yeni bir gün, yeni bir çekim. Bugün ne diyor kaderin?',
+                        'Günlük burç ve tarot okuman seni bekliyor. ✨'
+                    ];
+                    const body = messages[Math.floor(Math.random() * messages.length)];
+
+                    const reg = await navigator.serviceWorker.register('notification-sw.js');
+                    await navigator.serviceWorker.ready;
+
+                    await reg.showNotification('TAROTISTAN 🔮', {
+                        body,
+                        icon:  'logo192.png',
+                        badge: 'logo72.png',
+                        tag:   'tarot-daily',
+                        requireInteraction: false,
+                        data:  { url: './dashboard.html' }
+                    });
+
+                    // Tek seferlik — temizle
+                    localStorage.removeItem('tarotNextNotify');
+                    localStorage.removeItem('tarotNotifyUid');
+
+                    // Firestore'u sıfırla
+                    db.collection('users').doc(uid)
+                        .set({ pushNotifyAt: null, pushEnabled: false }, { merge: true })
+                        .catch(() => {});
+
+                } catch (e) {
+                    console.warn('[Tarotistan] Bildirim gösterilemedi:', e);
+                }
+            }
+            // ──────────────────────────────────────────────────────────────────
 
             startConnectionCheck();
 
