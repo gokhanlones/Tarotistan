@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
     <script src="firebase-config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -87,6 +88,57 @@
         const auth         = firebase.auth();
         const db           = firebase.firestore();
         const remoteConfig = firebase.remoteConfig();
+        const messaging    = firebase.messaging();
+
+        // ── VAPID Anahtarı ────────────────────────────────────────────────
+        // Firebase Console → Project Settings → Cloud Messaging →
+        // Web Push certificates → "Generate key pair" ile oluştur ve buraya yaz.
+        const VAPID_KEY = 'BURAYA_FIREBASE_VAPID_KEY_YAZ';
+        // ─────────────────────────────────────────────────────────────────
+
+        // ── Bildirim Planlayıcı ───────────────────────────────────────────
+        // Okuma tamamlandıktan sonra çağrılır.
+        // 1) Bildirim izni alır
+        // 2) FCM token'ı Firestore'a yazar (Cloud Function bu token'ı kullanır)
+        // 3) pushNotifyAt = şimdi + 24 saat olarak kaydeder
+        // 4) localStorage'a da yazar (uygulama açıkken fallback için)
+        async function scheduleNotification(uid) {
+            try {
+                if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+                // İzin zaten verilmişse popup çıkmaz; ilk kez sorulur
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') return;
+
+                // FCM token al (firebase-messaging-sw.js'i otomatik kaydeder)
+                let fcmToken = null;
+                try {
+                    fcmToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+                } catch (tokenErr) {
+                    console.warn('[Tarotistan] FCM token alınamadı:', tokenErr);
+                }
+
+                // 24 saat sonrasını hesapla
+                const notifyAt = Date.now() + 24 * 60 * 60 * 1000;
+
+                // Firestore'a yaz — Cloud Function bu kaydı okur
+                const updateData = {
+                    pushEnabled:  true,
+                    pushNotifyAt: firebase.firestore.Timestamp.fromMillis(notifyAt)
+                };
+                if (fcmToken) updateData.fcmToken = fcmToken;
+
+                await db.collection('users').doc(uid).set(updateData, { merge: true });
+
+                // localStorage fallback (uygulama açıkken bildirim için)
+                localStorage.setItem('tarotNextNotify', notifyAt.toString());
+                localStorage.setItem('tarotNotifyUid',  uid);
+
+            } catch (e) {
+                console.warn('[Tarotistan] Bildirim planlanamadı:', e);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         remoteConfig.settings = { minimumFetchIntervalMillis: 0 };
 
@@ -300,6 +352,7 @@
                             status: aiText ? 'completed' : 'pending'
                         });
                         log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
+                        await scheduleNotification(user.uid); // 24 saat sonrası için bildirim planla
                     } else {
                         log('   24 saat geçmemiş, mevcut kayıt GÜNCELLENİYOR...');
                         await lastDoc.ref.update({
@@ -322,6 +375,7 @@
                         status: aiText ? 'completed' : 'pending'
                     });
                     log('   Yeni kayıt başarılı, doc ID: ' + docRef.id);
+                    await scheduleNotification(user.uid); // İlk okuma → bildirim planla
                 }
 
                 // 6. Yönlendir
