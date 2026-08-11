@@ -99,16 +99,15 @@
             ? 'Tek kart çekimi için kısa bir reklam izliyorsunuz.'
             : 'Üç kart çekimi için reklam izliyorsunuz.';
 
-        const watchBtn    = document.getElementById('watchBtn');
-        const adStatus    = document.getElementById('adStatus');
-        const adBox       = document.getElementById('adBox');
-        const aiLoader    = document.getElementById('aiLoader');
+        const watchBtn     = document.getElementById('watchBtn');
+        const adStatus     = document.getElementById('adStatus');
+        const adBox        = document.getElementById('adBox');
+        const aiLoader     = document.getElementById('aiLoader');
         const aiLoaderText = document.getElementById('aiLoaderText');
-        const debugBox    = document.getElementById('debugBox');
+        const debugBox     = document.getElementById('debugBox');
 
         function log(msg) {
             console.log(msg);
-            // Debug box sadece geliştirme ortamında açılır
             if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
                 debugBox.innerHTML += msg + '\n';
                 debugBox.classList.add('active');
@@ -116,12 +115,12 @@
         }
 
         function loadRewardedAd() {
-            adStatus.textContent  = 'Reklam yükleniyor...';
-            watchBtn.disabled     = true;
+            adStatus.textContent = 'Reklam yükleniyor...';
+            watchBtn.disabled    = true;
             setTimeout(() => {
-                adStatus.textContent  = 'Reklam hazır!';
-                watchBtn.disabled     = false;
-                watchBtn.textContent  = type === 'single' ? 'Reklamı İzle ve Kartı Gör' : 'Reklamı İzle ve Kartları Gör';
+                adStatus.textContent = 'Reklam hazır!';
+                watchBtn.disabled    = false;
+                watchBtn.textContent = type === 'single' ? 'Reklamı İzle ve Kartı Gör' : 'Reklamı İzle ve Kartları Gör';
             }, 1500);
         }
 
@@ -139,7 +138,7 @@
         async function onRewardEarned() {
             sessionStorage.setItem('adWatched', 'true');
             sessionStorage.setItem('adWatchedAt', Date.now().toString());
-            adBox.style.display = 'none';
+            adBox.style.display  = 'none';
             aiLoader.classList.add('active');
             adStatus.textContent = '';
             await generateAiReadingAndSave();
@@ -153,7 +152,7 @@
 
         async function generateAiReadingAndSave() {
             const drawnCards  = JSON.parse(sessionStorage.getItem('tarotDrawnCards') || '[]');
-            const intentText  = sessionStorage.getItem('tarotIntent') || '';
+            const intentText  = sessionStorage.getItem('tarotIntent')      || '';
             const readingType = sessionStorage.getItem('tarotReadingType') || 'single';
             const isThree     = readingType === 'three';
 
@@ -200,15 +199,13 @@
                 prompt += `(Tüm kartların birlikte oluşturduğu temel tema, 2-3 cümle)\n\n`;
 
                 if (isThree) {
-                    // Üç kart: her pozisyon kendi başlığıyla ayrı bölüm
-                    prompt += `Geçmiş <img src="history.png" alt="Geçmiş">\n\n`;
+                    prompt += `Geçmiş\n\n`;
                     prompt += `(Geçmiş kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
-                    prompt += `Şimdi <img src="now.png" alt="Şimdi">\n\n`;
+                    prompt += `Şimdi\n\n`;
                     prompt += `(Şimdi kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
-                    prompt += `Gelecek <img src="coming.png" alt="Gelecek">\n\n`;
+                    prompt += `Gelecek\n\n`;
                     prompt += `(Gelecek kartının kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
                 } else {
-                    // Tek kart
                     prompt += `Kart Yorumu\n\n`;
                     prompt += `(Kartın kullanıcının niyetiyle bağlantılı yorumu, 3-4 cümle)\n\n`;
                 }
@@ -217,7 +214,7 @@
                 prompt += `(Kullanıcıya pratik, olumlu ve yapıcı bir öneri, 2-3 cümle)\n\n`;
 
                 prompt += `Kurallar:\n`;
-                prompt += `- Başlıkları (Genel Enerji, Geçmiş <img src="history.png" alt="Geçmiş">, Şimdi <img src="now.png" alt="Şimdi">, Gelecek <img src="coming.png" alt="Gelecek">, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
+                prompt += `- Başlıkları (Genel Enerji, Geçmiş, Şimdi, Gelecek, Kart Yorumu, Sonuç ve Tavsiye) yukarıdaki gibi tek başına bir satırda, olduğu gibi yaz.\n`;
                 prompt += `- Başlıkların başına numara (1. 2. 3.) veya herhangi bir işaret koyma.\n`;
                 prompt += `- Başlıkların sonuna iki nokta (:) koyma.\n`;
                 prompt += `- Yıldız (*), kare işaret (#) veya başka hiçbir markdown biçimlendirmesi kullanma, düz metin yaz.\n`;
