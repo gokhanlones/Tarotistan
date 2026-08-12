@@ -144,11 +144,11 @@
             flex-direction: row;
             align-items: center;
             justify-content: flex-start;
-            gap: 12px;
+            gap: 8px;
             width: 100%;
         }
         .horoscope-icon {
-            width: 40px; height: 40px;
+            width: 20px; height: 20px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -387,7 +387,7 @@
         <!-- Günlük Burç Yorumu -->
         <div class="horoscope-area" id="horoscopeOption">
             <div class="horoscope-header">
-                <img src="ikizler.png" class="horoscope-icon" id="horoscopeIcon" alt="Burç">
+                <img src="horoscope/gemini.png" class="horoscope-icon" id="horoscopeIcon" alt="Burç">
                 <div class="horoscope-sign-name" id="horoscopeSignName">İkizler</div>
             </div>
             <div class="horoscope-title" id="horoscopeTitle">Günlük Burç Yorumu</div>
@@ -532,13 +532,9 @@
             return map[signTr] || signTr;
         }
 
-        function getZodiacIconFile(signTr) {
-            const map = {
-                'Koç':'koc.png','Boğa':'boga.png','İkizler':'ikizler.png','Yengeç':'yengec.png',
-                'Aslan':'aslan.png','Başak':'basak.png','Terazi':'terazi.png','Akrep':'akrep.png',
-                'Yay':'yay.png','Oğlak':'oglak.png','Kova':'kova.png','Balık':'balik.png'
-            };
-            return map[signTr] || 'ikizler.png';
+        function getZodiacIconPath(signTr) {
+            const signEn = getZodiacSignEn(signTr);
+            return 'horoscope/' + signEn.toLowerCase() + '.png';
         }
 
         async function fetchHoroscopeFromGemini(signTr, signEn) {
@@ -594,7 +590,8 @@
             const iconEl     = document.getElementById('horoscopeIcon');
             const signNameEl = document.getElementById('horoscopeSignName');
             const dateEl     = document.getElementById('horoscopeDate');
-            iconEl.src = getZodiacIconFile(sign); iconEl.alt = sign;
+            iconEl.src = getZodiacIconPath(sign);
+            iconEl.alt = sign;
             signNameEl.textContent = sign;
             document.getElementById('horoscopeTitle').textContent = t('dailyHoroscopeAreaTitle');
             document.getElementById('horoscopeDesc').textContent  = text;
@@ -609,7 +606,7 @@
         }
 
         function showHoroscopeEmpty() {
-            document.getElementById('horoscopeIcon').src            = 'ikizler.png';
+            document.getElementById('horoscopeIcon').src            = 'horoscope/gemini.png';
             document.getElementById('horoscopeSignName').textContent = 'Burç';
             document.getElementById('horoscopeTitle').textContent    = t('dailyHoroscopeAreaTitle');
             document.getElementById('horoscopeDesc').textContent     = t('dailyHoroscopeAreaDesc');
