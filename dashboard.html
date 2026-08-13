@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="zodiac-data.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -138,7 +139,10 @@
             padding: 14px 16px;
             background: #cfebff;
             margin-top: 16px;
+            cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
         }
+        .horoscope-area:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .horoscope-area:active { transform: scale(0.98); }
         .horoscope-header {
             display: flex;
             flex-direction: row;
@@ -349,6 +353,95 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .zodiac-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: flex-start; justify-content: center;
+            padding: 60px 16px 40px;
+            z-index: 200;
+            overflow-y: auto;
+        }
+        .zodiac-modal-overlay.active { display: flex; }
+        .zodiac-modal-box {
+            width: 100%; max-width: 480px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 0;
+            display: flex; flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .zodiac-modal-header {
+            background: #cfebff;
+            padding: 24px 20px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .zodiac-modal-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.8);
+            border: none; border-radius: 50%;
+            font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #333;
+        }
+        .zodiac-modal-icon {
+            width: 64px; height: 64px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        .zodiac-modal-sign-name {
+            font-size: 1.5rem; font-weight: 700;
+            color: #000; letter-spacing: 1px;
+        }
+        .zodiac-modal-tagline {
+            font-size: 0.95rem; color: #555;
+            margin-top: 2px; font-style: italic;
+        }
+        .zodiac-modal-meta {
+            display: flex; flex-wrap: wrap;
+            justify-content: center; gap: 8px;
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e8e8ed;
+        }
+        .zodiac-meta-chip {
+            background: #fff;
+            border: 1px solid #e8e8ed;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: #333;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .zodiac-meta-chip strong { color: #000; }
+        .zodiac-modal-body {
+            padding: 20px 20px 28px;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #222;
+            white-space: pre-line;
+        }
+        .zodiac-modal-body::-webkit-scrollbar { width: 4px; }
+        .zodiac-modal-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .zodiac-compatible-list {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 6px;
+        }
+        .zodiac-compatible-chip {
+            background: #cfebff;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -368,7 +461,6 @@
     </div>
 
     <div class="content">
-        <!-- Tek Kart -->
         <div class="card-area" id="singleCardOption">
             <div class="single-card-container">
                 <img src="onecard.png" class="single-card-img" alt="Tek Kart">
@@ -376,7 +468,6 @@
             </div>
         </div>
 
-        <!-- Üç Kart -->
         <div class="card-area" id="threeCardOption">
             <div class="three-card-container">
                 <img src="threecards.png" class="three-card-img" alt="Üç Kart">
@@ -384,7 +475,6 @@
             </div>
         </div>
 
-        <!-- Günlük Burç Yorumu -->
         <div class="horoscope-area" id="horoscopeOption">
             <div class="horoscope-header">
                 <img src="horoscope/gemini.png" class="horoscope-icon" id="horoscopeIcon" alt="Burç">
@@ -437,6 +527,27 @@
             </div>
             <button class="birth-save-btn" id="birthModalSaveBtn">Kaydet</button>
             <div class="birth-msg" id="birthModalMsg"></div>
+        </div>
+    </div>
+
+    <div class="zodiac-modal-overlay" id="zodiacModalOverlay">
+        <div class="zodiac-modal-box">
+            <div class="zodiac-modal-header">
+                <button class="zodiac-modal-close" id="zodiacModalClose" aria-label="Kapat">&times;</button>
+                <img src="" class="zodiac-modal-icon" id="zodiacModalIcon" alt="">
+                <div class="zodiac-modal-sign-name" id="zodiacModalSignName"></div>
+                <div class="zodiac-modal-tagline" id="zodiacModalTagline"></div>
+            </div>
+            <div class="zodiac-modal-meta">
+                <div class="zodiac-meta-chip"><strong>Tarih:</strong> <span id="zodiacModalDates"></span></div>
+                <div class="zodiac-meta-chip"><strong>Element:</strong> <span id="zodiacModalElement"></span></div>
+                <div class="zodiac-meta-chip"><strong>Gezegen:</strong> <span id="zodiacModalRuler"></span></div>
+                <div class="zodiac-meta-chip" style="flex-basis: 100%; justify-content: center;">
+                    <strong>Uyumlu:</strong>
+                    <div class="zodiac-compatible-list" id="zodiacModalCompatible"></div>
+                </div>
+            </div>
+            <div class="zodiac-modal-body" id="zodiacModalBody"></div>
         </div>
     </div>
 
@@ -498,7 +609,6 @@
             document.getElementById('threeCardOption').classList.remove('locked');
         }
 
-        // ===== BURÇ HESAPLAMA =====
         function getZodiacSign(day, month) {
             const signs = [
                 { name: 'Oğlak',   start: [1,  1],  end: [1,  19] },
@@ -802,6 +912,49 @@
         document.getElementById('premiumCtaBtn').addEventListener('click', function() {
             closeCooldownModal();
             document.getElementById('premiumSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // ===== ZODIAC MODAL =====
+        function openZodiacModal() {
+            if (!userBirthInfo || !userBirthInfo.day || !userBirthInfo.month) {
+                openBirthModal();
+                return;
+            }
+            const sign = getZodiacSign(userBirthInfo.day, userBirthInfo.month);
+            const data = ZODIAC_DATA[sign];
+            if (!data) return;
+
+            document.getElementById('zodiacModalIcon').src = getZodiacIconPath(sign);
+            document.getElementById('zodiacModalIcon').alt = sign;
+            document.getElementById('zodiacModalSignName').textContent = sign + ' Burcu';
+            document.getElementById('zodiacModalTagline').textContent = data.tagline;
+            document.getElementById('zodiacModalDates').textContent = data.dates;
+            document.getElementById('zodiacModalElement').textContent = data.element;
+            document.getElementById('zodiacModalRuler').textContent = data.ruler;
+
+            const compatContainer = document.getElementById('zodiacModalCompatible');
+            compatContainer.innerHTML = '';
+            data.compatible.forEach(c => {
+                const chip = document.createElement('span');
+                chip.className = 'zodiac-compatible-chip';
+                chip.textContent = c;
+                compatContainer.appendChild(chip);
+            });
+
+            document.getElementById('zodiacModalBody').textContent = data.article;
+            document.getElementById('zodiacModalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeZodiacModal() {
+            document.getElementById('zodiacModalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('horoscopeOption').addEventListener('click', openZodiacModal);
+        document.getElementById('zodiacModalClose').addEventListener('click', closeZodiacModal);
+        document.getElementById('zodiacModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeZodiacModal();
         });
     </script>
 </body>
