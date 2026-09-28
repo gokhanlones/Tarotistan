@@ -291,6 +291,15 @@
             }
         }
 
+        function cardImage(card) {
+            const slug = card.name_en.toLowerCase().replace(/^the\s+/, '').replace(/\s+/g, '_');
+            return 'cards/' + slug + '.jpg';
+        }
+        function cardImgFallback(img) {
+            img.onerror = null;
+            img.src = 'onecard.png';
+        }
+
         function renderCards(cards, type, tarotData) {
             const area = document.getElementById('cardsArea');
             const lang = typeof getLang === 'function' ? getLang() : 'tr';
@@ -311,7 +320,7 @@
 
                 const slot = document.createElement('div');
                 slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
-                slot.innerHTML = `<div class="card-bg"><img src="onecard.png" alt=""></div>${reversedBadge}<div class="card-name">${cardName}</div>`;
+                slot.innerHTML = `<div class="card-bg"><img src="${cardImage(info)}" alt="" onerror="cardImgFallback(this)"></div>${reversedBadge}<div class="card-name">${cardName}</div>`;
                 slot.onclick = () => showDetail(info, drawn);
 
                 wrapper.appendChild(slot);
