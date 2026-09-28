@@ -272,6 +272,15 @@
             } catch (err) { console.error('Kart verisi yüklenemedi:', err); }
         }
 
+        function cardImage(card) {
+            const slug = card.name_en.toLowerCase().replace(/^the\s+/, '').replace(/\s+/g, '_');
+            return 'cards/' + slug + '.jpg';
+        }
+        function cardImgFallback(img) {
+            img.onerror = null;
+            img.src = 'onecard.png';
+        }
+
         function renderGrid() {
             const grid = document.getElementById('cardsGrid');
             grid.innerHTML = '';
@@ -279,7 +288,7 @@
                 const item = document.createElement('div');
                 item.className = 'card-item';
                 item.style.animationDelay = (index * 0.02) + 's';
-                item.innerHTML = `<div class="thumb"><img src="onecard.png" alt=""></div><div class="name">${cardName(card)}</div>`;
+                item.innerHTML = `<div class="thumb"><img src="${cardImage(card)}" alt="" loading="lazy" onerror="cardImgFallback(this)"></div><div class="name">${cardName(card)}</div>`;
                 item.addEventListener('click', () => openDetail(card));
                 grid.appendChild(item);
             });
