@@ -49,9 +49,7 @@
         .card-slot.reversed { transform: rotate(180deg); }
         .card-bg { position: absolute; inset: 0; }
         .card-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .card-slot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.60) 100%); }
-        .card-name { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; padding: 10px 8px; font-size: clamp(0.65rem, 2.5vw, 0.85rem); font-weight: 700; color: #fff; text-align: center; line-height: 1.2; }
-        .card-badge { position: absolute; top: 4px; right: 4px; z-index: 3; background: #ff3b30; color: #fff; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .card-name { width: 100%; margin-top: 8px; font-size: clamp(0.65rem, 2.5vw, 0.85rem); font-weight: 700; color: #000; text-align: center; line-height: 1.2; }
 
         .ai-section { width: 100%; background: #fafafa; border: 2px dashed #e8e8ed; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 16px; }
         .ai-text { font-size: 0.92rem; color: #333; line-height: 1.65; text-align: justify; white-space: pre-wrap; }
@@ -313,17 +311,19 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'card-wrapper';
 
-                const reversedBadge = drawn.reversed
-                    ? `<div class="card-badge">${typeof t === 'function' ? t('resultReversedBadge') : 'Ters'}</div>`
-                    : '';
                 const cardName = lang === 'tr' ? info.name_tr : info.name_en;
 
                 const slot = document.createElement('div');
                 slot.className = 'card-slot' + (drawn.reversed ? ' reversed' : '');
-                slot.innerHTML = `<div class="card-bg"><img src="${cardImage(info)}" alt="" onerror="cardImgFallback(this)"></div>${reversedBadge}<div class="card-name">${cardName}</div>`;
+                slot.innerHTML = `<div class="card-bg"><img src="${cardImage(info)}" alt="" onerror="cardImgFallback(this)"></div>`;
                 slot.onclick = () => showDetail(info, drawn);
 
+                const nameEl = document.createElement('div');
+                nameEl.className = 'card-name';
+                nameEl.textContent = cardName;
+
                 wrapper.appendChild(slot);
+                wrapper.appendChild(nameEl);
                 area.appendChild(wrapper);
             });
         }
