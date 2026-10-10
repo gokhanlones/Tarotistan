@@ -15,10 +15,14 @@ self.addEventListener('activate', event => {
     event.waitUntil(clients.claim());
 });
 
-// ── Push bildirimi (ileride FCM kullanıldığında devreye girer) ────────────────
+// ── Push bildirimi ────────────────────────────────────────────────────────────
+// FCM (functions/index.js) sadece "data" alanı olan mesaj gönderir; FCM SDK'sı
+// bu SW'de yüklü olmadığı için bildirimi burada kendimiz gösteriyoruz.
+// FCM yükü { data: {...}, from, ... } şeklindedir; düz push için yükün kendisi.
 self.addEventListener('push', event => {
-    let data = {};
-    try { data = event.data ? event.data.json() : {}; } catch (e) {}
+    let payload = {};
+    try { payload = event.data ? event.data.json() : {}; } catch (e) {}
+    const data = payload.data || payload;
 
     const title = data.title || 'TAROTISTAN 🔮';
     const options = {

@@ -222,6 +222,8 @@
             // ── 24 Saat Bildirim Kontrolü ──────────────────────────────────────
             // Uygulama her açıldığında çalışır.
             // localStorage'da kayıtlı notifyAt zamanı geçmişse bildirimi gösterir.
+            // Bu kayıt sadece FCM token alınamadığında yazılır (bkz. ad.html);
+            // token varsa bildirimi Cloud Function gönderir.
             async function maybeShowNotification(uid) {
                 try {
                     if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -259,7 +261,7 @@
                     localStorage.removeItem('tarotNotifyUid');
 
                     // Firestore'u sıfırla
-                    db.collection('users').doc(uid)
+                    firebase.firestore().collection('users').doc(uid)
                         .set({ pushNotifyAt: null, pushEnabled: false }, { merge: true })
                         .catch(() => {});
 
