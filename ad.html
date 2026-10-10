@@ -106,7 +106,7 @@
 
         // ── Bildirim Planlayıcı ───────────────────────────────────────────
         // Okuma tamamlandıktan sonra çağrılır.
-        // 1) Bildirim izni alır
+        // 1) Bildirim izni verildiyse devam eder (izin butonda istenir)
         // 2) FCM token'ı Firestore'a yazar (Cloud Function bu token'ı kullanır)
         // 3) pushNotifyAt = şimdi + 24 saat olarak kaydeder
         // 4) localStorage'a da yazar (uygulama açıkken fallback için)
@@ -114,9 +114,17 @@
             try {
                 if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
-                // İzin zaten verilmişse popup çıkmaz; ilk kez sorulur
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') return;
+                // İzin, reklam butonuna basıldığında istenir (requestNotificationPermission).
+                // Burada tekrar sormuyoruz: kullanıcı etkileşimi olmadan gelen istek
+                // tarayıcılar tarafından sessizce engellenir. Kullanıcı izin
+                // penceresini hâlâ yanıtlamadıysa en fazla 15 sn bekleriz.
+                if (permissionRequest) {
+                    await Promise.race([
+                        permissionRequest,
+                        new Promise(resolve => setTimeout(resolve, 15000))
+                    ]);
+                }
+                if (Notification.permission !== 'granted') return;
 
                 // FCM token al. SW'yi kendimiz kaydediyoruz: SDK varsayılan olarak
                 // kök dizindeki /firebase-messaging-sw.js'i arar, GitHub Pages'te
@@ -200,7 +208,23 @@
             }, 1500);
         }
 
+        // Safari ve Chrome izin penceresini sadece kullanıcı etkileşimiyle (tıklama)
+        // açar; bu yüzden izin, butonun click handler'ında hiçbir await'ten önce istenir.
+        // İzin zaten verildi/reddedildiyse pencere çıkmaz. Sonucu beklemiyoruz,
+        // reklam hemen başlar.
+        let permissionRequest = null;
+        function requestNotificationPermission() {
+            try {
+                if (!('Notification' in window) || Notification.permission !== 'default') return;
+                // Eski Safari Promise döndürmez, callback ister
+                permissionRequest = Promise.resolve(Notification.requestPermission()).catch(() => {});
+            } catch (e) {
+                console.warn('[Tarotistan] Bildirim izni istenemedi:', e);
+            }
+        }
+
         function showRewardedAd() {
+            requestNotificationPermission();
             watchBtn.disabled    = true;
             adStatus.textContent = 'Reklam oynatılıyor...';
             let remaining = 3;
