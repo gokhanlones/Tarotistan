@@ -16,13 +16,17 @@ self.addEventListener('activate', event => {
 });
 
 // ── Push bildirimi ────────────────────────────────────────────────────────────
-// FCM (functions/index.js) sadece "data" alanı olan mesaj gönderir; FCM SDK'sı
+// FCM (scripts/send-reminders.js) sadece "data" alanı olan mesaj gönderir; FCM SDK'sı
 // bu SW'de yüklü olmadığı için bildirimi burada kendimiz gösteriyoruz.
 // FCM yükü { data: {...}, from, ... } şeklindedir; düz push için yükün kendisi.
 self.addEventListener('push', event => {
     let payload = {};
-    try { payload = event.data ? event.data.json() : {}; } catch (e) {}
-    const data = payload.data || payload;
+    try { payload = event.data ? event.data.json() : {}; } catch (e) {
+        console.warn('[SW] Push yükü JSON değil:', e);
+    }
+    // Teşhis için: chrome://serviceworker-internals sayfasındaki Log kutusunda görünür
+    console.log('[SW] Push alındı:', JSON.stringify(payload));
+    const data = payload.data || payload.notification || payload;
 
     const title = data.title || 'TAROTISTAN 🔮';
     const options = {
@@ -37,6 +41,8 @@ self.addEventListener('push', event => {
 
     event.waitUntil(
         self.registration.showNotification(title, options)
+            .then(() => console.log('[SW] Bildirim gösterildi'))
+            .catch(err => console.error('[SW] Bildirim gösterilemedi:', err))
     );
 });
 
