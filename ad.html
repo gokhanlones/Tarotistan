@@ -88,11 +88,19 @@
         const auth         = firebase.auth();
         const db           = firebase.firestore();
         const remoteConfig = firebase.remoteConfig();
-        const messaging    = firebase.messaging();
+        // iOS Safari (ana ekrana eklenmemiş) gibi tarayıcılarda messaging desteklenmez;
+        // firebase.messaging() orada hata fırlatıp tüm sayfayı durdurabilir.
+        let messaging = null;
+        try {
+            if (firebase.messaging.isSupported()) messaging = firebase.messaging();
+        } catch (e) {
+            console.warn('[Tarotistan] Messaging desteklenmiyor:', e);
+        }
 
         // ── VAPID Anahtarı ────────────────────────────────────────────────
         // Firebase Console → Project Settings → Cloud Messaging →
         // Web Push certificates → "Generate key pair" ile oluştur ve buraya yaz.
+        // Yer tutucu kaldıkça FCM atlanır, sadece localStorage yedeği çalışır.
         const VAPID_KEY = 'BURAYA_FIREBASE_VAPID_KEY_YAZ';
         // ─────────────────────────────────────────────────────────────────
 
@@ -110,12 +118,21 @@
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') return;
 
-                // FCM token al (firebase-messaging-sw.js'i otomatik kaydeder)
+                // FCM token al. SW'yi kendimiz kaydediyoruz: SDK varsayılan olarak
+                // kök dizindeki /firebase-messaging-sw.js'i arar, GitHub Pages'te
+                // (/Tarotistan/ alt yolu) o dosya bulunamaz. index.html de aynı SW'yi
+                // kullandığı için iki SW aynı kapsamda birbirini ezmez.
                 let fcmToken = null;
-                try {
-                    fcmToken = await messaging.getToken({ vapidKey: VAPID_KEY });
-                } catch (tokenErr) {
-                    console.warn('[Tarotistan] FCM token alınamadı:', tokenErr);
+                if (messaging && VAPID_KEY && !VAPID_KEY.startsWith('BURAYA')) {
+                    try {
+                        const swReg = await navigator.serviceWorker.register('notification-sw.js');
+                        fcmToken = await messaging.getToken({
+                            vapidKey: VAPID_KEY,
+                            serviceWorkerRegistration: swReg
+                        });
+                    } catch (tokenErr) {
+                        console.warn('[Tarotistan] FCM token alınamadı:', tokenErr);
+                    }
                 }
 
                 // 24 saat sonrasını hesapla
@@ -130,9 +147,16 @@
 
                 await db.collection('users').doc(uid).set(updateData, { merge: true });
 
-                // localStorage fallback (uygulama açıkken bildirim için)
-                localStorage.setItem('tarotNextNotify', notifyAt.toString());
-                localStorage.setItem('tarotNotifyUid',  uid);
+                // Token yoksa push gelemez; uygulama açıldığında index.html'in
+                // göstermesi için localStorage'a yaz. Token varsa bildirimi
+                // Cloud Function gönderir, burada yazmak çift bildirime yol açar.
+                if (fcmToken) {
+                    localStorage.removeItem('tarotNextNotify');
+                    localStorage.removeItem('tarotNotifyUid');
+                } else {
+                    localStorage.setItem('tarotNextNotify', notifyAt.toString());
+                    localStorage.setItem('tarotNotifyUid',  uid);
+                }
 
             } catch (e) {
                 console.warn('[Tarotistan] Bildirim planlanamadı:', e);
