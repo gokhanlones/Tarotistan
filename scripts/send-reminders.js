@@ -79,7 +79,9 @@ async function sendDailyReadingReminders() {
                     body,
                     url: APP_URL + 'dashboard.html'
                 },
-                webpush: { headers: { Urgency: 'normal', TTL: String(6 * 60 * 60) } }
+                // Urgency 'high': Android ekran kapalıyken (Doze) 'normal' mesajları
+                // erteleyebiliyor; hatırlatmanın gecikmeden düşmesi için yüksek öncelik.
+                webpush: { headers: { Urgency: 'high', TTL: String(6 * 60 * 60) } }
             });
             sent++;
             await doc.ref.update(reset);
