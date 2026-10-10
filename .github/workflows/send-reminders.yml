@@ -1,0 +1,51 @@
+# Okumadan 24 saat sonra hatırlatma bildirimi gönderir (scripts/send-reminders.js).
+# Cloud Functions Blaze planı gerektirdiği için gönderici GitHub Actions'ta çalışır.
+name: Bildirim gönder
+
+on:
+  schedule:
+    # GitHub zamanlanmış işleri yoğunlukta birkaç dakika geciktirebilir;
+    # 24 saatlik hatırlatma için sorun değil.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: send-reminders
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    steps:
+      - name: Secret kontrolü
+        id: check
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_SERVICE_ACCOUNT secret'ı eklenmemiş, atlanıyor."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Bağımlılıkları kur
+        if: steps.check.outputs.ready == 'true'
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+
+      - name: Bildirimleri gönder
+        if: steps.check.outputs.ready == 'true'
+        working-directory: scripts
+        run: node send-reminders.js

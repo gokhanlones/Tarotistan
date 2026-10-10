@@ -1,0 +1,14 @@
+{
+  "name": "tarotistan-scripts",
+  "private": true,
+  "main": "send-reminders.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "send-reminders": "node send-reminders.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}
